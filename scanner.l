@@ -9,7 +9,7 @@ Vinicius Castro 193026
 #include "tokens.h"
 
 int LineNumber = 1;
-int getLineNumber(void);
+int getLineNumber(void) { return LineNumber; }
 
 %}
 
@@ -51,19 +51,14 @@ protected   { return TK_PR_PROTECTED; }
 ">>"        { return TK_OC_SR; }
 "%>%"       { return TK_OC_FORWARD_PIPE; }
 "%|%"       { return TK_OC_BASH_PIPE; }
-TK_LIT_INT
-TK_LIT_FLOAT
-TK_LIT_FALSE
-TK_LIT_TRUE
-TK_LIT_CHAR
-TK_LIT_STRING
-TK_IDENTIFICADOR
+[+-]?[0-9]+           { printf("TK_LIT_INT:%s",yytext); return TK_LIT_INT; }
+[+-]?[0-9]+\.[0-9]+   { printf("TK_LIT_FLOAT:%s",yytext); return TK_LIT_FLOAT; }
+true                       { printf("TK_LIT_TRUE:%s",yytext); return TK_LIT_TRUE; }
+false                      { printf("TK_LIT_FALSE:%s",yytext); return TK_LIT_FALSE; }
+\'.\'                      { printf("TK_LIT_CHAR:%s",yytext); return TK_LIT_CHAR; } 
+\".*\"                     { printf("TK_LIT_STRING:%s",yytext); return TK_LIT_STRING; } 
+[a-zA-Z_][0-9]*            { return TK_IDENTIFICADOR; }
 TOKEN_ERRO
 \n		{ LineNumber++; }
 
 %%
-
-
-int getLineNumber(void) {
-	return LineNumber;
-}
