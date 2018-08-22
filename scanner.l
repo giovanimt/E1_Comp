@@ -13,6 +13,8 @@ int getLineNumber(void) { return LineNumber; }
 
 %}
 
+%x SingleLineComment
+%x Comment
 
 %%
 
@@ -60,7 +62,19 @@ false                      { printf("TK_LIT_FALSE:%s",yytext); return TK_LIT_FAL
 \'.\'                      { printf("TK_LIT_CHAR:%s",yytext); return TK_LIT_CHAR; } 
 \".*\"                     { printf("TK_LIT_STRING:%s",yytext); return TK_LIT_STRING; } 
 [a-zA-Z_][0-9]*            { return TK_IDENTIFICADOR; }
-TOKEN_ERRO
-\n		{ LineNumber++; }
+
+"//".*   			{ BEGIN(SingleLineComment); }
+<SingleLineComment>\n 		{ BEGIN(INITIAL); LineNumber++; }
+
+"/*"          		{ BEGIN(Comment); }
+<Comment>\n             { printf("pulou linha %d \n", getLineNumber()); LineNumber++; }
+<Comment>"*/"  		{ BEGIN(INITIAL); }
+<Comment>.		{;}
+
+
+\n   { LineNumber++; }
+
+.    { printf("erro linha %d \n", getLineNumber()); return TOKEN_ERRO; }
+
 
 %%
