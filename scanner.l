@@ -16,6 +16,8 @@ int getLineNumber(void) { return LineNumber; }
 
 %%
 
+[\t ]+      { ; } /* ignora tabs e espacos */
+
 int         { return TK_PR_INT; }
 float       { return TK_PR_FLOAT; }
 bool        { return TK_PR_BOOL; }
@@ -52,7 +54,7 @@ protected   { return TK_PR_PROTECTED; }
 "%>%"       { return TK_OC_FORWARD_PIPE; }
 "%|%"       { return TK_OC_BASH_PIPE; }
 [+-]?[0-9]+           { printf("TK_LIT_INT:%s",yytext); return TK_LIT_INT; }
-[+-]?[0-9]+\.[0-9]+   { printf("TK_LIT_FLOAT:%s",yytext); return TK_LIT_FLOAT; }
+[+-]?[0-9]+\.[0-9]+([eE][+-][0-9]+)?   { printf("TK_LIT_FLOAT:%s",yytext); return TK_LIT_FLOAT; }
 true                       { printf("TK_LIT_TRUE:%s",yytext); return TK_LIT_TRUE; }
 false                      { printf("TK_LIT_FALSE:%s",yytext); return TK_LIT_FALSE; }
 \'.\'                      { printf("TK_LIT_CHAR:%s",yytext); return TK_LIT_CHAR; } 
