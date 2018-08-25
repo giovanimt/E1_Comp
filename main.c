@@ -13,7 +13,7 @@ extern int get_line_number (void);
 #define print_nome(TOKEN) \
     printf("%d " #TOKEN " [%s]\n", get_line_number(), yytext);
 #define print_nome2(TOKEN) \
-    printf("%d TK_ESPECIAL [%c]\n", get_line_number(), TOKEN);
+    printf("%d TK_ESPECIAL [%c] ASCII: %d\n", get_line_number(), TOKEN, (int)TOKEN);
 
 int main (int argc, char **argv)
 {
