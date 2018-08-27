@@ -19,31 +19,7 @@ int get_line_number(void) { return LineNumber; }
 
 [\t ]+      { ; } /* ignora tabs e espacos */
 
-","		{ return (int)','; }
-";"		{ return (int)';'; }
-":"		{ return (int)':'; }
-"("		{ return (int)'('; }
-")"		{ return (int)')'; }
-"["		{ return (int)'['; }
-"]"		{ return (int)']'; }
-"{"		{ return (int)'{'; }
-"}"		{ return (int)'}'; }
-"+"		{ return (int)'+'; }
-"-"		{ return (int)'-'; }
-"|"		{ return (int)'|'; }
-"?"		{ return (int)'?'; }
-"*"		{ return (int)'*'; }
-"/"		{ return (int)'/'; }
-"<"		{ return (int)'<'; }
-">"		{ return (int)'>'; }
-"="		{ return (int)'='; }
-"!"		{ return (int)'!'; }
-"&"		{ return (int)'&'; }
-"%"		{ return (int)'%'; }
-"#"		{ return (int)'#'; }
-"^"		{ return (int)'^'; }
-"."		{ return (int)'.'; }
-"$"		{ return (int)'$'; }
+[,;:()\[\]{}+-|?*/<>=!&%#^.$] { return yytext[0]; }
 
 int         { return TK_PR_INT; }
 float       { return TK_PR_FLOAT; }
