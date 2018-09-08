@@ -1,3 +1,8 @@
+/*
+Giovani Tirello 252741
+Vinicius Castro 193026
+*/
+
  %{
 #include <stdio.h>
 int yylex(void);
@@ -79,10 +84,9 @@ funcao_const:		TK_PR_CONST TK_IDENTIFICADOR funcao_novo_param | TK_IDENTIFICADOR
 funcao_novo_param:	',' funcao_param | funcao_param
 
 bloco_comandos:		'{' comandos
-comandos:		'}' | comandos_simples novo_comando
-novo_comando:		';' comandos
+comandos:		'}' | comandos_simples comandos
 
-comandos_simples:	var_local | atribuicao | fluxo_contr | entrada | saida | retorno | bloco_comandos | chamadas_func
+comandos_simples:	var_local | atribuicao | contr_fluxo | entrada | saida | retorno | break | continue | case | bloco_comandos | cham_func | com_shift | com_pipes
 
 var_local:		TK_IDENTIFICADOR var_local_static
 var_local_static:	TK_PR_STATIC var_local_const | var_local_const
@@ -91,6 +95,37 @@ var_local_tipo:		tipo var_local_inic | TK_IDENTIFICADOR ';'
 var_local_inic:		';' | TK_OC_LE var_local_inic2
 var_local_inic2:	literal ';' | TK_IDENTIFICADOR ';'
 
-atribuicao:		
+atribuicao:		tipo atribuicao_prim | TK_IDENTIFICADOR atribuicao_decl
+atribuicao_decl:	'$' TK_IDENTIFICADOR '=' expressao ';' | '[' expressao ']' '$' TK_IDENTIFICADOR '=' expressao ';'
+atribuicao_prim:	'=' expressao ';' | '[' expressao ']' '=' expressao ';'
+
+entrada:		TK_PR_INPUT expressao ';'
+
+saida:			TK_PR_OUTPUT expressao saida2
+saida2:			',' expressao saida2 | ';'
+
+retorno:		TK_PR_RETURN expressao ';'
+
+break:			TK_PR_BREAK ';'
+
+continue:		TK_PR_CONTINUE ';'
+
+case:			TK_PR_CASE TK_LIT_INT ':'
+
+cham_func:		TK_IDENTIFICADOR '(' cham_func_arg
+cham_func_arg:		expressao cham_func_fim | '.' cham_func_fim
+cham_func_fim:		',' cham_func_arg | ')' ';'
+/// TO DO cham_func: ver comandos pipe para o '.'
+
+com_shift:		TK_IDENTIFICADOR com_shift_opcoes
+com_shift_opcoes:	TK_OC_SL com_shift_dados | TK_OC_SR com_shift_dados | '$' TK_IDENTIFICADOR com_shift_dir | '[' expressao ']' com_shift_dados2
+com_shift_dados2:	'$' TK_IDENTIFICADOR com_shift_dir | com_shift_dir
+com_shift_dir:		TK_OC_SL com_shift_dados | TK_OC_SR com_shift_dados
+com_shift_dados:	expressao ';' | TK_LIT_INT ';'
+///TO DO com_shift: TK_LIT_INT deve ser inteiro positivo
+
+contr_fluxo:
+
+com_pipes:
 
 %%
