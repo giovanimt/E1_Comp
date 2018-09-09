@@ -63,21 +63,38 @@ programa:
   %empty
 | programa novo_tipo
 | programa var_global
-//| programa funcao 
+| programa funcao 
 
-tipo:   
-  TK_PR_INT | TK_PR_FLOAT | TK_PR_BOOL | TK_PR_CHAR | TK_PR_STRING
+tipo_primario:   
+  TK_PR_INT 
+| TK_PR_FLOAT 
+| TK_PR_BOOL 
+| TK_PR_CHAR 
+| TK_PR_STRING
+
+tipo_usuario:
+  TK_IDENTIFICADOR
+
+tipo:
+  tipo_primario
+| tipo_usuario
 
 encapsulamento:
-  TK_PR_PRIVATE | TK_PR_PUBLIC | TK_PR_PROTECTED
+  TK_PR_PRIVATE 
+| TK_PR_PUBLIC 
+| TK_PR_PROTECTED
+
+static_modifier:
+  %empty
+| TK_PR_STATIC
 
 /* Declarações de Novos Tipos */
 novo_tipo:
   TK_PR_CLASS TK_IDENTIFICADOR '[' novo_tipo_lista_campos ']' ';'
 
 novo_tipo_campo:
-  tipo TK_IDENTIFICADOR
-| encapsulamento tipo TK_IDENTIFICADOR
+  tipo_primario TK_IDENTIFICADOR
+| encapsulamento tipo_primario TK_IDENTIFICADOR
 
 novo_tipo_lista_campos:
   novo_tipo_campo
@@ -85,26 +102,31 @@ novo_tipo_lista_campos:
 
 /* Declarações de Variáveis Globais */
 var_global:
-  TK_IDENTIFICADOR var_global_tipo_static var_global_tipo ';'
-| TK_IDENTIFICADOR '[' TK_LIT_INT ']' var_global_tipo_static var_global_tipo ';'
+  TK_IDENTIFICADOR static_modifier tipo ';'
+| TK_IDENTIFICADOR '[' TK_LIT_INT ']' static_modifier tipo ';'
 
-var_global_tipo:
+
+/* Definição de Funções */
+funcao:
+  cabecalho corpo
+
+cabecalho:
+  tipo_retorno TK_IDENTIFICADOR '(' lista_parametros ')'
+
+tipo_retorno:
   tipo
-| TK_IDENTIFICADOR
 
-var_global_tipo_static:
+lista_parametros:
   %empty
-| TK_PR_STATIC
+| parametro ',' lista_parametros
 
+parametro:
+  tipo TK_IDENTIFICADOR
+
+corpo:
+  %empty
 
 /*
-funcao:			tipo funcao_static
-funcao_static:		TK_PR_STATIC funcao_ident | funcao_ident
-funcao_ident:		TK_IDENTIFICADOR '(' funcao_param
-funcao_param:		')' bloco_comandos | tipo funcao_const
-funcao_const:		TK_PR_CONST TK_IDENTIFICADOR funcao_novo_param | TK_IDENTIFICADOR funcao_novo_param
-funcao_novo_param:	',' funcao_param | funcao_param
-
 bloco_comandos:		'{' comandos
 comandos:		'}' | comandos_simples comandos
 
