@@ -9,6 +9,7 @@ Vinicius Castro 193026
 int yylex(void);
 void yyerror (char const *s);
 extern int get_line_number();
+extern int get_col_number();
 %}
 
 %token TK_PR_INT
@@ -163,5 +164,5 @@ com_pipes:  %empty
 /* Called by yyparse on error.  */
 void yyerror (char const *s)
 {
-  fprintf (stderr, "linha %d: %s: token invalido:\n\t%s\n", get_line_number(), s, yytext);
+  fprintf (stderr, "linha %d coluna %d: %s: token invalido: %s\n", get_line_number(), get_col_number(), s, yytext);
 }

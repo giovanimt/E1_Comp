@@ -10,4 +10,6 @@ echo $? // Imprime o valor de retorno do parser: zero em caso de sucesso, caso c
 */
 
 class novotipo1[int campo1];
+class novotipo1[int campo1:float campo2];
+class novotipo1[int campo1:float campo2:];
 class novotipo1[int campo1]

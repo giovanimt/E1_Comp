@@ -9,7 +9,10 @@ Vinicius Castro 193026
 #include "parser.tab.h"
 
 int LineNumber = 1;
+int ColNumber = 0;
 int get_line_number(void) { return LineNumber; }
+int get_col_number(void) { return ColNumber; }
+void count_cols();
 
 %}
 
@@ -17,64 +20,74 @@ int get_line_number(void) { return LineNumber; }
 
 %%
 
-[\t ]+      { ; } /* ignora tabs e espacos */
+[\t ]+      { count_cols(); } /* ignora tabs e espacos */
 
-[,;:()\[\]{}+-|?*/<>=!&%#^.$] { return yytext[0]; }
+[,;:()\[\]{}+-|?*/<>=!&%#^.$] { count_cols();return yytext[0]; }
 
-int         { return TK_PR_INT; }
-float       { return TK_PR_FLOAT; }
-bool        { return TK_PR_BOOL; }
-char        { return TK_PR_CHAR; }
-string      { return TK_PR_STRING; }
-if          { return TK_PR_IF; }
-then        { return TK_PR_THEN; }
-else        { return TK_PR_ELSE; }
-while       { return TK_PR_WHILE; }
-do          { return TK_PR_DO; }
-input       { return TK_PR_INPUT; }
-output      { return TK_PR_OUTPUT; }
-return      { return TK_PR_RETURN; }
-const       { return TK_PR_CONST; }
-static      { return TK_PR_STATIC; }
-foreach     { return TK_PR_FOREACH; }
-for         { return TK_PR_FOR; }
-switch      { return TK_PR_SWITCH; }
-case        { return TK_PR_CASE; }
-break       { return TK_PR_BREAK; }
-continue    { return TK_PR_CONTINUE; }
-class       { return TK_PR_CLASS; }
-private     { return TK_PR_PRIVATE; }
-public      { return TK_PR_PUBLIC; }
-protected   { return TK_PR_PROTECTED; }
-true        { return TK_LIT_TRUE; }
-false       { return TK_LIT_FALSE; }
+int         { count_cols();return TK_PR_INT; }
+float       { count_cols();return TK_PR_FLOAT; }
+bool        { count_cols();return TK_PR_BOOL; }
+char        { count_cols();return TK_PR_CHAR; }
+string      { count_cols();return TK_PR_STRING; }
+if          { count_cols();return TK_PR_IF; }
+then        { count_cols();return TK_PR_THEN; }
+else        { count_cols();return TK_PR_ELSE; }
+while       { count_cols();return TK_PR_WHILE; }
+do          { count_cols();return TK_PR_DO; }
+input       { count_cols();return TK_PR_INPUT; }
+output      { count_cols();return TK_PR_OUTPUT; }
+return      { count_cols();return TK_PR_RETURN; }
+const       { count_cols();return TK_PR_CONST; }
+static      { count_cols();return TK_PR_STATIC; }
+foreach     { count_cols();return TK_PR_FOREACH; }
+for         { count_cols();return TK_PR_FOR; }
+switch      { count_cols();return TK_PR_SWITCH; }
+case        { count_cols();return TK_PR_CASE; }
+break       { count_cols();return TK_PR_BREAK; }
+continue    { count_cols();return TK_PR_CONTINUE; }
+class       { count_cols();return TK_PR_CLASS; }
+private     { count_cols();return TK_PR_PRIVATE; }
+public      { count_cols();return TK_PR_PUBLIC; }
+protected   { count_cols();return TK_PR_PROTECTED; }
+true        { count_cols();return TK_LIT_TRUE; }
+false       { count_cols();return TK_LIT_FALSE; }
 
-"<="        { return TK_OC_LE; }
-">="        { return TK_OC_GE; }
-"=="        { return TK_OC_EQ; }
-"!="        { return TK_OC_NE; }
-"&&"        { return TK_OC_AND; }
-"||"        { return TK_OC_OR; }
-"<<"        { return TK_OC_SL; }
-">>"        { return TK_OC_SR; }
-"%>%"       { return TK_OC_FORWARD_PIPE; }
-"%|%"       { return TK_OC_BASH_PIPE; }
+"<="        { count_cols();return TK_OC_LE; }
+">="        { count_cols();return TK_OC_GE; }
+"=="        { count_cols();return TK_OC_EQ; }
+"!="        { count_cols();return TK_OC_NE; }
+"&&"        { count_cols();return TK_OC_AND; }
+"||"        { count_cols();return TK_OC_OR; }
+"<<"        { count_cols();return TK_OC_SL; }
+">>"        { count_cols();return TK_OC_SR; }
+"%>%"       { count_cols();return TK_OC_FORWARD_PIPE; }
+"%|%"       { count_cols();return TK_OC_BASH_PIPE; }
 
-[+-]?[0-9]+                             { return TK_LIT_INT; }
-[+-]?[0-9]+\.[0-9]+([eE][+-]?[0-9]+)?   { return TK_LIT_FLOAT; }
+[+-]?[0-9]+                             { count_cols();return TK_LIT_INT; }
+[+-]?[0-9]+\.[0-9]+([eE][+-]?[0-9]+)?   { count_cols();return TK_LIT_FLOAT; }
 
-\'.\'                      { return TK_LIT_CHAR; } 
-\".*\"                     { return TK_LIT_STRING; } 
-[a-zA-Z_][a-zA-Z_0-9]*     { return TK_IDENTIFICADOR; }
+\'.\'                      { count_cols();return TK_LIT_CHAR; } 
+\".*\"                     { count_cols();return TK_LIT_STRING; } 
+[a-zA-Z_][a-zA-Z_0-9]*     { count_cols();return TK_IDENTIFICADOR; }
 
-"//".*   			     { ; }
+"//".*   			     { count_cols(); }
 
-"/*"          { BEGIN(Comment); }
-<Comment>\n   { LineNumber++; }
-<Comment>.	  {;}
-<Comment>"*/" { BEGIN(INITIAL); }
+"/*"          { count_cols();BEGIN(Comment); }
+<Comment>\n   { count_cols();LineNumber++;}
+<Comment>.	  { count_cols();}
+<Comment>"*/" { count_cols();BEGIN(INITIAL); }
 
-\n   { LineNumber++; }
-.    { return TOKEN_ERRO; }
+\n   { count_cols();LineNumber++; }
+.    { count_cols();return TOKEN_ERRO; }
 
 %%
+
+void count_cols(){
+  int i;
+  for(i=0 ; yytext[i] != '\0' ; i++){
+    if(yytext[i] != '\n')
+      ColNumber++;
+    else
+      ColNumber=0;
+  } 
+}
