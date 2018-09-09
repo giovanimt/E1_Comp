@@ -3,9 +3,9 @@ all: bison flex gcc
 bison:
 	bison -d parser.y -r all
 flex:
-	flex scanner.l
+	flex --header-file=lex.yy.h scanner.l
 gcc:
 	gcc -c lex.yy.c parser.tab.c
-	gcc -o etapa2 lex.yy.o parser.tab.o main.c -lfl
+	gcc -o etapa2 main.c lex.yy.o parser.tab.o -lfl
 clean:
-	rm -f etapa2 lex.yy.c parser.tab.c parser.tab.h parser.output *.o
+	rm -f etapa2 lex.yy.* parser.tab.* parser.output *.o

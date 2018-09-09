@@ -9,7 +9,5 @@ echo $? // Imprime o valor de retorno do parser: zero em caso de sucesso, caso c
 
 */
 
-xis[10] int;
-int main (int xis) {
-return 2;
-}
+class novotipo1[int campo1];
+class novotipo1[int campo1]

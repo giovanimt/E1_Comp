@@ -5,8 +5,10 @@ Vinicius Castro 193026
 
 %{
 #include <stdio.h>
+#include "lex.yy.h"
 int yylex(void);
 void yyerror (char const *s);
+extern int get_line_number();
 %}
 
 %token TK_PR_INT
@@ -56,21 +58,34 @@ void yyerror (char const *s);
 
 %%
 
-programa:   %empty
-            | programa novo_tipo
-            | programa var_global
-            | programa funcao 
+programa:   
+  %empty
+| programa novo_tipo
+//| programa var_global
+//| programa funcao 
 
-tipo: 			TK_PR_INT | TK_PR_FLOAT | TK_PR_BOOL | TK_PR_CHAR | TK_PR_STRING
-encapsulamento:		TK_PR_PRIVATE | TK_PR_PUBLIC | TK_PR_PROTECTED
-literal:		TK_LIT_INT | TK_LIT_FLOAT | TK_LIT_FALSE | TK_LIT_TRUE | TK_LIT_CHAR | TK_LIT_STRING
+tipo:   
+  TK_PR_INT | TK_PR_FLOAT | TK_PR_BOOL | TK_PR_CHAR | TK_PR_STRING
+
+encapsulamento:
+  TK_PR_PRIVATE | TK_PR_PUBLIC | TK_PR_PROTECTED
 
 
-novo_tipo:		TK_PR_CLASS TK_IDENTIFICADOR '[' novo_campo_enc
-novo_campo_enc:		encapsulamento novo_campo_tipo | novo_campo_tipo
-novo_campo_tipo:	tipo TK_IDENTIFICADOR novo_campo
-novo_campo:		':' novo_campo_enc | ']'';'
+/* Declarações de Novos Tipos */
+novo_tipo:
+  TK_PR_CLASS TK_IDENTIFICADOR '[' novo_tipo_lista_campos ']' ';'
 
+novo_tipo_campo:
+  tipo TK_IDENTIFICADOR
+| encapsulamento tipo TK_IDENTIFICADOR
+
+novo_tipo_lista_campos:
+  novo_tipo_campo
+| novo_tipo_campo ':' novo_tipo_lista_campos
+
+
+
+/*
 var_global:		TK_IDENTIFICADOR var_global_static
 var_global_static:	TK_PR_STATIC var_global_tipo | var_global_tipo
 var_global_tipo:	tipo var_global_fim | TK_IDENTIFICADOR var_global_fim
@@ -88,6 +103,7 @@ comandos:		'}' | comandos_simples comandos
 
 comandos_simples:	var_local | atribuicao | contr_fluxo | entrada | saida | retorno | break | continue | case | bloco_comandos | cham_func | com_shift | com_pipes
 
+literal:		TK_LIT_INT | TK_LIT_FLOAT | TK_LIT_FALSE | TK_LIT_TRUE | TK_LIT_CHAR | TK_LIT_STRING
 var_local:		TK_IDENTIFICADOR var_local_static
 var_local_static:	TK_PR_STATIC var_local_const | var_local_const
 var_local_const:	TK_PR_CONST var_local_tipo | var_local_tipo
@@ -140,12 +156,12 @@ contr_fluxo:    %empty
 
 // TO DO
 com_pipes:  %empty
+*/
 
 %%
 
 /* Called by yyparse on error.  */
-void
-yyerror (char const *s)
+void yyerror (char const *s)
 {
-  fprintf (stderr, "%s\n", s);
+  fprintf (stderr, "linha %d: %s: token invalido:\n\t%s\n", get_line_number(), s, yytext);
 }
