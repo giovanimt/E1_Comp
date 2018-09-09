@@ -13,4 +13,4 @@ class novotipo[int campo1]; // OK
 class novotipo[private int campo1]; // OK
 class novotipo[public int campo1]; // OK
 class novotipo[int campo1: protected float campo2]; // OK
-class novotipo[]; // ERRO
+class novotipo[]; // ERRO OBS: nao e permitido lista de campos vazia entao ta OK
