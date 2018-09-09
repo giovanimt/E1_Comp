@@ -62,7 +62,7 @@ extern int get_col_number();
 programa:   
   %empty
 | programa novo_tipo
-//| programa var_global
+| programa var_global
 //| programa funcao 
 
 tipo:   
@@ -70,7 +70,6 @@ tipo:
 
 encapsulamento:
   TK_PR_PRIVATE | TK_PR_PUBLIC | TK_PR_PROTECTED
-
 
 /* Declarações de Novos Tipos */
 novo_tipo:
@@ -84,14 +83,21 @@ novo_tipo_lista_campos:
   novo_tipo_campo
 | novo_tipo_campo ':' novo_tipo_lista_campos
 
+/* Declarações de Variáveis Globais */
+var_global:
+  TK_IDENTIFICADOR var_global_tipo_static var_global_tipo ';'
+| TK_IDENTIFICADOR '[' TK_LIT_INT ']' var_global_tipo_static var_global_tipo ';'
+
+var_global_tipo:
+  tipo
+| TK_IDENTIFICADOR
+
+var_global_tipo_static:
+  %empty
+| TK_PR_STATIC
 
 
 /*
-var_global:		TK_IDENTIFICADOR var_global_static
-var_global_static:	TK_PR_STATIC var_global_tipo | var_global_tipo
-var_global_tipo:	tipo var_global_fim | TK_IDENTIFICADOR var_global_fim
-var_global_fim:		'[' TK_LIT_INT ']' ';' | ';'
-
 funcao:			tipo funcao_static
 funcao_static:		TK_PR_STATIC funcao_ident | funcao_ident
 funcao_ident:		TK_IDENTIFICADOR '(' funcao_param
@@ -164,5 +170,5 @@ com_pipes:  %empty
 /* Called by yyparse on error.  */
 void yyerror (char const *s)
 {
-  fprintf (stderr, "linha %d coluna %d: %s: token invalido: %s\n", get_line_number(), get_col_number(), s, yytext);
+  fprintf (stderr, "linha %d coluna %d: %s: token invalido: %s\n", get_line_number(), get_col_number()-strlen(yytext)+1, s, yytext);
 }

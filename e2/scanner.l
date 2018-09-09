@@ -63,8 +63,8 @@ false       { count_cols();return TK_LIT_FALSE; }
 "%>%"       { count_cols();return TK_OC_FORWARD_PIPE; }
 "%|%"       { count_cols();return TK_OC_BASH_PIPE; }
 
-[+-]?[0-9]+                             { count_cols();return TK_LIT_INT; }
-[+-]?[0-9]+\.[0-9]+([eE][+-]?[0-9]+)?   { count_cols();return TK_LIT_FLOAT; }
+[0-9]+                             { count_cols();return TK_LIT_INT; }
+[0-9]+\.[0-9]+([eE][+-]?[0-9]+)?   { count_cols();return TK_LIT_FLOAT; }
 
 \'.\'                      { count_cols();return TK_LIT_CHAR; } 
 \".*\"                     { count_cols();return TK_LIT_STRING; } 
