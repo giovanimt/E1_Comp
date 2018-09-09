@@ -6,7 +6,7 @@ Vinicius Castro 193026
 
 %{
 
-#include "tokens.h"
+#include "parser.tab.h"
 
 int LineNumber = 1;
 int get_line_number(void) { return LineNumber; }

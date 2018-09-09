@@ -3,7 +3,7 @@ Giovani Tirello 252741
 Vinicius Castro 193026
 */
 
- %{
+%{
 #include <stdio.h>
 int yylex(void);
 void yyerror (char const *s);
@@ -52,18 +52,18 @@ void yyerror (char const *s);
 %token TK_LIT_STRING
 %token TK_IDENTIFICADOR
 %token TOKEN_ERRO
+%start programa
 
 %%
 
-programa: ///???
-
-
-
+programa:   %empty
+            | programa novo_tipo
+            | programa var_global
+            | programa funcao 
 
 tipo: 			TK_PR_INT | TK_PR_FLOAT | TK_PR_BOOL | TK_PR_CHAR | TK_PR_STRING
 encapsulamento:		TK_PR_PRIVATE | TK_PR_PUBLIC | TK_PR_PROTECTED
 literal:		TK_LIT_INT | TK_LIT_FLOAT | TK_LIT_FALSE | TK_LIT_TRUE | TK_LIT_CHAR | TK_LIT_STRING
-
 
 
 novo_tipo:		TK_PR_CLASS TK_IDENTIFICADOR '[' novo_campo_enc
@@ -95,6 +95,17 @@ var_local_tipo:		tipo var_local_inic | TK_IDENTIFICADOR ';'
 var_local_inic:		';' | TK_OC_LE var_local_inic2
 var_local_inic2:	literal ';' | TK_IDENTIFICADOR ';'
 
+
+expressao:  expr_arit
+            | expr_logica
+            | expr_pipes
+
+// TODO: criar as regras de expressoes
+expr_arit:  %empty
+expr_logica:  %empty
+expr_pipes:  %empty
+
+
 atribuicao:		tipo atribuicao_prim | TK_IDENTIFICADOR atribuicao_decl
 atribuicao_decl:	'$' TK_IDENTIFICADOR '=' expressao ';' | '[' expressao ']' '$' TK_IDENTIFICADOR '=' expressao ';'
 atribuicao_prim:	'=' expressao ';' | '[' expressao ']' '=' expressao ';'
@@ -124,8 +135,17 @@ com_shift_dir:		TK_OC_SL com_shift_dados | TK_OC_SR com_shift_dados
 com_shift_dados:	expressao ';' | TK_LIT_INT ';'
 ///TO DO com_shift: TK_LIT_INT deve ser inteiro positivo
 
-contr_fluxo:
+// TO DO
+contr_fluxo:    %empty
 
-com_pipes:
+// TO DO
+com_pipes:  %empty
 
 %%
+
+/* Called by yyparse on error.  */
+void
+yyerror (char const *s)
+{
+  fprintf (stderr, "%s\n", s);
+}

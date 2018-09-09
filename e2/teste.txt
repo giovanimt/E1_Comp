@@ -1,0 +1,15 @@
+/* 
+
+Exemplo de uso (terminal *nix): 
+cat teste.txt | ./etapa2 ; echo $?
+
+Onde:
+cat teste.txt | ./etapa2 ; // Direciona o conteudo do arquivo teste.txt (qualquer programa de teste) para a entrada padrao do parser
+echo $? // Imprime o valor de retorno do parser: zero em caso de sucesso, caso contrario erro
+
+*/
+
+xis[10] int;
+int main (int xis) {
+return 2;
+}
