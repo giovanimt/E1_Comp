@@ -112,8 +112,7 @@ pipes:
 */
 
 static_modifier:
-  %empty
-| TK_PR_STATIC
+  TK_PR_STATIC
 ;
 
 const_modifier:
@@ -138,7 +137,9 @@ novo_tipo_lista_campos:
 
 /* Declarações de Variáveis Globais */
 var_global:
-  TK_IDENTIFICADOR static_modifier tipo ';'
+  TK_IDENTIFICADOR tipo ';'
+| TK_IDENTIFICADOR static_modifier tipo ';'
+| TK_IDENTIFICADOR '[' TK_LIT_INT ']' tipo ';'
 | TK_IDENTIFICADOR '[' TK_LIT_INT ']' static_modifier tipo ';'
 ;
 
@@ -148,7 +149,8 @@ funcao:
 ;
 
 cabecalho:
-  static_modifier tipo TK_IDENTIFICADOR '(' lista_parametros ')'
+  tipo TK_IDENTIFICADOR '(' lista_parametros ')'
+| static_modifier tipo TK_IDENTIFICADOR '(' lista_parametros ')'
 ;
 
 lista_parametros:
