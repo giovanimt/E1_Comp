@@ -80,15 +80,6 @@ tipo_primario:
 | TK_PR_STRING
 ;
 
-tipo_usuario:
-  TK_IDENTIFICADOR
-;
-
-tipo:
-  tipo_primario
-| tipo_usuario
-;
-
 encapsulamento:
   TK_PR_PRIVATE 
 | TK_PR_PUBLIC 
@@ -111,14 +102,6 @@ pipes:
 ;
 */
 
-static_modifier:
-  TK_PR_STATIC
-;
-
-const_modifier:
-  %empty
-| TK_PR_CONST
-;
 
 /* Declarações de Novos Tipos */
 novo_tipo:
@@ -137,10 +120,14 @@ novo_tipo_lista_campos:
 
 /* Declarações de Variáveis Globais */
 var_global:
-  TK_IDENTIFICADOR tipo ';'
-| TK_IDENTIFICADOR static_modifier tipo ';'
-| TK_IDENTIFICADOR '[' TK_LIT_INT ']' tipo ';'
-| TK_IDENTIFICADOR '[' TK_LIT_INT ']' static_modifier tipo ';'
+  TK_IDENTIFICADOR tipo_primario ';'
+| TK_IDENTIFICADOR TK_IDENTIFICADOR ';'
+| TK_IDENTIFICADOR TK_PR_STATIC tipo_primario ';'
+| TK_IDENTIFICADOR TK_PR_STATIC TK_IDENTIFICADOR ';'
+| TK_IDENTIFICADOR '[' TK_LIT_INT ']' tipo_primario ';'
+| TK_IDENTIFICADOR '[' TK_LIT_INT ']' TK_IDENTIFICADOR ';'
+| TK_IDENTIFICADOR '[' TK_LIT_INT ']' TK_PR_STATIC tipo_primario ';'
+| TK_IDENTIFICADOR '[' TK_LIT_INT ']' TK_PR_STATIC TK_IDENTIFICADOR ';'
 ;
 
 /* Definição de Funções */
@@ -149,8 +136,10 @@ funcao:
 ;
 
 cabecalho:
-  tipo TK_IDENTIFICADOR '(' lista_parametros ')'
-| static_modifier tipo TK_IDENTIFICADOR '(' lista_parametros ')'
+  tipo_primario TK_IDENTIFICADOR '(' lista_parametros ')'
+| TK_IDENTIFICADOR TK_IDENTIFICADOR '(' lista_parametros ')'
+| TK_PR_STATIC tipo_primario TK_IDENTIFICADOR '(' lista_parametros ')'
+| TK_PR_STATIC TK_IDENTIFICADOR TK_IDENTIFICADOR '(' lista_parametros ')'
 ;
 
 lista_parametros:
@@ -160,7 +149,10 @@ lista_parametros:
 ;
 
 parametro:
-  const_modifier tipo TK_IDENTIFICADOR
+  tipo_primario TK_IDENTIFICADOR
+| TK_PR_CONST tipo_primario TK_IDENTIFICADOR
+| TK_IDENTIFICADOR TK_IDENTIFICADOR
+| TK_PR_CONST TK_IDENTIFICADOR TK_IDENTIFICADOR
 ;
 
 /* Bloco de Comandos */
@@ -194,7 +186,10 @@ comando_simples:
 
 /*Variavel Local*/
 var_local:
-  static_modifier const_modifier var_local_tipo
+  var_local_tipo
+| TK_PR_CONST var_local_tipo
+| TK_PR_STATIC var_local_tipo
+| TK_PR_STATIC TK_PR_CONST var_local_tipo
 ;
 
 var_local_tipo:
