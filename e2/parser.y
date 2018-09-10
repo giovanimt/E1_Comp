@@ -168,23 +168,36 @@ sequencia_comandos_simples:
 
 comando_simples:
   bloco_comandos
-| var_local
+| var_local ';'
 | atribuicao ';'
-/*| contr_fluxo
-| entrada
-| saida
-| retorno
-| break
-| continue
-| case
-| bloco_comandos
-| cham_func
-| com_shift 
-| com_pipes */
+/*| contr_fluxo ';'
+| entrada		ok
+| saida 		ok
+| retorno ';'
+| break ';'
+| continue ';'
+| case			ok
+| cham_func ';'
+| com_shift ';'
+| com_pipes ';' */
 ///OBS: TODOS comandos_simples menos case DEVEM terminar com ';'
 ;
 
+comando_for:
+  bloco_comandos
+| var_local
+| atribuicao
+/*| contr_fluxo
+| retorno
+| break
+| continue
+| cham_func
+| com_shift 
+| com_pipes */
+
+
 /*Variavel Local*/
+
 var_local:
   var_local_tipo
 | TK_PR_CONST var_local_tipo
@@ -194,17 +207,17 @@ var_local:
 
 var_local_tipo:
   tipo_primario TK_IDENTIFICADOR var_local_inic
-| TK_IDENTIFICADOR TK_IDENTIFICADOR';'
+| TK_IDENTIFICADOR TK_IDENTIFICADOR
 ;
 
 var_local_inic:
-  ';'
+  %empty
 | TK_OC_LE var_local_inic2
 ;
 
 var_local_inic2:
-  literal ';'
-| TK_IDENTIFICADOR ';'
+  literal
+| TK_IDENTIFICADOR
 ;
 
 
@@ -225,11 +238,11 @@ saida2:			',' expressao saida2 | ';'
 
 
 /// Retorno, Break, Continue, Case
-retorno:		TK_PR_RETURN expressao ';'
+retorno:		TK_PR_RETURN expressao
 
-break:			TK_PR_BREAK ';'
+break:			TK_PR_BREAK
 
-continue:		TK_PR_CONTINUE ';'
+continue:		TK_PR_CONTINUE
 
 case:			TK_PR_CASE TK_LIT_INT ':'
 
@@ -244,15 +257,30 @@ cham_func_arg:
 
 cham_func_fim:
   ',' cham_func_arg
-  | ')' ';'
+  | ')'
 
 
 ///Comando Shift
-com_shift:		TK_IDENTIFICADOR com_shift_opcoes
-com_shift_opcoes:	TK_OC_SL com_shift_dados | TK_OC_SR com_shift_dados | '$' TK_IDENTIFICADOR com_shift_dir | '[' expressao ']' com_shift_dados2
-com_shift_dados2:	'$' TK_IDENTIFICADOR com_shift_dir | com_shift_dir
-com_shift_dir:		TK_OC_SL com_shift_dados | TK_OC_SR com_shift_dados
-com_shift_dados:	expressao ';' | TK_LIT_INT ';'
+com_shift:
+TK_IDENTIFICADOR com_shift_opcoes
+
+com_shift_opcoes:
+  TK_OC_SL com_shift_dados
+| TK_OC_SR com_shift_dados
+| '$' TK_IDENTIFICADOR com_shift_dir
+| '[' expressao ']' com_shift_dados2
+
+com_shift_dados2:
+  '$' TK_IDENTIFICADOR com_shift_dir
+| com_shift_dir
+
+com_shift_dir:
+  TK_OC_SL com_shift_dados 
+| TK_OC_SR com_shift_dados
+
+com_shift_dados:
+  expressao
+| TK_LIT_INT
 ///TODO com_shift: TK_LIT_INT deve ser inteiro positivo
 
 
@@ -266,14 +294,14 @@ constr_cond:
   TK_PR_IF expressao TK_PR_THEN bloco_comandos constr_cond_else
 
 constr_cond_else:
-  TK_PR_ELSE bloco_comandos ';'
-| ';'
+  TK_PR_ELSE bloco_comandos
+| %empty
 
 constr_iter:
-  TK_PR_FOREACH '(' TK_IDENTIFICADOR ':' lista_foreach ')' bloco_comandos ';'
-| TK_PR_FOR '(' lista_for ':' expressao ':' lista_for ')' bloco_comandos ';'
-| TK_PR_WHILE '(' expressao ')' TK_PR_DO bloco_comandos ';'
-| TK_PR_DO bloco_comandos TK_PR_WHILE '(' expressao ')' ';'
+  TK_PR_FOREACH '(' TK_IDENTIFICADOR ':' lista_foreach ')' bloco_comandos
+| TK_PR_FOR '(' lista_for ':' expressao ':' lista_for ')' bloco_comandos
+| TK_PR_WHILE '(' expressao ')' TK_PR_DO bloco_comandos
+| TK_PR_DO bloco_comandos TK_PR_WHILE '(' expressao ')'
 
 lista_foreach:
   expressao lista_foreach2
@@ -283,7 +311,11 @@ lista_foreach2:
 | %empty
 
 lista_for:
-///TODO: https://github.com/schnorr/comp/issues/50
+  comando_for lista_for2
+
+lista_for2:
+  ',' comando_for lista_for2
+| %empty
 
 constr_sel:
   TK_PR_SWITCH '(' expressao ')' bloco_comandos
@@ -296,7 +328,7 @@ com_pipes:
 | TK_IDENTIFICADOR '=' cham_func pipes cham_func com_pipes_fim
 
 com_pipes_fim:
-  ';'
+  %empty
 | pipes cham_func com_pipes_fim
 
 */
@@ -340,5 +372,5 @@ expr_pipes:  %empty
 /* Called by yyparse on error.  */
 void yyerror (char const *s)
 {
-  fprintf (stderr, "linha %d coluna %d: %s: token invalido: %s\n", get_line_number(), get_col_number()-strlen(yytext)+1, s, yytext);
+  fprintf (stderr, "linha %d coluna %ld: %s: token invalido: %s\n", get_line_number(), get_col_number()-strlen(yytext)+1, s, yytext);
 }
