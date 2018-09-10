@@ -55,6 +55,12 @@ extern int get_col_number();
 %token TK_LIT_STRING
 %token TK_IDENTIFICADOR
 %token TOKEN_ERRO
+
+%left '-' '+'
+%left '*' '/' '%'
+%precedence NEG   /* negation--unary minus */
+%right '^'        /* exponentiation */
+
 %start programa
 
 %%
@@ -63,7 +69,8 @@ programa:
   %empty
 | programa novo_tipo
 | programa var_global
-| programa funcao 
+| programa funcao
+;
 
 tipo_primario:   
   TK_PR_INT 
@@ -71,18 +78,22 @@ tipo_primario:
 | TK_PR_BOOL 
 | TK_PR_CHAR 
 | TK_PR_STRING
+;
 
 tipo_usuario:
   TK_IDENTIFICADOR
+;
 
 tipo:
   tipo_primario
 | tipo_usuario
+;
 
 encapsulamento:
   TK_PR_PRIVATE 
 | TK_PR_PUBLIC 
 | TK_PR_PROTECTED
+;
 
 literal:
   TK_LIT_INT
@@ -91,90 +102,124 @@ literal:
 | TK_LIT_TRUE
 | TK_LIT_CHAR
 | TK_LIT_STRING
+;
 
+/*
 pipes:
   TK_OC_FORWARD_PIPE
 | TK_OC_BASH_PIPE
+;
+*/
 
 static_modifier:
   %empty
 | TK_PR_STATIC
+;
 
 const_modifier:
   %empty
 | TK_PR_CONST
+;
 
 /* Declarações de Novos Tipos */
 novo_tipo:
   TK_PR_CLASS TK_IDENTIFICADOR '[' novo_tipo_lista_campos ']' ';'
+;
 
 novo_tipo_campo:
   tipo_primario TK_IDENTIFICADOR
 | encapsulamento tipo_primario TK_IDENTIFICADOR
+;
 
 novo_tipo_lista_campos:
   novo_tipo_campo
 | novo_tipo_campo ':' novo_tipo_lista_campos
-
+;
 
 /* Declarações de Variáveis Globais */
 var_global:
   TK_IDENTIFICADOR static_modifier tipo ';'
 | TK_IDENTIFICADOR '[' TK_LIT_INT ']' static_modifier tipo ';'
-
+;
 
 /* Definição de Funções */
 funcao:
   cabecalho bloco_comandos
+;
 
 cabecalho:
   static_modifier tipo TK_IDENTIFICADOR '(' lista_parametros ')'
+;
 
 lista_parametros:
   %empty
 | parametro lista_parametros	//criado novo OR para o 1o parametro a ser passado
 | ',' parametro lista_parametros // alterado para que o ultimo parametro nao tenha ',' no final
+;
 
 parametro:
   const_modifier tipo TK_IDENTIFICADOR
-
+;
 
 /* Bloco de Comandos */
 bloco_comandos:
-  '{' comandos
+  '{' '}'
+| '{' sequencia_comandos_simples '}'
+;
 
-comandos:
-  '}'
-| comandos_simples comandos
+sequencia_comandos_simples:
+  comando_simples
+| sequencia_comandos_simples comando_simples
+;
 
-comandos_simples:
-  var_local /*| atribuicao | contr_fluxo | entrada | saida | retorno | break | continue | case | bloco_comandos | cham_func | com_shift | com_pipes */
+comando_simples:
+  bloco_comandos
+| var_local
+| atribuicao ';'
+/*| contr_fluxo
+| entrada
+| saida
+| retorno
+| break
+| continue
+| case
+| bloco_comandos
+| cham_func
+| com_shift 
+| com_pipes */
 ///OBS: TODOS comandos_simples menos case DEVEM terminar com ';'
+;
 
 /*Variavel Local*/
 var_local:
   static_modifier const_modifier var_local_tipo
+;
 
 var_local_tipo:
   tipo TK_IDENTIFICADOR var_local_inic
 | TK_IDENTIFICADOR TK_IDENTIFICADOR';'
+;
 
 var_local_inic:
   ';'
 | TK_OC_LE var_local_inic2
+;
 
 var_local_inic2:
   literal ';'
 | TK_IDENTIFICADOR ';'
+;
 
+
+///Atribuicao
+atribuicao:
+  TK_IDENTIFICADOR '=' expressao
+| TK_IDENTIFICADOR '[' expressao ']' '=' expressao 
+| TK_IDENTIFICADOR '$' TK_IDENTIFICADOR '=' expressao
+| TK_IDENTIFICADOR '[' expressao ']' '$' TK_IDENTIFICADOR '=' expressao
+;
 
 /*
-///Atribuicao
-atribuicao:		tipo atribuicao_prim | TK_IDENTIFICADOR atribuicao_decl
-atribuicao_decl:	'$' TK_IDENTIFICADOR '=' expressao ';' | '[' expressao ']' '$' TK_IDENTIFICADOR '=' expressao ';'
-atribuicao_prim:	'=' expressao ';' | '[' expressao ']' '=' expressao ';'
-
-
 ///Entrada e Saida
 entrada:		TK_PR_INPUT expressao ';'
 
@@ -257,25 +302,40 @@ com_pipes_fim:
   ';'
 | pipes cham_func com_pipes_fim
 
+*/
 
 
+/* Expr. Aritméticas */
+num:
+  TK_LIT_INT
+| TK_LIT_FLOAT
+;  
 
-/// TODO: Expressao
-expressao:  expr_arit
-            | expr_logica
-            | expr_pipes
+expressao:
+  expr_arit
+//| expr_logica
+//| expr_pipes
+;
 
-expr_arit:  %empty
+expr_arit:
+  num
+| expr_arit '+' expr_arit
+| expr_arit '-' expr_arit
+| expr_arit '*' expr_arit
+| expr_arit '/' expr_arit
+| expr_arit '%' expr_arit
+| '-' expr_arit %prec NEG
+| expr_arit '^' expr_arit
+| '(' expr_arit ')'
+;
 
-
-
-
-
+/*
 expr_logica:  %empty
-
+;
 
 
 expr_pipes:  %empty
+;
 */
 
 %%

@@ -1,5 +1,5 @@
-int func1 (float par1, const int par2) {
-static int var1 <= 8; //ERRO reconhecer 8 ??
+int func1 (float par1, const int par2,) {
+//static int var1 <= 8; //ERRO reconhecer 8 ??
 const float var2;
 static const bool var3 <= true;
 tipo var3;
