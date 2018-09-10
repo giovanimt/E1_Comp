@@ -196,7 +196,7 @@ var_local:
 ;
 
 var_local_tipo:
-  tipo TK_IDENTIFICADOR var_local_inic
+  tipo_primario TK_IDENTIFICADOR var_local_inic
 | TK_IDENTIFICADOR TK_IDENTIFICADOR';'
 ;
 
