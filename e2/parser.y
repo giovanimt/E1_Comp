@@ -167,27 +167,27 @@ sequencia_comandos_simples:
 ;
 
 comando_simples:
-  bloco_comandos
+  bloco_comandos ';'
 | var_local ';'
 | atribuicao ';'
 /*| contr_fluxo ';'
-| entrada		ok
-| saida 		ok
+| entrada ';'
+| saida
 | retorno ';'
 | break ';'
 | continue ';'
-| case			ok
+| case
 | cham_func ';'
 | com_shift ';'
 | com_pipes ';' */
-///OBS: TODOS comandos_simples menos case DEVEM terminar com ';'
 ;
-
+/* ///comando_for usado em lista_for
 comando_for:
   bloco_comandos
 | var_local
 | atribuicao
-/*| contr_fluxo
+| contr_fluxo
+| entrada
 | retorno
 | break
 | continue
@@ -231,7 +231,7 @@ atribuicao:
 
 /*
 ///Entrada e Saida
-entrada:		TK_PR_INPUT expressao ';'
+entrada:		TK_PR_INPUT expressao
 
 saida:			TK_PR_OUTPUT expressao saida2
 saida2:			',' expressao saida2 | ';'
