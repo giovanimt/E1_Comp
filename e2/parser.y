@@ -340,32 +340,72 @@ num:
 | TK_LIT_FLOAT
 ;  
 
+op_arit_bin:
+  '+'
+| '-'
+| '*'
+| '/'
+| '%'
+| '^'
+;
+
+op_arit_un:
+  '+'
+| '&'
+| '*'
+| '?'
+| '#'
+;
+
+op_rel:
+  TK_OC_LE
+| TK_OC_GE
+| TK_OC_EQ
+| TK_OC_NE
+| TK_OC_AND
+| TK_OC_OR
+| TK_OC_SL
+| TK_OC_SR
+;
+
+op_log:
+  '!'
+| '|'
+| '&'
+;
+
 expressao:
   expr_arit
-//| expr_logica
+| expr_logica
 //| expr_pipes
 ;
 
 expr_arit:
   num
-| expr_arit '+' expr_arit
-| expr_arit '-' expr_arit
-| expr_arit '*' expr_arit
-| expr_arit '/' expr_arit
-| expr_arit '%' expr_arit
+| TK_IDENTIFICADOR expr_vetor
+///| cham_func
+| expr_arit op_arit_bin expr_arit
+| op_arit_un expr_arit ///TODO: precisa de algum %prec?
 | '-' expr_arit %prec NEG
-| expr_arit '^' expr_arit
 | '(' expr_arit ')'
+| expr_arit '?' expr_arit ':' expr_arit
 ;
 
+expr_vetor:
+  '[' TK_LIT_INT ']'
+| %empty
+;
+
+expr_logica:
+  expr_arit op_rel expr_arit
+| expr_logica op_log expr_logica
+| '(' expr_logica ')'
+;
 /*
-expr_logica:  %empty
-;
+expr_pipes:
+  com_pipes
+;*/
 
-
-expr_pipes:  %empty
-;
-*/
 
 %%
 
