@@ -157,8 +157,8 @@ parametro:
 
 /* Bloco de Comandos */
 bloco_comandos:
-  '{' '}'
-| '{' sequencia_comandos_simples '}'
+  '{' '}' ';'
+| '{' sequencia_comandos_simples '}' ';'
 ;
 
 sequencia_comandos_simples:
@@ -170,10 +170,10 @@ comando_simples:
   bloco_comandos ';'
 | var_local ';'
 | atribuicao ';'
-/*| contr_fluxo ';'
+///| contr_fluxo ';'
 | entrada ';'
 | saida
-| retorno ';'
+/*| retorno ';'
 | break ';'
 | continue ';'
 | case
@@ -183,7 +183,7 @@ comando_simples:
 ;
 /* ///comando_for usado em lista_for
 comando_for:
-  bloco_comandos
+  bloco_comandos_for
 | var_local
 | atribuicao
 | contr_fluxo
@@ -193,7 +193,12 @@ comando_for:
 | continue
 | cham_func
 | com_shift 
-| com_pipes */
+| com_pipes
+
+bloco_comandos_for:
+  '{' '}'
+| '{' sequencia_comandos_simples '}'
+;*/
 
 
 /*Variavel Local*/
@@ -229,14 +234,14 @@ atribuicao:
 | TK_IDENTIFICADOR '[' expressao ']' '$' TK_IDENTIFICADOR '=' expressao
 ;
 
-/*
+
 ///Entrada e Saida
 entrada:		TK_PR_INPUT expressao
 
 saida:			TK_PR_OUTPUT expressao saida2
 saida2:			',' expressao saida2 | ';'
 
-
+/*
 /// Retorno, Break, Continue, Case
 retorno:		TK_PR_RETURN expressao
 

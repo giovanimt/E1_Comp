@@ -4,4 +4,4 @@ int main() {
   var$campo = 42 * 12;
   var[42]$campo = 42 % 12;
   var = (42 + 10)^-12.0e-14;
-}
+};

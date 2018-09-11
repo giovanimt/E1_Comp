@@ -3,5 +3,5 @@ int func1 (float par1, const int par2) {
 static const float var2;
 static const bool var3 <= true;
 tipo var3;
-}
-static float func2 () {}
+};
+static float func2 () {};
