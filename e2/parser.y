@@ -131,7 +131,7 @@ var_global:
 
 /* Definição de Funções */
 funcao:
-  cabecalho bloco_comandos
+  cabecalho bloco_comandos_for
 ;
 
 cabecalho:
