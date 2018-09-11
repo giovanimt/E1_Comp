@@ -301,7 +301,6 @@ com_shift_dir:
 
 com_shift_dados:
   expressao
-| TK_LIT_INT
 ;
 
 
@@ -355,12 +354,12 @@ constr_sel:
 /// Comandos com Pipes
 com_pipes:
   cham_func pipes cham_func com_pipes_fim
-| TK_IDENTIFICADOR '=' cham_func pipes cham_func com_pipes_fim
+| TK_IDENTIFICADOR '=' cham_func pipes com_pipes_fim
 ;
 
 com_pipes_fim:
-  %empty
-| pipes cham_func com_pipes_fim
+  cham_func
+| cham_func pipes cham_func com_pipes_fim
 ;
 
 
