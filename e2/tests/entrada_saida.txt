@@ -1,4 +1,4 @@
 int main() {
   input 42;
   output 42, 43;
-};
+}

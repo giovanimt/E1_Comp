@@ -6,4 +6,4 @@ int main() {
   for ({var1=10}: var1=var1+10: {var1<100,var1>100}) {var2=var2+10};
   while (var1==10) do {var2=var2+10};
   do {var2=var2+10} while (var1==10);
-};
+}
