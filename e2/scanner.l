@@ -22,7 +22,7 @@ void count_cols();
 
 [\t ]+      { count_cols(); } /* ignora tabs e espacos */
 
-[,;:()\[\]{}+-|?*/<>=!&%#^.$] { count_cols();return yytext[0]; }
+","|";"|":"|"("|")"|"["|"]"|"{"|"}"|"+"|"-"|"|"|"?"|"*"|"/"|"<"|">"|"="|"!"|"&"|"%"|"#"|"^"|"."|"$"        { count_cols();return yytext[0]; }
 
 int         { count_cols();return TK_PR_INT; }
 float       { count_cols();return TK_PR_FLOAT; }
