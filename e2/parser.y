@@ -156,13 +156,12 @@ parametro:
 
 /* Bloco de Comandos */
 bloco_comandos:
-  '{' '}' ';'
-| '{' sequencia_comandos_simples '}' ';'
+  '{' sequencia_comandos_simples '}'
 ;
 
 sequencia_comandos_simples:
-  comando_simples
-| sequencia_comandos_simples comando_simples
+  comando_simples sequencia_comandos_simples
+| %empty
 ;
 
 comando_simples:
@@ -196,8 +195,7 @@ comando_for:
 | com_pipes
 
 bloco_comandos_for:
-  '{' '}'
-| '{' sequencia_comandos_simples '}'
+  '{' sequencia_comandos_simples '}'
 ;
 
 
@@ -353,42 +351,45 @@ constr_sel:
 
 /// Comandos com Pipes
 com_pipes:
-  TK_IDENTIFICADOR '=' cham_func pipes cham_func com_pipes_fim
-| cham_func pipes cham_func com_pipes_fim
-;
-
-com_pipes_fim:
-  %empty
-| pipes cham_func com_pipes_fim
+  cham_func pipes cham_func
+| com_pipes pipes cham_func
 ;
 
 
 /* Expr. Aritméticas */
-
-num:
+val_expr:
   TK_LIT_INT
 | TK_LIT_FLOAT
-;  
+| TK_LIT_CHAR
+| TK_LIT_STRING
+| TK_LIT_FALSE
+| TK_LIT_TRUE
+|'(' expressao ')'
+| com_pipes
+| cham_func
+| TK_IDENTIFICADOR expr_vet
+;
 
-op_arit_bin:
+expr_vet:
+  '[' TK_LIT_INT ']' expr_cif
+|  expr_cif
+;
+
+expr_cif:
+  '$' TK_IDENTIFICADOR
+| %empty
+;
+
+op_bin:
   '+'
 | '-'
 | '*'
 | '/'
 | '%'
-| '^'
-;
-
-op_arit_un:
-  '+'
+| '|'
 | '&'
-| '*'
-| '?'
-| '#'
-;
-
-op_rel:
-  TK_OC_LE
+| '^'
+| TK_OC_LE
 | TK_OC_GE
 | TK_OC_EQ
 | TK_OC_NE
@@ -398,46 +399,26 @@ op_rel:
 | TK_OC_SR
 ;
 
-op_log:
-  '!'
-| '|'
+op_un:
+  '+'
+| '-'
+| '!'
 | '&'
-;
-
-expressao:
-  expr_arit
-| expr_logica
-| expr_pipes
-;
-
-expr_arit:
-  num
-| TK_IDENTIFICADOR expr_vetor
-| cham_func
-| expr_arit op_arit_bin expr_arit
-| op_arit_un expr_arit ///TODO: precisa de algum %prec?
-| '-' expr_arit %prec NEG
-| '(' expr_arit ')'
-| expr_arit '?' expr_arit ':' expr_arit
-;
-
-expr_vetor:
-  '[' TK_LIT_INT ']'
+| '*'
+| '?'
+| '#'
 | %empty
 ;
 
-expr_logica:
-  expr_arit op_rel expr_arit
-| expr_logica op_log expr_logica
-| '(' expr_logica ')'
-| TK_LIT_FALSE
-| TK_LIT_TRUE
+expressao:
+  op_un val_expr expressao_cont
 ;
 
-expr_pipes:
-  com_pipes
+expressao_cont:
+  op_bin expressao
+| '?' expressao ':' expressao
+| %empty
 ;
-
 
 %%
 
