@@ -1,5 +1,7 @@
 all: bison flex gcc
 
+run:
+	tests/run_tests.sh
 bison:
 	bison -d parser.y -r all
 flex:

@@ -310,7 +310,7 @@ contr_fluxo:
 ;
 
 constr_cond:
-  TK_PR_IF expressao TK_PR_THEN bloco_comandos constr_cond_else
+  TK_PR_IF '(' expressao ')' TK_PR_THEN bloco_comandos constr_cond_else
 ;
 
 constr_cond_else:
@@ -371,7 +371,7 @@ val_expr:
 ;
 
 expr_vet:
-  '[' TK_LIT_INT ']' expr_cif
+  '[' expressao ']' expr_cif
 |  expr_cif
 ;
 
