@@ -10,6 +10,10 @@ int yylex(void);
 void yyerror (char const *s);
 extern int get_line_number();
 extern int get_col_number();
+extern void *arvore;
+extern void descompila (void *arvore);
+extern void libera (void *arvore);
+
 %}
 
 %token TK_PR_INT
@@ -427,3 +431,6 @@ void yyerror (char const *s)
 {
   fprintf (stderr, "linha %d coluna %ld: %s: token invalido: %s\n", get_line_number(), get_col_number()-strlen(yytext)+1, s, yytext);
 }
+
+void descompila (void *arvore) {};
+void libera (void *arvore) {};
