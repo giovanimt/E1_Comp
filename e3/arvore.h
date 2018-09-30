@@ -11,30 +11,30 @@
 
 #define NAO_LITERAL	20
 #define ESPECIAL	21
-#define P_RESERVADA	22
-#define OPERADOR	23
+#define RESERVADA	22
+#define OPERADOR_COMP	23
 #define IDENT		24
 
 union Literal {
-	int tipo_bool;
-	int tipo_int;
-	float tipo_float;
-	char tipo_char;
-	char* tipo_string;
-}
+	int bool_val;
+	int int_val;
+	float float_val;
+	char char_val;
+	char* string_val;
+};
 
 struct nodo_basico {
-	union Literal valor
-	int tipo_token
-	int tipo_lit
-	int coluna
-	int linha
-}
+	union Literal valor;
+	int tipo_token;
+	int tipo_lit;
+	int coluna;
+	int linha;
+};
 
 typedef struct nodo_arvore {
 	struct nodo_basico* token;
-	int numero_filhos
-	struct nodo_arvore **filhos
+	int numero_filhos;
+	struct nodo_arvore **filhos;
 } Nodo_arvore;
 
 Nodo_arvore* novo_nodo(struct nodo_basico* token);

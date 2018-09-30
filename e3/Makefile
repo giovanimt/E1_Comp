@@ -8,6 +8,6 @@ flex:
 	flex --header-file=lex.yy.h scanner.l
 gcc:
 	gcc -c lex.yy.c parser.tab.c
-	gcc -o etapa2 main.c lex.yy.o parser.tab.o -lfl
+	gcc -o etapa3 main.c lex.yy.o parser.tab.o -lfl
 clean:
-	rm -f etapa2 lex.yy.* parser.tab.* parser.output *.o
+	rm -f etapa3 lex.yy.* parser.tab.* parser.output *.o
