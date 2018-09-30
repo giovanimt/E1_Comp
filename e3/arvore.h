@@ -2,18 +2,15 @@
 #include <string.h>
 #include <stdlib.h>
 
-#define LITERAL		10
-#define BOOL		11
-#define INTEIRO		12
-#define FLOAT		13
-#define CHAR		14
-#define STRING		15
-
-#define NAO_LITERAL	20
-#define ESPECIAL	21
-#define RESERVADA	22
-#define OPERADOR_COMP	23
-#define IDENT		24
+#define BOOL		1
+#define INTEIRO		2
+#define FLOAT		3
+#define CHAR		4
+#define STRING		5
+#define ESPECIAL	6
+#define RESERVADA	7
+#define OPERADOR_COMP	8
+#define IDENT		9
 
 union Literal {
 	int bool_val;
@@ -23,23 +20,25 @@ union Literal {
 	char* string_val;
 };
 
-struct nodo_basico {
-	union Literal valor;
+struct inf_nodo {
+	union Literal valor_lit;
 	int tipo_token;
-	int tipo_lit;
 	int coluna;
 	int linha;
+	char* valor_nlit
 };
 
 typedef struct nodo_arvore {
-	struct nodo_basico* token;
+	struct inf_nodo* token;
 	int numero_filhos;
 	struct nodo_arvore **filhos;
 } Nodo_arvore;
 
-Nodo_arvore* novo_nodo(struct nodo_basico* token);
+Nodo_arvore* novo_nodo(struct inf_nodo* token);
 
 void adiciona_filho(Nodo_arvore *pai, Nodo_arvore *filho);
+
+void imprime(struct inf_nodo* token);
 
 void descompila (void *nodo_arvore);
 
