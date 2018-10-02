@@ -34,7 +34,11 @@ struct valor_lexico {
 
 enum NaoTerminalType {
 	programa,
-	var_global
+	var_global,
+	novo_tipo,
+	novo_tipo_campo,
+	novo_tipo_lista_campos
+	
 };
 
 union Nodo {

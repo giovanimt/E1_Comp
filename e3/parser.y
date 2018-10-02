@@ -71,8 +71,13 @@ extern void libera (void *arvore);
 %token TOKEN_ERRO
 
 %type <NodoArvore> programa
-%type <valor_lexico> tipo_primario
 %type <NodoArvore> var_global
+%type <NodoArvore> novo_tipo
+%type <NodoArvore> novo_tipo_campo
+%type <NodoArvore> novo_tipo_lista_campos
+%type <valor_lexico> tipo_primario
+%type <valor_lexico> encapsulamento
+
 
 %left '-' '+'
 %left '*' '/' '%'
@@ -84,9 +89,9 @@ extern void libera (void *arvore);
 %%
 
 programa:   
-  %empty	{ $$ = cria_nodo(programa,0); arvore = $$; }
-| programa novo_tipo
-| programa var_global	{ adiciona_filho($1,$2); arvore = $$; }
+  %empty		{ $$ = cria_nodo(programa,0); arvore = $$; }
+| programa novo_tipo	{ arvore = $$; adiciona_filho($1,$2); }
+| programa var_global	{ arvore = $$; adiciona_filho($1,$2); }
 | programa funcao
 ;
 
@@ -123,17 +128,23 @@ pipes:
 /* Declarações de Novos Tipos */
 novo_tipo:
   TK_PR_CLASS TK_IDENTIFICADOR '[' novo_tipo_lista_campos ']' ';'
+	{ $$ = cria_nodo(novo_tipo,3,cria_folha($1),cria_folha($2),$4); }
 ;
 
 novo_tipo_campo:
   tipo_primario TK_IDENTIFICADOR
+	{ $$ = cria_nodo(novo_tipo_campo,3,NULL,cria_folha($1),cria_folha($2)); }
+
 | encapsulamento tipo_primario TK_IDENTIFICADOR
+	{ $$ = cria_nodo(novo_tipo_campo,3,cria_folha($1),cria_folha($2),cria_folha($3)); }
 ;
 
 novo_tipo_lista_campos:
   novo_tipo_campo
-| novo_tipo_campo ':' novo_tipo_lista_campos
-;
+	{ $$ = cria_nodo(novo_tipo_lista_campos,1,$1); }
+| novo_tipo_lista_campos ':' novo_tipo_campo 
+	{ $$ = $1; adiciona_filho($$,$3); }
+;	
 
 /* Declarações de Variáveis Globais */
 var_global:
@@ -504,8 +515,32 @@ void descompila (void *arvore) {
 				printf(";");				
 				return;
 
-			// demais regras
+			// novo_tipo
+			// TK_PR_CLASS TK_IDENTIFICADOR '[' novo_tipo_lista_campos ']' ';'
+			case(novo_tipo):
+				descompila(a->filhos[0]);
+				descompila(a->filhos[1]);
+				printf("["); descompila(a->filhos[2]); printf("];");
+				return;
 
+			// novo_tipo_lista_campos
+			// novo_tipo_campo ':' novo_tipo_lista_campos
+			case(novo_tipo_lista_campos):
+				descompila(a->filhos[0]);
+				if(a->num_filhos > 1) {
+					printf(":");
+					descompila(a->filhos[1]);
+				}
+				return;
+
+			// novo_tipo_campo
+			// encapsulamento tipo_primario TK_IDENTIFICADOR
+			case(novo_tipo_campo):
+				if(a->filhos[0] != NULL)
+					descompila(a->filhos[0]);
+				descompila(a->filhos[1]); descompila(a->filhos[2]);
+				return;
+				
 		}
 		descompila(a->filhos[i]);
 	}

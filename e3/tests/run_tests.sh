@@ -5,5 +5,4 @@ while read FILE;
     ./etapa3 < $FILE.out1 > $FILE.out2;
     diff $FILE.out1 $FILE.out2;
     echo $?;
-    rm -f $FILE.out?
   done;
