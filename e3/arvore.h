@@ -33,6 +33,7 @@ struct valor_lexico {
 };
 
 enum NaoTerminalType {
+	programa,
 	var_global
 };
 
@@ -50,9 +51,8 @@ typedef struct NodoArvore {
 
 NodoArvore* cria_nodo(enum NaoTerminalType type, int num_filhos, ...);
 NodoArvore* cria_folha(struct valor_lexico valor_lexico);
+void adiciona_filho(NodoArvore *pai, NodoArvore *filho);
 
-//NodoArvore* novo_nodo(struct inf_nodo* token);
-//void adiciona_filho(NodoArvore *pai, NodoArvore *filho);
 //void imprime(struct inf_nodo* token);
 
 void descompila (void *NodoArvore);

@@ -23,30 +23,26 @@ NodoArvore* cria_nodo(enum NaoTerminalType type, int num_filhos, ...){
 	nodo_arvore->nodo.type = type;
 	nodo_arvore->type = 1;
 	nodo_arvore->num_filhos = num_filhos;
+	nodo_arvore->filhos = NULL;
 
-	NodoArvore **filhos = malloc(sizeof(NodoArvore*)*num_filhos);
+	if(num_filhos > 0) {
+		NodoArvore **filhos = malloc(sizeof(NodoArvore*)*num_filhos);
 
-	for(i=0;i<num_filhos;i++)
-		filhos[i] = va_arg(args,NodoArvore*);
+		for(i=0;i<num_filhos;i++)
+			filhos[i] = va_arg(args,NodoArvore*);
+	}
 
 	va_end(args);
 	return nodo_arvore;
 }
 
-/*Nodo_arvore* novo_nodo(struct inf_nodo* token){
-	Nodo_arvore* nodo = malloc(sizeof(Nodo_arvore));
-	nodo->numero_filhos = 0;
-	nodo->filhos = (Nodo_arvore**) malloc(sizeof(Nodo_arvore**));
-	nodo->token = token;
-	return nodo;
+void adiciona_filho(NodoArvore *pai, NodoArvore *filho){
+	pai->filhos = (NodoArvore**) realloc(pai->filhos, (pai->num_filhos + 1) * sizeof(NodoArvore**));
+	pai->filhos[pai->num_filhos] = filho;
+	pai->num_filhos++;
 }
 
-void adiciona_filho(Nodo_arvore *pai, Nodo_arvore *filho){
-	pai->filhos = (Nodo_arvore**) realloc(pai->filhos, (pai->numero_filhos + 1) * sizeof(Nodo_arvore**));
-	pai->filhos[pai->numero_filhos] = filho;
-	pai->numero_filhos++;
-}
-
+/*
 void imprime(struct inf_nodo* token){
 	switch(token->tipo_token){
 		case BOOL:

@@ -70,6 +70,7 @@ extern void libera (void *arvore);
 %token <valor_lexico> TK_IDENTIFICADOR
 %token TOKEN_ERRO
 
+%type <NodoArvore> programa
 %type <valor_lexico> tipo_primario
 %type <NodoArvore> var_global
 
@@ -83,9 +84,9 @@ extern void libera (void *arvore);
 %%
 
 programa:   
-  %empty
+  %empty	{ $$ = cria_nodo(programa,0); arvore = $$; }
 | programa novo_tipo
-| programa var_global
+| programa var_global	{ adiciona_filho($1,$2); arvore = $$; }
 | programa funcao
 ;
 
