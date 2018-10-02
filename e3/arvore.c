@@ -5,7 +5,7 @@
 #include "arvore.h"
 
 NodoArvore* cria_folha(struct valor_lexico valor_lexico){
-	NodoArvore *folha = malloc(sizeof(NodoArvore));
+	NodoArvore *folha = (NodoArvore*)malloc(sizeof(NodoArvore));
 	folha->nodo.valor_lexico = valor_lexico;
 	folha->type = 0;
 	folha->num_filhos = 0;
@@ -19,17 +19,17 @@ NodoArvore* cria_nodo(enum NaoTerminalType type, int num_filhos, ...){
 	va_list args;
 	va_start(args, num_filhos);
 
-	NodoArvore *nodo_arvore = malloc(sizeof(NodoArvore));
+	NodoArvore *nodo_arvore = (NodoArvore*)malloc(sizeof(NodoArvore));
 	nodo_arvore->nodo.type = type;
 	nodo_arvore->type = 1;
 	nodo_arvore->num_filhos = num_filhos;
 	nodo_arvore->filhos = NULL;
 
 	if(num_filhos > 0) {
-		NodoArvore **filhos = malloc(sizeof(NodoArvore*)*num_filhos);
+		nodo_arvore->filhos = (NodoArvore**)malloc(sizeof(NodoArvore*)*num_filhos);
 
 		for(i=0;i<num_filhos;i++)
-			filhos[i] = va_arg(args,NodoArvore*);
+			nodo_arvore->filhos[i] = va_arg(args,NodoArvore*);
 	}
 
 	va_end(args);

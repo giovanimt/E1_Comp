@@ -1,1 +1,9 @@
-ls tests/asl* |while read FILE; do echo "$FILE "; cat $FILE | ./etapa3; done;
+ls tests/asl* |
+while read FILE; 
+  do echo -n "$FILE "; 
+    ./etapa3 < $FILE > $FILE.out1;
+    ./etapa3 < $FILE.out1 > $FILE.out2;
+    diff $FILE.out1 $FILE.out2;
+    echo $?;
+    rm -f $FILE.out?
+  done;

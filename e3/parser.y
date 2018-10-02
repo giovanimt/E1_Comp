@@ -464,5 +464,51 @@ void yyerror (char const *s)
   fprintf (stderr, "linha %d coluna %ld: %s: token invalido: %s\n", get_line_number(), get_col_number()-strlen(yytext)+1, s, yytext);
 }
 
-void descompila (void *arvore) {};
+void descompila (void *arvore) {
+	NodoArvore *a = (NodoArvore*)arvore;
+	if(a == NULL)
+		return;
+
+	if(a->type == 0){
+		switch(a->nodo.valor_lexico.type) {
+			case(INTEIRO):
+				printf(" %d ",a->nodo.valor_lexico.val.int_val);
+				break;
+			case(FLOAT):
+				printf(" %f ",a->nodo.valor_lexico.val.float_val);
+				break;			
+			case(CHAR):
+				printf(" %c ",a->nodo.valor_lexico.val.char_val);
+				break;
+			default:
+				printf(" %s ",a->nodo.valor_lexico.val.string_val);
+				break;
+		return;
+		}
+	}
+
+	int i;
+	for(i=0 ; i < a->num_filhos; i++) {
+		switch(a->nodo.type) {
+			// var_global
+			case(var_global):
+				descompila(a->filhos[0]);
+				if(a->filhos[1] != NULL) {
+					printf("[");
+					descompila(a->filhos[1]);
+					printf("]");
+				}
+				if(a->filhos[2] != NULL)
+					descompila(a->filhos[2]);
+				descompila(a->filhos[3]);
+				printf(";");				
+				return;
+
+			// demais regras
+
+		}
+		descompila(a->filhos[i]);
+	}
+};
+
 void libera (void *arvore) {};
