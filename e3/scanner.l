@@ -15,7 +15,7 @@ int ColNumber = 0;
 int get_line_number(void) { return LineNumber; }
 int get_col_number(void) { return ColNumber; }
 void count_cols();
-void add_valor_lexico(int type);
+void add_valor_lexico(enum ValorLexicoType type);
 
 %}
 
@@ -27,11 +27,11 @@ void add_valor_lexico(int type);
 
 ","|";"|":"|"("|")"|"["|"]"|"{"|"}"|"+"|"-"|"|"|"?"|"*"|"/"|"<"|">"|"="|"!"|"&"|"%"|"#"|"^"|"."|"$"        { count_cols(); add_valor_lexico(ESPECIAL); return yytext[0]; }
 
-int         { count_cols(); add_valor_lexico(RESERVADA); return TK_PR_INT; }
-float       { count_cols(); add_valor_lexico(RESERVADA); return TK_PR_FLOAT; }
-bool        { count_cols(); add_valor_lexico(RESERVADA); return TK_PR_BOOL; }
-char        { count_cols(); add_valor_lexico(RESERVADA); return TK_PR_CHAR; }
-string      { count_cols(); add_valor_lexico(RESERVADA); return TK_PR_STRING; }
+int         { count_cols(); add_valor_lexico(TIPO_PRIMARIO); return TK_PR_INT; }
+float       { count_cols(); add_valor_lexico(TIPO_PRIMARIO); return TK_PR_FLOAT; }
+bool        { count_cols(); add_valor_lexico(TIPO_PRIMARIO); return TK_PR_BOOL; }
+char        { count_cols(); add_valor_lexico(TIPO_PRIMARIO); return TK_PR_CHAR; }
+string      { count_cols(); add_valor_lexico(TIPO_PRIMARIO); return TK_PR_STRING; }
 if          { count_cols(); add_valor_lexico(RESERVADA); return TK_PR_IF; }
 then        { count_cols(); add_valor_lexico(RESERVADA); return TK_PR_THEN; }
 else        { count_cols(); add_valor_lexico(RESERVADA); return TK_PR_ELSE; }
@@ -40,8 +40,8 @@ do          { count_cols(); add_valor_lexico(RESERVADA); return TK_PR_DO; }
 input       { count_cols(); add_valor_lexico(RESERVADA); return TK_PR_INPUT; }
 output      { count_cols(); add_valor_lexico(RESERVADA); return TK_PR_OUTPUT; }
 return      { count_cols(); add_valor_lexico(RESERVADA); return TK_PR_RETURN; }
-const       { count_cols(); add_valor_lexico(RESERVADA); return TK_PR_CONST; }
-static      { count_cols(); add_valor_lexico(RESERVADA); return TK_PR_STATIC; }
+const       { count_cols(); add_valor_lexico(MODIFICADOR); return TK_PR_CONST; }
+static      { count_cols(); add_valor_lexico(MODIFICADOR); return TK_PR_STATIC; }
 foreach     { count_cols(); add_valor_lexico(RESERVADA); return TK_PR_FOREACH; }
 for         { count_cols(); add_valor_lexico(RESERVADA); return TK_PR_FOR; }
 switch      { count_cols(); add_valor_lexico(RESERVADA); return TK_PR_SWITCH; }
@@ -49,9 +49,9 @@ case        { count_cols(); add_valor_lexico(RESERVADA); return TK_PR_CASE; }
 break       { count_cols(); add_valor_lexico(RESERVADA); return TK_PR_BREAK; }
 continue    { count_cols(); add_valor_lexico(RESERVADA); return TK_PR_CONTINUE; }
 class       { count_cols(); add_valor_lexico(RESERVADA); return TK_PR_CLASS; }
-private     { count_cols(); add_valor_lexico(RESERVADA); return TK_PR_PRIVATE; }
-public      { count_cols(); add_valor_lexico(RESERVADA); return TK_PR_PUBLIC; }
-protected   { count_cols(); add_valor_lexico(RESERVADA); return TK_PR_PROTECTED; }
+private     { count_cols(); add_valor_lexico(ENCAPSULAMENTO); return TK_PR_PRIVATE; }
+public      { count_cols(); add_valor_lexico(ENCAPSULAMENTO); return TK_PR_PUBLIC; }
+protected   { count_cols(); add_valor_lexico(ENCAPSULAMENTO); return TK_PR_PROTECTED; }
 
 
 true        { count_cols(); add_valor_lexico(BOOL); return TK_LIT_TRUE; }
@@ -98,33 +98,33 @@ void count_cols(){
 }
 
 
-void add_valor_lexico(int type){
+void add_valor_lexico(enum ValorLexicoType type){
 	yylval.valor_lexico.line =  get_line_number();
 	yylval.valor_lexico.col =  get_col_number();
 	yylval.valor_lexico.type = type; 
-	yylval.valor_lexico.val = strdup(yytext);
 	
 	switch(type) {
 		case BOOL:
 			if(strcmp(yytext,"true"))
-				yylval.valor_lexico.lit_val.bool_val = 1;
+				yylval.valor_lexico.val.bool_val = 1;
 			if(strcmp(yytext,"false"))
-				yylval.valor_lexico.lit_val.bool_val = 0;
+				yylval.valor_lexico.val.bool_val = 0;
 			break;
 		case INTEIRO:
-			yylval.valor_lexico.lit_val.int_val = atoi(yytext);
+			yylval.valor_lexico.val.int_val = atoi(yytext);
 			break;
 		case FLOAT:
-			yylval.valor_lexico.lit_val.float_val = atof(yytext);
+			yylval.valor_lexico.val.float_val = atof(yytext);
 			break;
 		case CHAR:
-			yylval.valor_lexico.lit_val.char_val = yytext[0];
+			yylval.valor_lexico.val.char_val = yytext[0];
 			break;
 		case STRING:
-			yylval.valor_lexico.lit_val.string_val = strdup(yytext);
+			yylval.valor_lexico.val.string_val = strdup(yytext);
+			break;
+		default:
+			yylval.valor_lexico.val.string_val = strdup(yytext);
 			break;
 	}
-
-
 }
 

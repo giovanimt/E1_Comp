@@ -1,0 +1,16 @@
+/* 
+
+Exemplo de uso (terminal *nix): 
+cat teste.txt | ./etapa2 ; echo $?
+
+Onde:
+cat teste.txt | ./etapa2 ; // Direciona o conteudo do arquivo teste.txt (qualquer programa de teste) para a entrada padrao do parser
+echo $? // Imprime o valor de retorno do parser: zero em caso de sucesso, caso contrario erro
+
+*/
+
+class novotipo[int campo1]; // OK
+class novotipo[private int campo1]; // OK
+class novotipo[public int campo1]; // OK
+class novotipo[int campo1: protected float campo2]; // OK
+class novotipo[]; // ERRO OBS: nao e permitido lista de campos vazia entao ta OK

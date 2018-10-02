@@ -1,9 +1,39 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include "arvore.h"
 
-Nodo_arvore* novo_nodo(struct inf_nodo* token){
+NodoArvore* cria_folha(struct valor_lexico valor_lexico){
+	NodoArvore *folha = malloc(sizeof(NodoArvore));
+	folha->nodo.valor_lexico = valor_lexico;
+	folha->type = 0;
+	folha->num_filhos = 0;
+	folha->filhos = NULL;
+	
+	return folha;	
+}
+
+NodoArvore* cria_nodo(union NaoTerminal nao_terminal, int num_filhos, ...){
+	int i;
+	va_list args;
+	va_start(args, num_filhos);
+
+	NodoArvore *nodo_arvore = malloc(sizeof(NodoArvore));
+	nodo_arvore->nodo.nao_terminal = nao_terminal;
+	nodo_arvore->type = 1;
+	nodo_arvore->num_filhos = num_filhos;
+
+	NodoArvore **filhos = malloc(sizeof(NodoArvore*)*num_filhos);
+
+	for(i=0;i<num_filhos;i++)
+		filhos[i] = va_arg(args,NodoArvore*);
+
+	va_end(args);
+	return nodo_arvore;
+}
+
+/*Nodo_arvore* novo_nodo(struct inf_nodo* token){
 	Nodo_arvore* nodo = malloc(sizeof(Nodo_arvore));
 	nodo->numero_filhos = 0;
 	nodo->filhos = (Nodo_arvore**) malloc(sizeof(Nodo_arvore**));
@@ -57,8 +87,7 @@ void imprime(struct inf_nodo* token){
 			printf("%s ", token->valor_nlit);
 			break;
 	}
-}
+} */
 
 void descompila (void *nodo_arvore);
-
 void libera (void *nodo_arvore);

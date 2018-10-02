@@ -6,7 +6,6 @@ Vinicius Castro 193026
 %{
 #include <stdio.h>
 #include "lex.yy.h"
-//#include "arvore.h"
 int yylex(void);
 void yyerror (char const *s);
 extern int get_line_number();
@@ -23,12 +22,8 @@ extern void libera (void *arvore);
 
 
 %union {
-	struct valor_lexico {
-		int line,col;
-		int type;
-		char* val;
-		union Literal lit_val;
-	} valor_lexico;
+	struct valor_lexico valor_lexico;
+	NodoArvore* NodoArvore;
 }
 
 %token <valor_lexico> TK_PR_INT
@@ -75,6 +70,9 @@ extern void libera (void *arvore);
 %token <valor_lexico> TK_IDENTIFICADOR
 %token TOKEN_ERRO
 
+%type <valor_lexico> tipo_primario
+%type <NodoArvore> var_global
+
 %left '-' '+'
 %left '*' '/' '%'
 %precedence NEG   /* negation--unary minus */
@@ -92,10 +90,10 @@ programa:
 ;
 
 tipo_primario:   
-  TK_PR_INT 
-| TK_PR_FLOAT 
-| TK_PR_BOOL 
-| TK_PR_CHAR 
+  TK_PR_INT		 
+| TK_PR_FLOAT	
+| TK_PR_BOOL	
+| TK_PR_CHAR	
 | TK_PR_STRING
 ;
 
@@ -138,19 +136,20 @@ novo_tipo_lista_campos:
 
 /* Declarações de Variáveis Globais */
 var_global:
-  TK_IDENTIFICADOR tipo_primario ';'
-| TK_IDENTIFICADOR TK_IDENTIFICADOR ';'
+  TK_IDENTIFICADOR tipo_primario ';' 
+| TK_IDENTIFICADOR TK_IDENTIFICADOR ';'	
 | TK_IDENTIFICADOR TK_PR_STATIC tipo_primario ';'
-| TK_IDENTIFICADOR TK_PR_STATIC TK_IDENTIFICADOR ';'
-| TK_IDENTIFICADOR '[' TK_LIT_INT ']' tipo_primario ';'
-| TK_IDENTIFICADOR '[' TK_LIT_INT ']' TK_IDENTIFICADOR ';'
-| TK_IDENTIFICADOR '[' TK_LIT_INT ']' TK_PR_STATIC tipo_primario ';'
+| TK_IDENTIFICADOR TK_PR_STATIC TK_IDENTIFICADOR ';' 
+| TK_IDENTIFICADOR '[' TK_LIT_INT ']' tipo_primario ';' 
+| TK_IDENTIFICADOR '[' TK_LIT_INT ']' TK_IDENTIFICADOR ';' 
+| TK_IDENTIFICADOR '[' TK_LIT_INT ']' TK_PR_STATIC tipo_primario ';' 
 | TK_IDENTIFICADOR '[' TK_LIT_INT ']' TK_PR_STATIC TK_IDENTIFICADOR ';'
 ;
 
 /* Definição de Funções */
 funcao:
-  cabecalho bloco_comandos_for
+//  cabecalho bloco_comandos_for
+	cabecalho bloco_comandos
 ;
 
 cabecalho:
@@ -201,7 +200,8 @@ comando_simples:
 
 ///comando_for usado em lista_for
 comando_for:
-  bloco_comandos_for
+//  bloco_comandos_for
+  bloco_comandos
 | var_local
 | atribuicao
 | contr_fluxo
@@ -213,9 +213,9 @@ comando_for:
 | com_shift 
 | com_pipes
 
-bloco_comandos_for:
-  '{' sequencia_comandos_simples '}'
-;
+//bloco_comandos_for:
+//  '{' sequencia_comandos_simples '}'
+//;
 
 
 /*Variavel Local*/

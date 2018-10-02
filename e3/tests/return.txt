@@ -1,0 +1,7 @@
+int main() {
+  case 10:
+  return 42+42;
+  return -10;
+  continue;
+  break;
+}

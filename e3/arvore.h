@@ -1,16 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-
-#define BOOL		1
-#define INTEIRO		2
-#define FLOAT		3
-#define CHAR		4
-#define STRING		5
-#define ESPECIAL	6
-#define RESERVADA	7
-#define OPERADOR_COMP	8
-#define IDENT		9
+#include <stdarg.h>
 
 union Literal {
 	int bool_val;
@@ -20,26 +11,56 @@ union Literal {
 	char* string_val;
 };
 
-struct inf_nodo {
-	union Literal valor_lit;
-	int tipo_token;
-	int coluna;
-	int linha;
-	char* valor_nlit
+enum ValorLexicoType {
+	BOOL,
+	INTEIRO,
+	FLOAT,
+	CHAR,
+	STRING,
+	ESPECIAL,
+	RESERVADA,
+	OPERADOR_COMP,
+	IDENT,
+	TIPO_PRIMARIO,
+	ENCAPSULAMENTO,
+	MODIFICADOR
 };
 
-typedef struct nodo_arvore {
-	struct inf_nodo* token;
-	int numero_filhos;
-	struct nodo_arvore **filhos;
-} Nodo_arvore;
+struct valor_lexico {
+	int line,col;
+	enum ValorLexicoType type;
+	union Literal val;
+};
 
-Nodo_arvore* novo_nodo(struct inf_nodo* token);
+struct var_global {
+	struct valor_lexico *id;
+	struct valor_lexico *tipo;
+	struct valor_lexico *tam_vetor;
+	struct valor_lexico *modificador;	
+};
 
-void adiciona_filho(Nodo_arvore *pai, Nodo_arvore *filho);
+union NaoTerminal {
+	struct var_global var_global;
+};
 
-void imprime(struct inf_nodo* token);
+union Nodo {
+	struct valor_lexico valor_lexico;
+	union NaoTerminal nao_terminal;    
+};
 
-void descompila (void *nodo_arvore);
+typedef struct NodoArvore {
+	union Nodo nodo;
+	int type; // 0 valor_lexico, 1 nao_terminal
+	int num_filhos;
+	struct NodoArvore **filhos;
+} NodoArvore;
 
-void libera (void *nodo_arvore);
+NodoArvore* cria_nodo(union NaoTerminal nao_terminal, int num_filhos, ...);
+NodoArvore* cria_folha(struct valor_lexico valor_lexico);
+
+//NodoArvore* novo_nodo(struct inf_nodo* token);
+//void adiciona_filho(NodoArvore *pai, NodoArvore *filho);
+//void imprime(struct inf_nodo* token);
+
+void descompila (void *NodoArvore);
+void libera (void *NodoArvore);
