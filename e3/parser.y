@@ -137,13 +137,29 @@ novo_tipo_lista_campos:
 /* Declarações de Variáveis Globais */
 var_global:
   TK_IDENTIFICADOR tipo_primario ';' 
+	{ $$ = cria_nodo(var_global,4,cria_folha($1),NULL,NULL,cria_folha($2)); }
+
 | TK_IDENTIFICADOR TK_IDENTIFICADOR ';'	
+	{ $$ = cria_nodo(var_global,4,cria_folha($1),NULL,NULL,cria_folha($2)); }
+
 | TK_IDENTIFICADOR TK_PR_STATIC tipo_primario ';'
+	{ $$ = cria_nodo(var_global,4,cria_folha($1),NULL,cria_folha($2),cria_folha($3)); }
+
 | TK_IDENTIFICADOR TK_PR_STATIC TK_IDENTIFICADOR ';' 
+	{ $$ = cria_nodo(var_global,4,cria_folha($1),NULL,cria_folha($2),cria_folha($3)); }
+
 | TK_IDENTIFICADOR '[' TK_LIT_INT ']' tipo_primario ';' 
+	{ $$ = cria_nodo(var_global,4,cria_folha($1),cria_folha($3),NULL,cria_folha($5)); }
+
 | TK_IDENTIFICADOR '[' TK_LIT_INT ']' TK_IDENTIFICADOR ';' 
+	{ $$ = cria_nodo(var_global,4,cria_folha($1),cria_folha($3),NULL,cria_folha($5)); }
+
 | TK_IDENTIFICADOR '[' TK_LIT_INT ']' TK_PR_STATIC tipo_primario ';' 
+	{ $$ = cria_nodo(var_global,4,cria_folha($1),cria_folha($3),cria_folha($5),cria_folha($6)); }
+
 | TK_IDENTIFICADOR '[' TK_LIT_INT ']' TK_PR_STATIC TK_IDENTIFICADOR ';'
+	{ $$ = cria_nodo(var_global,4,cria_folha($1),cria_folha($3),cria_folha($5),cria_folha($6)); }
+
 ;
 
 /* Definição de Funções */

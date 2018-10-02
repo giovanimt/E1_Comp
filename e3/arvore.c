@@ -14,13 +14,13 @@ NodoArvore* cria_folha(struct valor_lexico valor_lexico){
 	return folha;	
 }
 
-NodoArvore* cria_nodo(union NaoTerminal nao_terminal, int num_filhos, ...){
+NodoArvore* cria_nodo(enum NaoTerminalType type, int num_filhos, ...){
 	int i;
 	va_list args;
 	va_start(args, num_filhos);
 
 	NodoArvore *nodo_arvore = malloc(sizeof(NodoArvore));
-	nodo_arvore->nodo.nao_terminal = nao_terminal;
+	nodo_arvore->nodo.type = type;
 	nodo_arvore->type = 1;
 	nodo_arvore->num_filhos = num_filhos;
 

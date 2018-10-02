@@ -32,20 +32,13 @@ struct valor_lexico {
 	union Literal val;
 };
 
-struct var_global {
-	struct valor_lexico *id;
-	struct valor_lexico *tipo;
-	struct valor_lexico *tam_vetor;
-	struct valor_lexico *modificador;	
-};
-
-union NaoTerminal {
-	struct var_global var_global;
+enum NaoTerminalType {
+	var_global
 };
 
 union Nodo {
 	struct valor_lexico valor_lexico;
-	union NaoTerminal nao_terminal;    
+	enum NaoTerminalType type;    
 };
 
 typedef struct NodoArvore {
@@ -55,7 +48,7 @@ typedef struct NodoArvore {
 	struct NodoArvore **filhos;
 } NodoArvore;
 
-NodoArvore* cria_nodo(union NaoTerminal nao_terminal, int num_filhos, ...);
+NodoArvore* cria_nodo(enum NaoTerminalType type, int num_filhos, ...);
 NodoArvore* cria_folha(struct valor_lexico valor_lexico);
 
 //NodoArvore* novo_nodo(struct inf_nodo* token);
