@@ -37,7 +37,14 @@ enum NaoTerminalType {
 	var_global,
 	novo_tipo,
 	novo_tipo_campo,
-	novo_tipo_lista_campos
+	novo_tipo_lista_campos,
+	funcao,
+	cabecalho,
+	lista_parametros,
+	parametro,
+	bloco_comandos,
+	sequencia_comandos_simples,
+	comando_simples
 	
 };
 
@@ -56,6 +63,7 @@ typedef struct NodoArvore {
 NodoArvore* cria_nodo(enum NaoTerminalType type, int num_filhos, ...);
 NodoArvore* cria_folha(struct valor_lexico valor_lexico);
 void adiciona_filho(NodoArvore *pai, NodoArvore *filho);
+void adiciona_filho_esq(NodoArvore *pai, NodoArvore *filho);
 
 //void imprime(struct inf_nodo* token);
 

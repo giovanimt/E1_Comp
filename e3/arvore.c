@@ -42,5 +42,14 @@ void adiciona_filho(NodoArvore *pai, NodoArvore *filho){
 	pai->num_filhos++;
 }
 
+void adiciona_filho_esq(NodoArvore *pai, NodoArvore *filho){
+	pai->filhos = (NodoArvore**) realloc(pai->filhos, (pai->num_filhos + 1) * sizeof(NodoArvore**));
+	int i;
+	for(i=pai->num_filhos-1; i>=0; i--)
+		pai->filhos[pai->num_filhos] = pai->filhos[i];
+	pai->filhos[0] = filho;
+	pai->num_filhos++;
+}
+
 void descompila (void *nodo_arvore);
 void libera (void *nodo_arvore);

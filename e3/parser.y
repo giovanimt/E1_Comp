@@ -70,13 +70,22 @@ extern void libera (void *arvore);
 %token <valor_lexico> TK_IDENTIFICADOR
 %token TOKEN_ERRO
 
+%type <valor_lexico> tipo_primario
+%type <valor_lexico> encapsulamento
 %type <NodoArvore> programa
 %type <NodoArvore> var_global
 %type <NodoArvore> novo_tipo
 %type <NodoArvore> novo_tipo_campo
 %type <NodoArvore> novo_tipo_lista_campos
-%type <valor_lexico> tipo_primario
-%type <valor_lexico> encapsulamento
+
+%type <NodoArvore> funcao
+%type <NodoArvore> cabecalho
+%type <NodoArvore> parametros
+%type <NodoArvore> lista_parametros
+%type <NodoArvore> parametro
+%type <NodoArvore> bloco_comandos
+%type <NodoArvore> sequencia_comandos_simples
+%type <NodoArvore> comando_simples
 
 
 %left '-' '+'
@@ -89,7 +98,7 @@ extern void libera (void *arvore);
 %%
 
 programa:   
-  %empty		{ $$ = cria_nodo(programa,0); arvore = $$; }
+  %empty				{ $$ = cria_nodo(programa,0); arvore = $$; }
 | programa novo_tipo	{ arvore = $$; adiciona_filho($1,$2); }
 | programa var_global	{ arvore = $$; adiciona_filho($1,$2); }
 | programa funcao
@@ -176,38 +185,63 @@ var_global:
 
 /* Definição de Funções */
 funcao:
-//  cabecalho bloco_comandos_for
-	cabecalho bloco_comandos
+  cabecalho bloco_comandos
+	{ $$ = cria_nodo(funcao,2,$1,$2); }
 ;
 
 cabecalho:
-  tipo_primario TK_IDENTIFICADOR '(' lista_parametros ')'
-| TK_IDENTIFICADOR TK_IDENTIFICADOR '(' lista_parametros ')'
-| TK_PR_STATIC tipo_primario TK_IDENTIFICADOR '(' lista_parametros ')'
-| TK_PR_STATIC TK_IDENTIFICADOR TK_IDENTIFICADOR '(' lista_parametros ')'
+  tipo_primario TK_IDENTIFICADOR parametros
+	{ $$ = cria_nodo(cabecalho,4,NULL,cria_folha($1),cria_folha($2),$3); }	
+	
+| TK_IDENTIFICADOR TK_IDENTIFICADOR parametros
+	{ $$ = cria_nodo(cabecalho,4,NULL,cria_folha($1),cria_folha($2),$3); }	
+
+| TK_PR_STATIC tipo_primario TK_IDENTIFICADOR parametros
+	{ $$ = cria_nodo(cabecalho,4,cria_folha($1),cria_folha($2),cria_folha($3),$4); }		
+
+| TK_PR_STATIC TK_IDENTIFICADOR TK_IDENTIFICADOR parametros
+	{ $$ = cria_nodo(cabecalho,4,cria_folha($1),cria_folha($2),cria_folha($3),$4); }
+;
+
+parametros:
+  '(' ')'
+	{ $$ = cria_nodo(lista_parametros,0); }
+
+| '(' lista_parametros ')'
+	{ $$ = $2; }
 ;
 
 lista_parametros:
-  %empty
-| parametro lista_parametros	//criado novo OR para o 1o parametro a ser passado
-| ',' parametro lista_parametros // alterado para que o ultimo parametro nao tenha ',' no final
+  parametro
+	{ $$ = cria_nodo(lista_parametros,1,$1); }
+
+| lista_parametros ',' parametro
+	{ $$ = $1; adiciona_filho($$,$3); }
 ;
 
 parametro:
   tipo_primario TK_IDENTIFICADOR
-| TK_PR_CONST tipo_primario TK_IDENTIFICADOR
+	{ $$ = cria_nodo(parametro,3,NULL,cria_folha($1),cria_folha($2)); }
+
 | TK_IDENTIFICADOR TK_IDENTIFICADOR
+	{ $$ = cria_nodo(parametro,3,NULL,cria_folha($1),cria_folha($2)); }
+
+| TK_PR_CONST tipo_primario TK_IDENTIFICADOR
+	{ $$ = cria_nodo(parametro,3,cria_folha($1),cria_folha($2),cria_folha($3)); }
+
 | TK_PR_CONST TK_IDENTIFICADOR TK_IDENTIFICADOR
+	{ $$ = cria_nodo(parametro,3,cria_folha($1),cria_folha($2),cria_folha($3)); }
 ;
 
 /* Bloco de Comandos */
 bloco_comandos:
-  '{' sequencia_comandos_simples '}'
+  '{' '}'
+| '{' sequencia_comandos_simples '}'
 ;
 
 sequencia_comandos_simples:
-  comando_simples sequencia_comandos_simples
-| %empty
+  comando_simples
+| sequencia_comandos_simples comando_simples
 ;
 
 comando_simples:
@@ -228,7 +262,6 @@ comando_simples:
 
 ///comando_for usado em lista_for
 comando_for:
-//  bloco_comandos_for
   bloco_comandos
 | var_local
 | atribuicao
@@ -240,10 +273,6 @@ comando_for:
 | cham_func
 | com_shift 
 | com_pipes
-
-//bloco_comandos_for:
-//  '{' sequencia_comandos_simples '}'
-//;
 
 
 /*Variavel Local*/
