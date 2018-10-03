@@ -1,3 +1,4 @@
+//DECL
 //O tipo pode estar precedido opcionalmente pela palavra res. static.
 //variáveis globais
 v1 static int;

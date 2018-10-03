@@ -1,6 +1,0 @@
-int main() {
-  var << -42;
-  var[42] >> 42;
-  var$campo << 42+41;
-  var[42]$campo >> 42;
-}

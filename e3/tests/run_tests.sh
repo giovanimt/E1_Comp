@@ -1,4 +1,4 @@
-ls tests/asl* |
+ls tests/i* tests/asl* |
 while read FILE; 
   do echo -n "$FILE "; 
     ./etapa3 < $FILE > $FILE.out1;

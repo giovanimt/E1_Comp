@@ -590,6 +590,10 @@ void descompila (void *arvore) {
 					descompila(a->filhos[0]);
 				descompila(a->filhos[1]); descompila(a->filhos[2]);
 				return;
+			
+			// funcao
+			//case(funcao):
+			//	descompila(cabecalho); descompila(bloco_comandos);		
 				
 		}
 		descompila(a->filhos[i]);

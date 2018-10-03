@@ -1,4 +1,0 @@
-var float;
-var static int;
-var[20] bool;
-var[20] static char;

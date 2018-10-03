@@ -1,5 +1,0 @@
-int main() {
-  fun1() %>% fun2(., var1);
-  fun1() %>% fun2(., var1) %>% fun3(.);
-  var1 = fun1() %>% fun2(., 19) %|% fun3(.);
-}
