@@ -44,8 +44,19 @@ enum NaoTerminalType {
 	parametro,
 	bloco_comandos,
 	sequencia_comandos_simples,
-	comando_simples
-	
+	comando_simples,
+	var_local,
+	atribuicao,
+	contr_fluxo,
+	entrada,
+	saida,
+	retorno,
+	break_t,
+	continue_t,
+	case_t,
+	cham_func,
+	com_shift,
+	com_pipes,		
 };
 
 union Nodo {

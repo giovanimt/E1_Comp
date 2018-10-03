@@ -86,7 +86,18 @@ extern void libera (void *arvore);
 %type <NodoArvore> bloco_comandos
 %type <NodoArvore> sequencia_comandos_simples
 %type <NodoArvore> comando_simples
-
+%type <NodoArvore> var_local
+%type <NodoArvore> atribuicao
+%type <NodoArvore> contr_fluxo
+%type <NodoArvore> entrada
+%type <NodoArvore> saida
+%type <NodoArvore> retorno
+%type <NodoArvore> break_t
+%type <NodoArvore> continue_t
+%type <NodoArvore> case_t
+%type <NodoArvore> cham_func
+%type <NodoArvore> com_shift
+%type <NodoArvore> com_pipes
 
 %left '-' '+'
 %left '*' '/' '%'
@@ -236,28 +247,38 @@ parametro:
 /* Bloco de Comandos */
 bloco_comandos:
   '{' '}'
+	{ $$ = cria_nodo(bloco_comandos,0); }
+
 | '{' sequencia_comandos_simples '}'
+	{ $$ = cria_nodo(bloco_comandos,0); 
+		int i;
+		for(i=0 ; i<$2->num_filhos ; i++)
+			adiciona_filho($$,$2->filhos[i]);	
+	}
 ;
 
 sequencia_comandos_simples:
   comando_simples
+	{ $$ = cria_nodo(sequencia_comandos_simples,1,$1); }
+
 | sequencia_comandos_simples comando_simples
+	{ $$ = $1; adiciona_filho($$,$2); }
 ;
 
 comando_simples:
-  bloco_comandos ';'
-| var_local ';'
-| atribuicao ';'
-| contr_fluxo ';'
-| entrada ';'
-| saida
-| retorno ';'
-| break ';'
-| continue ';'
-| case
-| cham_func ';'
-| com_shift ';'
-| com_pipes ';'
+  bloco_comandos ';'	{ $$ = cria_nodo(bloco_comandos,1,$1); }
+| var_local ';'			
+| atribuicao ';'		
+| contr_fluxo ';'		
+| entrada ';'			
+| saida					
+| retorno ';'			
+| break_t ';'			
+| continue_t ';'		
+| case_t				
+| cham_func ';'			
+| com_shift ';'			
+| com_pipes ';'			
 ;
 
 ///comando_for usado em lista_for
@@ -268,8 +289,8 @@ comando_for:
 | contr_fluxo
 | entrada
 | retorno
-| break
-| continue
+| break_t
+| continue_t
 | cham_func
 | com_shift 
 | com_pipes
@@ -324,13 +345,13 @@ saida2:			',' expressao saida2 | ';'
 retorno:		TK_PR_RETURN expressao
 ;
 
-break:			TK_PR_BREAK
+break_t:			TK_PR_BREAK
 ;
 
-continue:		TK_PR_CONTINUE
+continue_t:		TK_PR_CONTINUE
 ;
 
-case:			TK_PR_CASE TK_LIT_INT ':'
+case_t:			TK_PR_CASE TK_LIT_INT ':'
 ;
 
 
