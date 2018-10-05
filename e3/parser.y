@@ -89,6 +89,8 @@ extern void libera (void *arvore);
 %type <NodoArvore> var_local
 %type <NodoArvore> atribuicao
 %type <NodoArvore> contr_fluxo
+%type <NodoArvore> lista_foreach
+%type <NodoArvore> lista_for
 %type <NodoArvore> entrada
 %type <NodoArvore> saida
 %type <NodoArvore> retorno
@@ -98,6 +100,8 @@ extern void libera (void *arvore);
 %type <NodoArvore> cham_func
 %type <NodoArvore> com_shift
 %type <NodoArvore> com_pipes
+
+%type <NodoArvore> expressao
 
 %left '-' '+'
 %left '*' '/' '%'
@@ -294,154 +298,322 @@ comando_for:
 | cham_func
 | com_shift 
 | com_pipes
-
+;
 
 /*Variavel Local*/
 
 var_local:
   var_local_tipo
+{ $$ = cria_nodo(var_local,2,NULL,NULL); 
+	int i;
+	for(i=0 ; i<$1->num_filhos ; i++)
+		adiciona_filho($$,$1->filhos[i]);
+}
 | TK_PR_CONST var_local_tipo
+{ $$ = cria_nodo(var_local,2,NULL,cria_folha($1));
+	int i;
+	for(i=0 ; i<$2->num_filhos ; i++)
+		adiciona_filho($$,$2->filhos[i]);
+}
 | TK_PR_STATIC var_local_tipo
+{ $$ = cria_nodo(var_local,2,cria_folha($1),NULL);
+	int i;
+	for(i=0 ; i<$2->num_filhos ; i++)
+		adiciona_filho($$,$2->filhos[i]);
+}
 | TK_PR_STATIC TK_PR_CONST var_local_tipo
+{ $$ = cria_nodo(var_local,2,cria_folha($1),cria_folha($2));
+	int i;
+	for(i=0 ; i<$3->num_filhos ; i++)
+		adiciona_filho($$,$3->filhos[i]);
+}
 ;
 
 var_local_tipo:
   tipo_primario TK_IDENTIFICADOR var_local_inic
+{ $$ = cria_nodo(var_local,2,cria_folha($1),cria_folha($2));
+	int i;
+	for(i=0 ; i<$3->num_filhos ; i++)
+		adiciona_filho($$,$3->filhos[i]);
+}
 | TK_IDENTIFICADOR TK_IDENTIFICADOR
+{ $$ = cria_nodo(var_local,2,cria_folha($1),cria_folha($2)); }
 ;
 
 var_local_inic:
   %empty
+{ $$ = cria_nodo(var_local,0); }
 | TK_OC_LE var_local_inic2
+{ $$ = cria_nodo(var_local,1,cria_folha($1)); 
+	int i;
+	for(i=0 ; i<$2->num_filhos ; i++)
+		adiciona_filho($$,$2->filhos[i]);
+}
 ;
 
 var_local_inic2:
   literal
+{ $$ = cria_nodo(var_local,1,cria_folha($1)); }
 | TK_IDENTIFICADOR
+{ $$ = cria_nodo(var_local,1,cria_folha($1)); }
 ;
 
 
 ///Atribuicao
 atribuicao:
   TK_IDENTIFICADOR '=' expressao
+{ $$ = cria_nodo(atribuicao,4,cria_folha($1), NULL, NULL,$2); }
 | TK_IDENTIFICADOR '[' expressao ']' '=' expressao 
+{ $$ = cria_nodo(atribuicao,4,cria_folha($1), $2, NULL,$3); }
 | TK_IDENTIFICADOR '$' TK_IDENTIFICADOR '=' expressao
+{ $$ = cria_nodo(atribuicao,4,cria_folha($1), NULL, cria_folha($2), $3); }
 | TK_IDENTIFICADOR '[' expressao ']' '$' TK_IDENTIFICADOR '=' expressao
+{ $$ = cria_nodo(atribuicao,4,cria_folha($1), $2, cria_folha($3), $4); }
 ;
 
 
 ///Entrada e Saida
-entrada:		TK_PR_INPUT expressao
+entrada:
+ TK_PR_INPUT expressao
+{ $$ = cria_nodo(entrada,2,cria_folha($1),$2); }
 ;
 
-saida:			TK_PR_OUTPUT expressao saida2
+saida:
+ TK_PR_OUTPUT expressao saida2
+{ $$ = cria_nodo(saida,2,cria_folha($1),$2); 
+	int i;
+	for(i=0 ; i<$3->num_filhos ; i++)
+		adiciona_filho($$,$3->filhos[i]);
+}
 ;
 
-saida2:			',' expressao saida2 | ';'
+saida2:
+ ',' expressao saida2
+{ $$ = cria_nodo(saida,1,$2);
+	int i;
+	for(i=0 ; i<$3->num_filhos ; i++)
+		adiciona_filho($$,$3->filhos[i]);
+}
+
+| ';'
+{ $$ = cria_nodo(saida,0);}
 ;
 
 
 /// Retorno, Break, Continue, Case
 retorno:		TK_PR_RETURN expressao
+{ $$ = cria_nodo(retorno,2,cria_folha($1), $2);}
 ;
 
 break_t:			TK_PR_BREAK
+{ $$ = cria_nodo(break_t,1,cria_folha($1));}
 ;
 
 continue_t:		TK_PR_CONTINUE
+{ $$ = cria_nodo(continue_t,1,cria_folha($1));}
 ;
 
 case_t:			TK_PR_CASE TK_LIT_INT ':'
+{ $$ = cria_nodo(case_t,2,cria_folha($1), cria_folha($2));}
 ;
 
 
 /// Chamada de Funcao
 cham_func:
   TK_IDENTIFICADOR '(' cham_func_arg
+{ $$ = cria_nodo(cham_func,1,cria_folha($1));
+	int i;
+	for(i=0 ; i<$3->num_filhos ; i++)
+		adiciona_filho($$,$3->filhos[i]);
+}
 ;
 
 cham_func_arg:
   expressao cham_func_fim
+{ $$ = cria_nodo(cham_func,1,$1);
+	int i;
+	for(i=0 ; i<$2->num_filhos ; i++)
+		adiciona_filho($$,$2->filhos[i]);
+}
 | '.' cham_func_fim
+{ $$ = cria_nodo(cham_func,0);
+	int i;
+	for(i=0 ; i<$2->num_filhos ; i++)
+		adiciona_filho($$,$2->filhos[i]);
+}
 | cham_func_fim
+{ $$ = cria_nodo(cham_func,0);
+	int i;
+	for(i=0 ; i<$1->num_filhos ; i++)
+		adiciona_filho($$,$1->filhos[i]);
+}
 ;
 
 cham_func_fim:
   ',' cham_func_arg
-  | ')'
+{ $$ = cria_nodo(cham_func,0);
+	int i;
+	for(i=0 ; i<$2->num_filhos ; i++)
+		adiciona_filho($$,$2->filhos[i]);
+}
+| ')'
+{ $$ = cria_nodo(cham_func,0);}
 ;
 
 
 ///Comando Shift
 com_shift:
 TK_IDENTIFICADOR com_shift_opcoes
+{ $$ = cria_nodo(com_shift,1,cria_folha($1)); 
+	int i;
+	for(i=0 ; i<$2->num_filhos ; i++)
+		adiciona_filho($$,$2->filhos[i]);
+}
 ;
 
 com_shift_opcoes:
   TK_OC_SL com_shift_dados
+{ $$ = cria_nodo(com_shift,1,cria_folha($1)); 
+	int i;
+	for(i=0 ; i<$2->num_filhos ; i++)
+		adiciona_filho($$,$2->filhos[i]);
+}
 | TK_OC_SR com_shift_dados
+{ $$ = cria_nodo(com_shift,1,cria_folha($1)); 
+	int i;
+	for(i=0 ; i<$2->num_filhos ; i++)
+		adiciona_filho($$,$2->filhos[i]);
+}
 | '$' TK_IDENTIFICADOR com_shift_dir
+{ $$ = cria_nodo(com_shift,1,cria_folha($2)); 
+	int i;
+	for(i=0 ; i<$3->num_filhos ; i++)
+		adiciona_filho($$,$3->filhos[i]);
+}
 | '[' expressao ']' com_shift_dados2
+{ $$ = cria_nodo(com_shift,1,$2); 
+	int i;
+	for(i=0 ; i<$4->num_filhos ; i++)
+		adiciona_filho($$,$4->filhos[i]);
+}
 ;
 
 com_shift_dados2:
   '$' TK_IDENTIFICADOR com_shift_dir
+{ $$ = cria_nodo(com_shift,1,cria_folha($2)); 
+	int i;
+	for(i=0 ; i<$3->num_filhos ; i++)
+		adiciona_filho($$,$3->filhos[i]);
+}
 | com_shift_dir
+{ $$ = cria_nodo(com_shift,0); 
+	int i;
+	for(i=0 ; i<$1->num_filhos ; i++)
+		adiciona_filho($$,$1->filhos[i]);
+}
 ;
 
 com_shift_dir:
   TK_OC_SL com_shift_dados 
+{ $$ = cria_nodo(com_shift,1,cria_folha($1)); 
+	int i;
+	for(i=0 ; i<$2->num_filhos ; i++)
+		adiciona_filho($$,$2->filhos[i]);
+}
 | TK_OC_SR com_shift_dados
+{ $$ = cria_nodo(com_shift,1,cria_folha($1)); 
+	int i;
+	for(i=0 ; i<$2->num_filhos ; i++)
+		adiciona_filho($$,$2->filhos[i]);
+}
 ;
 
 com_shift_dados:
   expressao
+{ $$ = cria_nodo(com_shift,1,$1);}
 ;
 
 
 ///Controle de Fluxo
 contr_fluxo:
   constr_cond
+{ $$ = $1; }
 | constr_iter
+{ $$ = $1; }
 | constr_sel
+{ $$ = $1; }
 ;
 
 constr_cond:
   TK_PR_IF '(' expressao ')' TK_PR_THEN bloco_comandos constr_cond_else
+{ $$ = cria_nodo(contr_fluxo,4,cria_folha($1),$3,cria_folha($5), $6); 
+	int i;
+	for(i=0 ; i<$7->num_filhos ; i++)
+		adiciona_filho($$,$7->filhos[i]);
+}
 ;
 
 constr_cond_else:
   TK_PR_ELSE bloco_comandos
+{ $$ = cria_nodo(contr_fluxo,2,cria_folha($1),$2); }
 | %empty
+{ $$ = cria_nodo(contr_fluxo,0); }
 ;
 
 constr_iter:
   TK_PR_FOREACH '(' TK_IDENTIFICADOR ':' lista_foreach ')' bloco_comandos
+{ $$ = cria_nodo(contr_fluxo,4,cria_folha($1),cria_folha($3),$5,$7); }
 | TK_PR_FOR '(' lista_for ':' expressao ':' lista_for ')' bloco_comandos
+{ $$ = cria_nodo(contr_fluxo,5,cria_folha($1),$3,$5,$7,$9); }
 | TK_PR_WHILE '(' expressao ')' TK_PR_DO bloco_comandos
+{ $$ = cria_nodo(contr_fluxo,4,cria_folha($1),$3,cria_folha($5),$6); }
 | TK_PR_DO bloco_comandos TK_PR_WHILE '(' expressao ')'
+{ $$ = cria_nodo(contr_fluxo,4,cria_folha($1),$2,cria_folha($3),$5); }
 ;
 
 lista_foreach:
   expressao lista_foreach2
+{ $$ = cria_nodo(lista_foreach,1,$1);
+	int i;
+	for(i=0 ; i<$2->num_filhos ; i++)
+		adiciona_filho($$,$2->filhos[i]);
+}
 ;
 
 lista_foreach2:
   ',' expressao lista_foreach2
+{ $$ = cria_nodo(lista_foreach,1,$2);
+	int i;
+	for(i=0 ; i<$3->num_filhos ; i++)
+		adiciona_filho($$,$3->filhos[i]);
+}
 | %empty
+{ $$ = cria_nodo(lista_foreach,0);}
 ;
 
 lista_for:
   comando_for lista_for2
+{ $$ = cria_nodo(lista_for,1,$1);
+	int i;
+	for(i=0 ; i<$2->num_filhos ; i++)
+		adiciona_filho($$,$2->filhos[i]);
+}
 ;
 
 lista_for2:
   ',' comando_for lista_for2
+{ $$ = cria_nodo(lista_for,1,$2);
+	int i;
+	for(i=0 ; i<$3->num_filhos ; i++)
+		adiciona_filho($$,$3->filhos[i]);
+}
 | %empty
+{ $$ = cria_nodo(lista_for,0);}
 ;
 
 constr_sel:
   TK_PR_SWITCH '(' expressao ')' bloco_comandos
+{ $$ = cria_nodo(contr_fluxo,3,cria_folha($1),$3,$5);}
 ;
 
 
@@ -449,7 +621,12 @@ constr_sel:
 /// Comandos com Pipes
 com_pipes:
   cham_func pipes cham_func
+{ $$ = cria_nodo(com_pipes,3,$1,cria_folha($2),$3);}
 | com_pipes pipes cham_func
+{ $$ = $1;
+adiciona_filho($$,cria_folha($2));
+adiciona_filho($$,$3);
+}
 ;
 
 

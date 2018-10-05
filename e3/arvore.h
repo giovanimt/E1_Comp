@@ -48,6 +48,8 @@ enum NaoTerminalType {
 	var_local,
 	atribuicao,
 	contr_fluxo,
+	lista_foreach,
+	lista_for,
 	entrada,
 	saida,
 	retorno,
@@ -56,7 +58,8 @@ enum NaoTerminalType {
 	case_t,
 	cham_func,
 	com_shift,
-	com_pipes,		
+	com_pipes,	
+	expressao,	
 };
 
 union Nodo {
@@ -74,9 +77,3 @@ typedef struct NodoArvore {
 NodoArvore* cria_nodo(enum NaoTerminalType type, int num_filhos, ...);
 NodoArvore* cria_folha(struct valor_lexico valor_lexico);
 void adiciona_filho(NodoArvore *pai, NodoArvore *filho);
-void adiciona_filho_esq(NodoArvore *pai, NodoArvore *filho);
-
-//void imprime(struct inf_nodo* token);
-
-void descompila (void *NodoArvore);
-void libera (void *NodoArvore);

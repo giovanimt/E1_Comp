@@ -51,5 +51,3 @@ void adiciona_filho_esq(NodoArvore *pai, NodoArvore *filho){
 	pai->num_filhos++;
 }
 
-void descompila (void *nodo_arvore);
-void libera (void *nodo_arvore);
