@@ -77,3 +77,4 @@ typedef struct NodoArvore {
 NodoArvore* cria_nodo(enum NaoTerminalType type, int num_filhos, ...);
 NodoArvore* cria_folha(struct valor_lexico valor_lexico);
 void adiciona_filho(NodoArvore *pai, NodoArvore *filho);
+void adiciona_netos(NodoArvore *avo, NodoArvore *pai);

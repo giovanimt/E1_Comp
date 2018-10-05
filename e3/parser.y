@@ -6,6 +6,7 @@ Vinicius Castro 193026
 %{
 #include <stdio.h>
 #include "lex.yy.h"
+int i;
 int yylex(void);
 void yyerror (char const *s);
 extern int get_line_number();
@@ -86,7 +87,8 @@ extern void libera (void *arvore);
 %type <NodoArvore> bloco_comandos
 %type <NodoArvore> sequencia_comandos_simples
 %type <NodoArvore> comando_simples
-%type <NodoArvore> var_local
+
+/*%type <NodoArvore> var_local
 %type <NodoArvore> atribuicao
 %type <NodoArvore> contr_fluxo
 %type <NodoArvore> lista_foreach
@@ -101,7 +103,7 @@ extern void libera (void *arvore);
 %type <NodoArvore> com_shift
 %type <NodoArvore> com_pipes
 
-%type <NodoArvore> expressao
+%type <NodoArvore> expressao */
 
 %left '-' '+'
 %left '*' '/' '%'
@@ -113,10 +115,10 @@ extern void libera (void *arvore);
 %%
 
 programa:   
-  %empty				{ $$ = cria_nodo(programa,0); arvore = $$; }
+  %empty		        { $$ = cria_nodo(programa,0); arvore = $$; }
 | programa novo_tipo	{ arvore = $$; adiciona_filho($1,$2); }
 | programa var_global	{ arvore = $$; adiciona_filho($1,$2); }
-| programa funcao
+| programa funcao       { $$ = $1; adiciona_filho($1,$2); arvore = $$; }
 ;
 
 tipo_primario:   
@@ -223,7 +225,7 @@ parametros:
 	{ $$ = cria_nodo(lista_parametros,0); }
 
 | '(' lista_parametros ')'
-	{ $$ = $2; }
+	{ $$ = cria_nodo(lista_parametros,0); adiciona_netos($$,$2); }
 ;
 
 lista_parametros:
@@ -271,7 +273,7 @@ sequencia_comandos_simples:
 
 comando_simples:
   bloco_comandos ';'	{ $$ = cria_nodo(bloco_comandos,1,$1); }
-| var_local ';'			
+/*| var_local ';'			
 | atribuicao ';'		
 | contr_fluxo ';'		
 | entrada ';'			
@@ -301,7 +303,7 @@ comando_for:
 ;
 
 /*Variavel Local*/
-
+/*
 var_local:
   var_local_tipo
 { $$ = cria_nodo(var_local,2,NULL,NULL); 
@@ -631,6 +633,7 @@ adiciona_filho($$,$3);
 
 
 /* Expr. Aritméticas */
+/*
 val_expr:
   TK_LIT_INT
 | TK_LIT_FLOAT
@@ -693,7 +696,7 @@ expressao_cont:
 | '?' expressao ':' expressao
 | %empty
 ;
-
+*/
 %%
 
 /* Called by yyparse on error.  */
@@ -721,60 +724,94 @@ void descompila (void *arvore) {
 			default:
 				printf(" %s ",a->nodo.valor_lexico.val.string_val);
 				break;
-		return;
 		}
+        return;
 	}
 
-	int i;
-	for(i=0 ; i < a->num_filhos; i++) {
-		switch(a->nodo.type) {
-			// var_global
-			case(var_global):
-				descompila(a->filhos[0]);
-				if(a->filhos[1] != NULL) {
-					printf("[");
-					descompila(a->filhos[1]);
-					printf("]");
-				}
-				if(a->filhos[2] != NULL)
-					descompila(a->filhos[2]);
-				descompila(a->filhos[3]);
-				printf(";");				
-				return;
+    switch(a->nodo.type) {
+    	// var_global
+    	case(var_global):
+    		descompila(a->filhos[0]);
+    		if(a->filhos[1] != NULL) {
+    			printf("[");
+    			descompila(a->filhos[1]);
+    			printf("]");
+    		}
+    		if(a->filhos[2] != NULL)
+    			descompila(a->filhos[2]);
+    		descompila(a->filhos[3]);
+    		printf(";");				
+    		return;
+    
+    	// novo_tipo
+    	// TK_PR_CLASS TK_IDENTIFICADOR '[' novo_tipo_lista_campos ']' ';'
+    	case(novo_tipo):
+    		descompila(a->filhos[0]);
+    		descompila(a->filhos[1]);
+    		printf("["); descompila(a->filhos[2]); printf("];");
+    		return;
+    
+    	// novo_tipo_lista_campos
+    	// novo_tipo_campo ':' novo_tipo_lista_campos
+    	case(novo_tipo_lista_campos):
+    		descompila(a->filhos[0]);
+    		if(a->num_filhos > 1) {
+    			printf(":");
+    			descompila(a->filhos[1]);
+    		}
+    		return;
+    
+    	// novo_tipo_campo
+    	// encapsulamento tipo_primario TK_IDENTIFICADOR
+    	case(novo_tipo_campo):
+    		if(a->filhos[0] != NULL)
+    			descompila(a->filhos[0]);
+    		descompila(a->filhos[1]); descompila(a->filhos[2]);
+    		return;
+    	
+    	// funcao
+    	case(funcao):
+    	    descompila(a->filhos[0]);
+            descompila(a->filhos[1]);
+    	    return;
+    
+        // funcao: cabecalho
+        case(cabecalho):
+            descompila(a->filhos[0]); 
+            descompila(a->filhos[1]);
+            descompila(a->filhos[2]); 
+            descompila(a->filhos[3]);
+            return;
+    
+        // funcao: lista_parametros
+        case(lista_parametros):
+            printf("(");
+            if(a->num_filhos > 0)
+                for(i=0; i<a->num_filhos; i++) {
+                    descompila(a->filhos[i]);
+                    if(i+1 < a->num_filhos)
+                        printf(",");
+                }
+            printf(")");
+            return;
+    
+        // funcao: lista_parametros: parametro
+        case(parametro):
+            if(a->filhos[0] != NULL)
+                descompila(a->filhos[0]);
+            descompila(a->filhos[1]); 
+            descompila(a->filhos[2]);
+            return;
 
-			// novo_tipo
-			// TK_PR_CLASS TK_IDENTIFICADOR '[' novo_tipo_lista_campos ']' ';'
-			case(novo_tipo):
-				descompila(a->filhos[0]);
-				descompila(a->filhos[1]);
-				printf("["); descompila(a->filhos[2]); printf("];");
-				return;
+        case(bloco_comandos):
+            return;
+    
+    }
+        
+    for(i=0; i<a->num_filhos; i++)
+        descompila(a->filhos[i]);
+    
 
-			// novo_tipo_lista_campos
-			// novo_tipo_campo ':' novo_tipo_lista_campos
-			case(novo_tipo_lista_campos):
-				descompila(a->filhos[0]);
-				if(a->num_filhos > 1) {
-					printf(":");
-					descompila(a->filhos[1]);
-				}
-				return;
-
-			// novo_tipo_campo
-			// encapsulamento tipo_primario TK_IDENTIFICADOR
-			case(novo_tipo_campo):
-				if(a->filhos[0] != NULL)
-					descompila(a->filhos[0]);
-				descompila(a->filhos[1]); descompila(a->filhos[2]);
-				return;
-			
-			// funcao
-			//case(funcao):
-			//	descompila(cabecalho); descompila(bloco_comandos);		
-				
-		}
-		descompila(a->filhos[i]);
-	}
 };
 
 void libera (void *arvore) {};
