@@ -71,8 +71,11 @@ extern void libera (void *arvore);
 %token <valor_lexico> TK_IDENTIFICADOR
 %token TOKEN_ERRO
 
+%type <valor_lexico> literal
 %type <valor_lexico> tipo_primario
 %type <valor_lexico> encapsulamento
+%type <valor_lexico> op_un
+%type <valor_lexico> op_bin
 %type <NodoArvore> programa
 %type <NodoArvore> var_global
 %type <NodoArvore> novo_tipo
@@ -88,8 +91,12 @@ extern void libera (void *arvore);
 %type <NodoArvore> sequencia_comandos_simples
 %type <NodoArvore> comando_simples
 
-/*%type <NodoArvore> var_local
+%type <NodoArvore> var_local
+%type <NodoArvore> var_local_tipo
+%type <NodoArvore> var_local_inic
+%type <NodoArvore> var_local_inic2
 %type <NodoArvore> atribuicao
+/*
 %type <NodoArvore> contr_fluxo
 %type <NodoArvore> lista_foreach
 %type <NodoArvore> lista_for
@@ -102,8 +109,13 @@ extern void libera (void *arvore);
 %type <NodoArvore> cham_func
 %type <NodoArvore> com_shift
 %type <NodoArvore> com_pipes
+*/
+%type <NodoArvore> expressao
+%type <NodoArvore> expressao_cont
+%type <NodoArvore> val_expr
+%type <NodoArvore> expr_vet
+%type <NodoArvore> expr_cif
 
-%type <NodoArvore> expressao */
 
 %left '-' '+'
 %left '*' '/' '%'
@@ -273,8 +285,9 @@ sequencia_comandos_simples:
 
 comando_simples:
   bloco_comandos ';'	{ $$ = cria_nodo(bloco_comandos,1,$1); }
-/*| var_local ';'			
+| var_local ';'		{ $$ = cria_nodo(comando_simples,1,$1); }
 | atribuicao ';'		
+/*
 | contr_fluxo ';'		
 | entrada ';'			
 | saida					
@@ -301,9 +314,9 @@ comando_for:
 | com_shift 
 | com_pipes
 ;
-
+*/
 /*Variavel Local*/
-/*
+;
 var_local:
   var_local_tipo
 { $$ = cria_nodo(var_local,2,NULL,NULL); 
@@ -354,9 +367,9 @@ var_local_inic:
 ;
 
 var_local_inic2:
-  literal
+  TK_IDENTIFICADOR
 { $$ = cria_nodo(var_local,1,cria_folha($1)); }
-| TK_IDENTIFICADOR
+| literal
 { $$ = cria_nodo(var_local,1,cria_folha($1)); }
 ;
 
@@ -364,16 +377,16 @@ var_local_inic2:
 ///Atribuicao
 atribuicao:
   TK_IDENTIFICADOR '=' expressao
-{ $$ = cria_nodo(atribuicao,4,cria_folha($1), NULL, NULL,$2); }
+{ $$ = cria_nodo(atribuicao,4,cria_folha($1), NULL, NULL,$3); }
 | TK_IDENTIFICADOR '[' expressao ']' '=' expressao 
-{ $$ = cria_nodo(atribuicao,4,cria_folha($1), $2, NULL,$3); }
+{ $$ = cria_nodo(atribuicao,4,cria_folha($1), $3, NULL,$6); }
 | TK_IDENTIFICADOR '$' TK_IDENTIFICADOR '=' expressao
-{ $$ = cria_nodo(atribuicao,4,cria_folha($1), NULL, cria_folha($2), $3); }
+{ $$ = cria_nodo(atribuicao,4,cria_folha($1), NULL, cria_folha($3), $5); }
 | TK_IDENTIFICADOR '[' expressao ']' '$' TK_IDENTIFICADOR '=' expressao
-{ $$ = cria_nodo(atribuicao,4,cria_folha($1), $2, cria_folha($3), $4); }
+{ $$ = cria_nodo(atribuicao,4,cria_folha($1), $3, cria_folha($6), $8); }
 ;
 
-
+/*
 ///Entrada e Saida
 entrada:
  TK_PR_INPUT expressao
@@ -631,30 +644,48 @@ adiciona_filho($$,$3);
 }
 ;
 
-
+*/
 /* Expr. Aritméticas */
-/*
+
 val_expr:
-  TK_LIT_INT
-| TK_LIT_FLOAT
-| TK_LIT_CHAR
-| TK_LIT_STRING
-| TK_LIT_FALSE
-| TK_LIT_TRUE
-|'(' expressao ')'
+  literal
+{ $$ = cria_nodo(expressao,1,cria_folha($1));}
+| '(' expressao ')'
+{ $$ = cria_nodo(expressao,1,$2);}
+/*
 | com_pipes
+{ $$ = cria_nodo(expressao,1,$1);}
 | cham_func
+{ $$ = cria_nodo(expressao,1,$1);}
+*/
 | TK_IDENTIFICADOR expr_vet
+{ $$ = cria_nodo(expressao,1,cria_folha($1));
+	int i;
+	for(i=0 ; i<$2->num_filhos ; i++)
+		adiciona_filho($$,$2->filhos[i]);
+}
 ;
 
 expr_vet:
   '[' expressao ']' expr_cif
+{ $$ = cria_nodo(expressao,1,$2);
+	int i;
+	for(i=0 ; i<$4->num_filhos ; i++)
+		adiciona_filho($$,$4->filhos[i]);
+}
 |  expr_cif
+{ $$ = cria_nodo(expressao,0);
+	int i;
+	for(i=0 ; i<$1->num_filhos ; i++)
+		adiciona_filho($$,$1->filhos[i]);
+}
 ;
 
 expr_cif:
   '$' TK_IDENTIFICADOR
+{ $$ = cria_nodo(expressao,1,cria_folha($2));}
 | %empty
+{ $$ = cria_nodo(expressao,0);}
 ;
 
 op_bin:
@@ -684,19 +715,36 @@ op_un:
 | '*'
 | '?'
 | '#'
-| %empty
 ;
 
 expressao:
   op_un val_expr expressao_cont
+{ $$ = cria_nodo(expressao,1,cria_folha($1));
+	int i;
+	for(i=0 ; i<$2->num_filhos ; i++)
+		adiciona_filho($$,$2->filhos[i]);
+	for(i=0 ; i<$3->num_filhos ; i++)
+		adiciona_filho($$,$3->filhos[i]);
+}
+| val_expr expressao_cont
+{ $$ = cria_nodo(expressao,1,NULL); 
+	int i;
+	for(i=0 ; i<$1->num_filhos ; i++)
+		adiciona_filho($$,$1->filhos[i]);
+	for(i=0 ; i<$2->num_filhos ; i++)
+		adiciona_filho($$,$2->filhos[i]);
+}
 ;
 
 expressao_cont:
   op_bin expressao
+{ $$ = cria_nodo(expressao,3,cria_folha($1),$2,NULL);}
 | '?' expressao ':' expressao
+{ $$ = cria_nodo(expressao,3,NULL,$2,$4);}
 | %empty
+{ $$ = cria_nodo(expressao,0);}
 ;
-*/
+
 %%
 
 /* Called by yyparse on error.  */
@@ -803,9 +851,148 @@ void descompila (void *arvore) {
             descompila(a->filhos[2]);
             return;
 
+        // bloco_comandos:
         case(bloco_comandos):
+            printf("{");
+            if(a->num_filhos > 0)
+                for(i=0; i<a->num_filhos; i++) {
+                    descompila(a->filhos[i]);
+                }
+            printf("}");
             return;
-    
+
+        //comando_simples:
+        case(comando_simples):
+            descompila(a->filhos[0]);
+            printf(";");
+            return;
+
+        //var_local:
+        case(var_local):
+            // TK_PR_STATIC
+            if(a->filhos[0] != NULL)
+    		descompila(a->filhos[0]);
+            //TK_PR_CONST
+            if(a->filhos[1] != NULL)
+    		descompila(a->filhos[1]);
+            //var_local_tipo:
+            descompila(a->filhos[2]);
+            descompila(a->filhos[3]);
+            //var_local_inic e inic2:
+            if(a->filhos[4] != NULL){
+    		descompila(a->filhos[4]);
+    		descompila(a->filhos[5]);
+		}
+            return;
+
+        //atribuicao
+        case(atribuicao):
+            //TK_IDENTIFICADOR
+            descompila(a->filhos[0]);
+            if(a->filhos[1] == NULL){
+    		//'=' expressao
+    		if(a->filhos[2] == NULL){
+    			printf(" = ");
+    			descompila(a->filhos[3]);
+		}
+    		//'$' TK_IDENTIFICADOR '=' expressao
+    		else{
+    			printf("$");
+    			descompila(a->filhos[2]);
+    			printf("=");
+    			descompila(a->filhos[3]);
+		}
+            }
+            else{
+    		//'[' expressao ']' '=' expressao 
+    		if(a->filhos[2] == NULL){
+    			printf("[");
+    			descompila(a->filhos[1]);
+    			printf("] = ");
+    			descompila(a->filhos[3]);
+		}
+    		//'[' expressao ']' '$' TK_IDENTIFICADOR '=' expressao
+    		else{
+    			printf("[");
+    			descompila(a->filhos[1]);
+    			printf("]$");
+    			descompila(a->filhos[2]);
+    			printf(" = ");
+    			descompila(a->filhos[3]);
+		}
+            }
+            return;
+
+        //entrada:
+        case(entrada):
+            descompila(a->filhos[0]);
+            descompila(a->filhos[1]);
+            return;
+
+        //saida
+        case(saida):
+            descompila(a->filhos[0]);
+            descompila(a->filhos[1]);
+            //saida2:
+            if(a->filhos[2] != NULL){
+            	for(i=2; i<a->num_filhos; i++) {
+                    printf(",");
+                    descompila(a->filhos[i]);
+		}
+             }
+            printf(";");
+            return;
+
+        //retorno
+        case(retorno):
+            descompila(a->filhos[0]);
+            descompila(a->filhos[1]);
+            return;
+
+        //break_t
+        case(break_t):
+            descompila(a->filhos[0]);
+            return;
+
+        //continue_t
+        case(continue_t):
+            descompila(a->filhos[0]);
+            return;
+
+        //case_t
+        case(case_t):
+            descompila(a->filhos[0]);
+            descompila(a->filhos[1]);
+            printf(":");
+            return;
+
+        //expressao:
+        case(expressao):
+            if(a->filhos[0] != NULL){
+    		descompila(a->filhos[0]);
+            }
+    	    //val_expr:
+    	    descompila(a->filhos[1]);
+    	    //TODO: Caso especial '(' expressao ')'
+    	    //TODO: Caso especial TK_IDENTIFICADOR expr_vet
+
+    	    //expressao_cont:
+    	    //op_bin expressao
+            if(a->filhos[2] != NULL){
+    		descompila(a->filhos[2]);
+    		descompila(a->filhos[3]);
+            }
+    	    //'?' expressao ':' expressao
+            else{
+    		printf("?");
+    		descompila(a->filhos[3]);
+    		printf(":");
+    		descompila(a->filhos[4]);
+            }
+            return;
+
+
+
     }
         
     for(i=0; i<a->num_filhos; i++)
