@@ -145,9 +145,9 @@ extern void libera (void *arvore);
 
 programa:   
   %empty		        { $$ = cria_nodo(programa,0); arvore = $$; }
-| programa novo_tipo	{ arvore = $$; adiciona_filho($1,$2); }
-| programa var_global	{ arvore = $$; adiciona_filho($1,$2); }
-| programa funcao       { $$ = $1; adiciona_filho($1,$2); arvore = $$; }
+| programa novo_tipo	{ $$ = $1; arvore = $$; adiciona_filho($$,$2); }
+| programa var_global	{ $$ = $1; arvore = $$; adiciona_filho($$,$2); }
+| programa funcao       { $$ = $1; arvore = $$; adiciona_filho($$,$2); }
 ;
 
 tipo_primario:   
@@ -289,11 +289,7 @@ bloco_comandos:
 	{ $$ = cria_nodo(bloco_comandos,0); }
 
 | '{' sequencia_comandos_simples '}'
-	{ $$ = cria_nodo(bloco_comandos,0); 
-		int i;
-		for(i=0 ; i<$2->num_filhos ; i++)
-			adiciona_filho($$,$2->filhos[i]);	
-	}
+	{ $$ = cria_nodo(bloco_comandos,0); adiciona_netos($$,$2); }
 ;
 
 sequencia_comandos_simples:
@@ -305,7 +301,7 @@ sequencia_comandos_simples:
 ;
 
 comando_simples:
-  bloco_comandos ';'	{ $$ = cria_nodo(bloco_comandos,1,$1); }
+  bloco_comandos ';'	{ $$ = cria_nodo(comando_simples,1,$1); }
 | var_local ';'		{ $$ = cria_nodo(comando_simples,1,$1); }
 | atribuicao ';'	{ $$ = cria_nodo(comando_simples,1,$1); }	
 | contr_fluxo ';'	{ $$ = cria_nodo(comando_simples,1,$1); }	
@@ -772,6 +768,7 @@ void yyerror (char const *s)
 }
 
 void descompila (void *arvore) {
+    int i;
 	NodoArvore *a = (NodoArvore*)arvore;
 	if(a == NULL)
 		return;
@@ -838,8 +835,8 @@ void descompila (void *arvore) {
     	// funcao
     	case(funcao):
     	    descompila(a->filhos[0]);
-            descompila(a->filhos[1]);
-    	    return;
+    	    descompila(a->filhos[1]);
+            return;
     
         // funcao: cabecalho
         case(cabecalho):
@@ -849,24 +846,18 @@ void descompila (void *arvore) {
             descompila(a->filhos[2]); 
             descompila(a->filhos[3]);
             return;
-    
+   
+        // funcao: parametros
         case(parametros):
             printf("(");
-            if(a->filhos[0] != NULL)
-                descompila(a->filhos[0]);
+            if(a->num_filhos > 0){
+                for(i=0; i<a->num_filhos; i++)
+                    descompila(a->filhos[i]);
+            }
             printf(")");
             return;
 
-        // funcao: lista_parametros
-        case(lista_parametros):
-            descompila(a->filhos[0]);
-                for(i=1; i<a->num_filhos; i++) {
-                    printf(",");
-                    descompila(a->filhos[i]);
-                }
-            return;
-    
-        // funcao: lista_parametros: parametro
+        // funcao: parametros: parametro
         case(parametro):
             if(a->filhos[0] != NULL)
                 descompila(a->filhos[0]);
@@ -878,10 +869,9 @@ void descompila (void *arvore) {
         case(bloco_comandos):
             printf("{");
             if(a->num_filhos > 0)
-                for(i=0; i<a->num_filhos; i++) {
+                for(i=0; i<a->num_filhos; i++)
                     descompila(a->filhos[i]);
-                }
-            printf("}");
+            printf("}"); 
             return;
 
         //comando_simples:
@@ -1140,9 +1130,10 @@ void descompila (void *arvore) {
 
 
     }
-        
-    for(i=0; i<a->num_filhos; i++)
+    
+    for(i=0; i<a->num_filhos; i++){
         descompila(a->filhos[i]);
+    }
     
 
 };
