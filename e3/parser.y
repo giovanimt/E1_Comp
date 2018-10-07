@@ -72,8 +72,10 @@ extern void libera (void *arvore);
 %token TOKEN_ERRO
 
 %type <valor_lexico> literal
+%type <valor_lexico> pipes
 %type <valor_lexico> tipo_primario
 %type <valor_lexico> encapsulamento
+%type <valor_lexico> point
 %type <valor_lexico> op_un
 %type <valor_lexico> op_bin
 %type <NodoArvore> programa
@@ -90,26 +92,41 @@ extern void libera (void *arvore);
 %type <NodoArvore> bloco_comandos
 %type <NodoArvore> sequencia_comandos_simples
 %type <NodoArvore> comando_simples
+%type <NodoArvore> comando_for
 
 %type <NodoArvore> var_local
 %type <NodoArvore> var_local_tipo
 %type <NodoArvore> var_local_inic
 %type <NodoArvore> var_local_inic2
 %type <NodoArvore> atribuicao
-/*
-%type <NodoArvore> contr_fluxo
-%type <NodoArvore> lista_foreach
-%type <NodoArvore> lista_for
 %type <NodoArvore> entrada
 %type <NodoArvore> saida
+%type <NodoArvore> saida2
 %type <NodoArvore> retorno
 %type <NodoArvore> break_t
 %type <NodoArvore> continue_t
 %type <NodoArvore> case_t
 %type <NodoArvore> cham_func
-%type <NodoArvore> com_shift
+%type <NodoArvore> cham_func_arg
+%type <NodoArvore> cham_func_fim
+
+%type <NodoArvore> contr_fluxo
+%type <NodoArvore> constr_cond
+%type <NodoArvore> constr_cond_else
+%type <NodoArvore> constr_iter
+%type <NodoArvore> constr_sel
+%type <NodoArvore> lista
+%type <NodoArvore> lista_foreach
+%type <NodoArvore> lista_foreach2
+%type <NodoArvore> lista_for
+%type <NodoArvore> lista_for2
+
 %type <NodoArvore> com_pipes
-*/
+%type <NodoArvore> com_shift
+%type <NodoArvore> com_shift_opcoes
+%type <NodoArvore> com_shift_dados
+%type <NodoArvore> com_shift_dados2
+%type <NodoArvore> com_shift_dir
 %type <NodoArvore> expressao
 %type <NodoArvore> expressao_cont
 %type <NodoArvore> val_expr
@@ -160,6 +177,10 @@ literal:
 pipes:
   TK_OC_FORWARD_PIPE
 | TK_OC_BASH_PIPE
+;
+
+point:
+  '.'
 ;
 
 
@@ -234,15 +255,15 @@ cabecalho:
 
 parametros:
   '(' ')'
-	{ $$ = cria_nodo(lista_parametros,0); }
+	{ $$ = cria_nodo(parametros,0); }
 
 | '(' lista_parametros ')'
-	{ $$ = cria_nodo(lista_parametros,0); adiciona_netos($$,$2); }
+	{ $$ = cria_nodo(parametros,0); adiciona_netos($$,$2); }
 ;
 
 lista_parametros:
   parametro
-	{ $$ = cria_nodo(lista_parametros,1,$1); }
+	{ $$ = cria_nodo(parametros,1,$1); }
 
 | lista_parametros ',' parametro
 	{ $$ = $1; adiciona_filho($$,$3); }
@@ -286,37 +307,36 @@ sequencia_comandos_simples:
 comando_simples:
   bloco_comandos ';'	{ $$ = cria_nodo(bloco_comandos,1,$1); }
 | var_local ';'		{ $$ = cria_nodo(comando_simples,1,$1); }
-| atribuicao ';'		
-/*
-| contr_fluxo ';'		
-| entrada ';'			
-| saida					
-| retorno ';'			
-| break_t ';'			
-| continue_t ';'		
-| case_t				
-| cham_func ';'			
-| com_shift ';'			
-| com_pipes ';'			
+| atribuicao ';'	{ $$ = cria_nodo(comando_simples,1,$1); }	
+| contr_fluxo ';'	{ $$ = cria_nodo(comando_simples,1,$1); }	
+| entrada ';'		{ $$ = cria_nodo(comando_simples,1,$1); }	
+| saida			{ $$ = cria_nodo(comando_simples,1,$1); }		
+| retorno ';'		{ $$ = cria_nodo(comando_simples,1,$1); }	
+| break_t ';'		{ $$ = cria_nodo(comando_simples,1,$1); }	
+| continue_t ';'	{ $$ = cria_nodo(comando_simples,1,$1); }	
+| case_t		{ $$ = cria_nodo(comando_simples,1,$1); }		
+| cham_func ';'		{ $$ = cria_nodo(comando_simples,1,$1); }	
+| com_shift ';'		{ $$ = cria_nodo(comando_simples,1,$1); }	
+| com_pipes ';'		{ $$ = cria_nodo(comando_simples,1,$1); }	
 ;
 
 ///comando_for usado em lista_for
 comando_for:
-  bloco_comandos
-| var_local
-| atribuicao
-| contr_fluxo
-| entrada
-| retorno
-| break_t
-| continue_t
-| cham_func
-| com_shift 
-| com_pipes
+  bloco_comandos	{ $$ = cria_nodo(bloco_comandos,1,$1); }
+| var_local	{ $$ = cria_nodo(comando_for,1,$1); }
+| atribuicao	{ $$ = cria_nodo(comando_for,1,$1); }
+| contr_fluxo	{ $$ = cria_nodo(comando_for,1,$1); }
+| entrada	{ $$ = cria_nodo(comando_for,1,$1); }
+| retorno	{ $$ = cria_nodo(comando_for,1,$1); }
+| break_t	{ $$ = cria_nodo(comando_for,1,$1); }
+| continue_t	{ $$ = cria_nodo(comando_for,1,$1); }
+| cham_func	{ $$ = cria_nodo(comando_for,1,$1); }
+| com_shift 	{ $$ = cria_nodo(comando_for,1,$1); }
+| com_pipes	{ $$ = cria_nodo(comando_for,1,$1); }
 ;
-*/
+
 /*Variavel Local*/
-;
+
 var_local:
   var_local_tipo
 { $$ = cria_nodo(var_local,2,NULL,NULL); 
@@ -386,7 +406,7 @@ atribuicao:
 { $$ = cria_nodo(atribuicao,4,cria_folha($1), $3, cria_folha($6), $8); }
 ;
 
-/*
+
 ///Entrada e Saida
 entrada:
  TK_PR_INPUT expressao
@@ -450,8 +470,8 @@ cham_func_arg:
 	for(i=0 ; i<$2->num_filhos ; i++)
 		adiciona_filho($$,$2->filhos[i]);
 }
-| '.' cham_func_fim
-{ $$ = cria_nodo(cham_func,0);
+| point cham_func_fim
+{ $$ = cria_nodo(cham_func,1, $1);
 	int i;
 	for(i=0 ; i<$2->num_filhos ; i++)
 		adiciona_filho($$,$2->filhos[i]);
@@ -588,7 +608,7 @@ constr_iter:
 
 lista_foreach:
   expressao lista_foreach2
-{ $$ = cria_nodo(lista_foreach,1,$1);
+{ $$ = cria_nodo(lista,1,$1);
 	int i;
 	for(i=0 ; i<$2->num_filhos ; i++)
 		adiciona_filho($$,$2->filhos[i]);
@@ -597,18 +617,18 @@ lista_foreach:
 
 lista_foreach2:
   ',' expressao lista_foreach2
-{ $$ = cria_nodo(lista_foreach,1,$2);
+{ $$ = cria_nodo(lista,1,$2);
 	int i;
 	for(i=0 ; i<$3->num_filhos ; i++)
 		adiciona_filho($$,$3->filhos[i]);
 }
 | %empty
-{ $$ = cria_nodo(lista_foreach,0);}
+{ $$ = cria_nodo(lista,0);}
 ;
 
 lista_for:
   comando_for lista_for2
-{ $$ = cria_nodo(lista_for,1,$1);
+{ $$ = cria_nodo(lista,1,$1);
 	int i;
 	for(i=0 ; i<$2->num_filhos ; i++)
 		adiciona_filho($$,$2->filhos[i]);
@@ -617,13 +637,13 @@ lista_for:
 
 lista_for2:
   ',' comando_for lista_for2
-{ $$ = cria_nodo(lista_for,1,$2);
+{ $$ = cria_nodo(lista,1,$2);
 	int i;
 	for(i=0 ; i<$3->num_filhos ; i++)
 		adiciona_filho($$,$3->filhos[i]);
 }
 | %empty
-{ $$ = cria_nodo(lista_for,0);}
+{ $$ = cria_nodo(lista,0);}
 ;
 
 constr_sel:
@@ -644,7 +664,7 @@ adiciona_filho($$,$3);
 }
 ;
 
-*/
+
 /* Expr. Aritméticas */
 
 val_expr:
@@ -652,12 +672,10 @@ val_expr:
 { $$ = cria_nodo(expressao,1,cria_folha($1));}
 | '(' expressao ')'
 { $$ = cria_nodo(expressao,1,$2);}
-/*
 | com_pipes
 { $$ = cria_nodo(expressao,1,$1);}
 | cham_func
 { $$ = cria_nodo(expressao,1,$1);}
-*/
 | TK_IDENTIFICADOR expr_vet
 { $$ = cria_nodo(expressao,1,cria_folha($1));
 	int i;
@@ -825,22 +843,27 @@ void descompila (void *arvore) {
     
         // funcao: cabecalho
         case(cabecalho):
-            descompila(a->filhos[0]); 
+            if(a->filhos[0] != NULL)
+                descompila(a->filhos[0]); 
             descompila(a->filhos[1]);
             descompila(a->filhos[2]); 
             descompila(a->filhos[3]);
             return;
     
+        case(parametros):
+            printf("(");
+            if(a->filhos[0] != NULL)
+                descompila(a->filhos[0]);
+            printf(")");
+            return;
+
         // funcao: lista_parametros
         case(lista_parametros):
-            printf("(");
-            if(a->num_filhos > 0)
-                for(i=0; i<a->num_filhos; i++) {
+            descompila(a->filhos[0]);
+                for(i=1; i<a->num_filhos; i++) {
+                    printf(",");
                     descompila(a->filhos[i]);
-                    if(i+1 < a->num_filhos)
-                        printf(",");
                 }
-            printf(")");
             return;
     
         // funcao: lista_parametros: parametro
@@ -865,6 +888,12 @@ void descompila (void *arvore) {
         case(comando_simples):
             descompila(a->filhos[0]);
             printf(";");
+		///TODO: Casos especiais saida e case_t sem ';'
+            return;
+
+        //comando_for:
+        case(comando_for):
+            descompila(a->filhos[0]);
             return;
 
         //var_local:
@@ -964,6 +993,123 @@ void descompila (void *arvore) {
             descompila(a->filhos[0]);
             descompila(a->filhos[1]);
             printf(":");
+            return;
+
+// TODO: Problema error: expected declaration or statement at end of input
+// void libera (void *arvore) {};
+
+        //Chamada de Funcao:
+        case(cham_func):
+            descompila(a->filhos[0]);
+            printf("(");
+            descompila(a->filhos[1]);
+            for(i=2; i<a->num_filhos; i++){
+                    printf(",");
+                    descompila(a->filhos[i]);
+            }
+            printf(")");
+            return;
+
+
+        //Comando shift:
+        case(com_shift):
+            descompila(a->filhos[0]);
+            if(a->filhos[1]->type == 0){
+		switch(a->filhos[1]->nodo.valor_lexico.type) {
+			case(IDENT):
+				printf("$");
+				descompila(a->filhos[1]);
+				for(i=2; i<a->num_filhos; i++)
+					descompila(a->filhos[i]);
+				break;
+			default:
+				descompila(a->filhos[1]);
+				descompila(a->filhos[2]);
+				break;
+		}
+            }
+            else{
+		printf("[");
+		descompila(a->filhos[1]);
+		printf("]$");
+		for(i=2; i<a->num_filhos; i++)
+			descompila(a->filhos[i]);
+            }
+            return;
+
+        //TODO: Controle de Fluxo:
+/*        case(contr_fluxo):
+            switch(l) {
+		case("if"):
+			descompila(a->filhos[0]);
+			printf("(");
+			descompila(a->filhos[1]);
+			printf(")");
+			descompila(a->filhos[2]);
+			descompila(a->filhos[3]);
+			if(a->filhos[4] != NULL){
+				descompila(a->filhos[4]);
+				descompila(a->filhos[5]);
+			}
+			break;
+		case("foreach"):
+			descompila(a->filhos[0]);
+			printf("(");
+			descompila(a->filhos[1]);
+			printf(":");
+			descompila(a->filhos[2]);
+			printf(")");
+			descompila(a->filhos[3]);
+			break;
+		case("for"):
+			descompila(a->filhos[0]);
+			printf("(");
+			descompila(a->filhos[1]);
+			printf(":");
+			descompila(a->filhos[2]);
+			printf(":");
+			descompila(a->filhos[3]);
+			printf(")");
+			descompila(a->filhos[4]);
+			break;
+		case("while"):
+			descompila(a->filhos[0]);
+			printf("(");
+			descompila(a->filhos[1]);
+			printf(")");
+			descompila(a->filhos[2]);
+			descompila(a->filhos[3]);
+			break;
+		case("do"):
+			descompila(a->filhos[0]);
+			descompila(a->filhos[1]);
+			descompila(a->filhos[2]);
+			printf("(");
+			descompila(a->filhos[3]);
+			printf(")");
+			break;
+		case("switch"):
+			descompila(a->filhos[0]);
+			printf("(");
+			descompila(a->filhos[1]);
+			printf(")");
+			descompila(a->filhos[2]);
+			break;
+            }
+            return;
+*/
+        case(lista):
+            descompila(a->filhos[0]);
+            for(i=1; i<a->num_filhos; i++){
+                    printf(",");
+                    descompila(a->filhos[i]);
+            }
+            return;
+
+        //Comandos com Pipes:
+        case(com_pipes):
+            for(i=0; i<a->num_filhos; i++)
+                    descompila(a->filhos[i]);
             return;
 
         //expressao:
