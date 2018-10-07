@@ -48,7 +48,9 @@ enum NaoTerminalType {
 	comando_simples,
 	comando_for,
 	var_local,
-	atribuicao,
+	var_local_inic,
+    
+    atribuicao,
 	contr_fluxo,
 	lista,
 	entrada,

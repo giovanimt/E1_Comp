@@ -95,9 +95,7 @@ extern void libera (void *arvore);
 %type <NodoArvore> comando_for
 
 %type <NodoArvore> var_local
-%type <NodoArvore> var_local_tipo
 %type <NodoArvore> var_local_inic
-%type <NodoArvore> var_local_inic2
 %type <NodoArvore> atribuicao
 %type <NodoArvore> entrada
 %type <NodoArvore> saida
@@ -332,63 +330,51 @@ comando_for:
 ;
 
 /*Variavel Local*/
-
 var_local:
-  var_local_tipo
-{ $$ = cria_nodo(var_local,2,NULL,NULL); 
-	int i;
-	for(i=0 ; i<$1->num_filhos ; i++)
-		adiciona_filho($$,$1->filhos[i]);
-}
-| TK_PR_CONST var_local_tipo
-{ $$ = cria_nodo(var_local,2,NULL,cria_folha($1));
-	int i;
-	for(i=0 ; i<$2->num_filhos ; i++)
-		adiciona_filho($$,$2->filhos[i]);
-}
-| TK_PR_STATIC var_local_tipo
-{ $$ = cria_nodo(var_local,2,cria_folha($1),NULL);
-	int i;
-	for(i=0 ; i<$2->num_filhos ; i++)
-		adiciona_filho($$,$2->filhos[i]);
-}
-| TK_PR_STATIC TK_PR_CONST var_local_tipo
-{ $$ = cria_nodo(var_local,2,cria_folha($1),cria_folha($2));
-	int i;
-	for(i=0 ; i<$3->num_filhos ; i++)
-		adiciona_filho($$,$3->filhos[i]);
-}
-;
+  tipo_primario TK_IDENTIFICADOR
+    { $$ = cria_nodo(var_local,5,NULL,NULL,cria_folha($1),cria_folha($2),NULL); }
 
-var_local_tipo:
-  tipo_primario TK_IDENTIFICADOR var_local_inic
-{ $$ = cria_nodo(var_local,2,cria_folha($1),cria_folha($2));
-	int i;
-	for(i=0 ; i<$3->num_filhos ; i++)
-		adiciona_filho($$,$3->filhos[i]);
-}
+| tipo_primario TK_IDENTIFICADOR var_local_inic
+    { $$ = cria_nodo(var_local,4,NULL,NULL,cria_folha($1),cria_folha($2)); adiciona_netos($$,$3); }
+
 | TK_IDENTIFICADOR TK_IDENTIFICADOR
-{ $$ = cria_nodo(var_local,2,cria_folha($1),cria_folha($2)); }
+    { $$ = cria_nodo(var_local,5,NULL,NULL,cria_folha($1),cria_folha($2),NULL); }
+
+| TK_PR_STATIC tipo_primario TK_IDENTIFICADOR
+    { $$ = cria_nodo(var_local,5,cria_folha($1),NULL,cria_folha($2),cria_folha($3),NULL); }
+
+| TK_PR_STATIC tipo_primario TK_IDENTIFICADOR var_local_inic
+    { $$ = cria_nodo(var_local,4,cria_folha($1),NULL,cria_folha($2),cria_folha($3)); adiciona_netos($$,$4); }
+
+| TK_PR_STATIC TK_IDENTIFICADOR TK_IDENTIFICADOR
+    { $$ = cria_nodo(var_local,5,cria_folha($1),NULL,cria_folha($2),cria_folha($3),NULL); }
+
+| TK_PR_CONST tipo_primario TK_IDENTIFICADOR
+    { $$ = cria_nodo(var_local,5,NULL,cria_folha($1),cria_folha($2),cria_folha($3),NULL); }
+
+| TK_PR_CONST tipo_primario TK_IDENTIFICADOR var_local_inic
+    { $$ = cria_nodo(var_local,4,NULL,cria_folha($1),cria_folha($2),cria_folha($3)); adiciona_netos($$,$4); }
+
+| TK_PR_CONST TK_IDENTIFICADOR TK_IDENTIFICADOR
+    { $$ = cria_nodo(var_local,5,NULL,cria_folha($1),cria_folha($2),cria_folha($3),NULL); }
+
+| TK_PR_STATIC TK_PR_CONST tipo_primario TK_IDENTIFICADOR
+    { $$ = cria_nodo(var_local,5,cria_folha($1),cria_folha($2),cria_folha($3),cria_folha($4),NULL); }
+
+| TK_PR_STATIC TK_PR_CONST tipo_primario TK_IDENTIFICADOR var_local_inic
+    { $$ = cria_nodo(var_local,4,cria_folha($1),cria_folha($2),cria_folha($3),cria_folha($4)); adiciona_netos($$,$5); }
+
+| TK_PR_STATIC TK_PR_CONST TK_IDENTIFICADOR TK_IDENTIFICADOR
+    { $$ = cria_nodo(var_local,5,cria_folha($1),cria_folha($2),cria_folha($3),cria_folha($4),NULL); }
 ;
 
 var_local_inic:
-  %empty
-{ $$ = cria_nodo(var_local,0); }
-| TK_OC_LE var_local_inic2
-{ $$ = cria_nodo(var_local,1,cria_folha($1)); 
-	int i;
-	for(i=0 ; i<$2->num_filhos ; i++)
-		adiciona_filho($$,$2->filhos[i]);
-}
-;
+  TK_OC_LE TK_IDENTIFICADOR
+    { $$ = cria_nodo(var_local_inic,2,cria_folha($1),cria_folha($2)); }
 
-var_local_inic2:
-  TK_IDENTIFICADOR
-{ $$ = cria_nodo(var_local,1,cria_folha($1)); }
-| literal
-{ $$ = cria_nodo(var_local,1,cria_folha($1)); }
+| TK_OC_LE literal
+    { $$ = cria_nodo(var_local_inic,2,cria_folha($1),cria_folha($2)); }
 ;
-
 
 ///Atribuicao
 atribuicao:
@@ -890,18 +876,19 @@ void descompila (void *arvore) {
         case(var_local):
             // TK_PR_STATIC
             if(a->filhos[0] != NULL)
-    		descompila(a->filhos[0]);
+    		    descompila(a->filhos[0]);
             //TK_PR_CONST
             if(a->filhos[1] != NULL)
-    		descompila(a->filhos[1]);
-            //var_local_tipo:
+    		    descompila(a->filhos[1]);
+            // tipo_primario ou TK_IDENTIFICADOR:
             descompila(a->filhos[2]);
+            // TK_IDENTIFICADOR
             descompila(a->filhos[3]);
-            //var_local_inic e inic2:
-            if(a->filhos[4] != NULL){
-    		descompila(a->filhos[4]);
-    		descompila(a->filhos[5]);
-		}
+            //var_local_inic:
+            if(a->filhos[4] != NULL) {
+    		    descompila(a->filhos[4]);
+    		    descompila(a->filhos[5]);
+		    }
             return;
 
         //atribuicao
