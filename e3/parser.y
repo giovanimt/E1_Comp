@@ -305,7 +305,7 @@ bloco_comandos:
 
 sequencia_comandos_simples:
   comando_simples
-	{ $$ = cria_nodo(sequencia_comandos_simples,1,$1); }
+	{ $$ = cria_nodo(bloco_comandos,1,$1); }
 
 | sequencia_comandos_simples comando_simples
 	{ $$ = $1; adiciona_filho($$,$2); }
@@ -686,6 +686,8 @@ expressao:
 | expressao '/' expressao
 | expressao '%' expressao
 | expressao '^' expressao
+| expressao '<' expressao
+| expressao '>' expressao
 | '&' expressao %prec ENDERECO
 | '*' expressao %prec PONTEIRO
 | '!' expressao %prec NEG_LOGICA
@@ -796,8 +798,11 @@ void descompila (void *arvore) {
         case(parametros):
             printf("(");
             if(a->num_filhos > 0){
-                for(i=0; i<a->num_filhos; i++)
+                descompila(a->filhos[0]);
+                for(i=1; i<a->num_filhos; i++){
+                    printf(",");
                     descompila(a->filhos[i]);
+                }
             }
             printf(")");
             return;
@@ -822,8 +827,11 @@ void descompila (void *arvore) {
         //comando_simples:
         case(comando_simples):
             descompila(a->filhos[0]);
-            printf(";");
-		///TODO: Casos especiais saida e case_t sem ';'
+            NodoArvore *primeirofilho = a->filhos[0];
+            NodoArvore *primeironeto = primeirofilho->filhos[0];
+            if(strcmp(primeironeto->nodo.valor_lexico.val.string_val, "case") && strcmp(primeironeto->nodo.valor_lexico.val.string_val, "output"))
+		printf(";");
+
             return;
 
         //comando_for:
@@ -931,8 +939,6 @@ void descompila (void *arvore) {
             printf(":");
             return;
 
-// TODO: Problema error: expected declaration or statement at end of input
-// void libera (void *arvore) {};
 
         //Chamada de Funcao:
         case(cham_func):
@@ -973,67 +979,68 @@ void descompila (void *arvore) {
             }
             return;
 
-        //TODO: Controle de Fluxo:
-/*        case(contr_fluxo):
-            switch(l) {
-		case("if"):
-			descompila(a->filhos[0]);
-			printf("(");
-			descompila(a->filhos[1]);
-			printf(")");
-			descompila(a->filhos[2]);
-			descompila(a->filhos[3]);
-			if(a->filhos[4] != NULL){
-				descompila(a->filhos[4]);
-				descompila(a->filhos[5]);
-			}
-			break;
-		case("foreach"):
-			descompila(a->filhos[0]);
-			printf("(");
-			descompila(a->filhos[1]);
-			printf(":");
-			descompila(a->filhos[2]);
-			printf(")");
-			descompila(a->filhos[3]);
-			break;
-		case("for"):
-			descompila(a->filhos[0]);
-			printf("(");
-			descompila(a->filhos[1]);
-			printf(":");
-			descompila(a->filhos[2]);
-			printf(":");
-			descompila(a->filhos[3]);
-			printf(")");
+        // Controle de Fluxo:
+        case(contr_fluxo):
+            descompila(a->filhos[0]);
+            NodoArvore *primeirofilho2 = a->filhos[0];
+            NodoArvore *primeironeto2 = primeirofilho2->filhos[0];
+            if(strcmp(primeironeto2->nodo.valor_lexico.val.string_val, "if")==0){
+		printf("(");
+		descompila(a->filhos[1]);
+		printf(")");
+		descompila(a->filhos[2]);
+		descompila(a->filhos[3]);
+		if(a->filhos[4] != NULL){
 			descompila(a->filhos[4]);
-			break;
-		case("while"):
-			descompila(a->filhos[0]);
-			printf("(");
-			descompila(a->filhos[1]);
-			printf(")");
-			descompila(a->filhos[2]);
-			descompila(a->filhos[3]);
-			break;
-		case("do"):
-			descompila(a->filhos[0]);
-			descompila(a->filhos[1]);
-			descompila(a->filhos[2]);
-			printf("(");
-			descompila(a->filhos[3]);
-			printf(")");
-			break;
-		case("switch"):
-			descompila(a->filhos[0]);
-			printf("(");
-			descompila(a->filhos[1]);
-			printf(")");
-			descompila(a->filhos[2]);
-			break;
-            }
+			descompila(a->filhos[5]);
+		}
+		}
+
+            else if(strcmp(primeironeto2->nodo.valor_lexico.val.string_val, "foreach")==0){
+		printf("(");
+		descompila(a->filhos[1]);
+		printf(":");
+		descompila(a->filhos[2]);
+		printf(")");
+		descompila(a->filhos[3]);
+		}
+
+            else if(strcmp(primeironeto2->nodo.valor_lexico.val.string_val, "for")==0){
+		printf("(");
+		descompila(a->filhos[1]);
+		printf(":");
+		descompila(a->filhos[2]);
+		printf(":");
+		descompila(a->filhos[3]);
+		printf(")");
+		descompila(a->filhos[4]);
+		}
+
+            else if(strcmp(primeironeto2->nodo.valor_lexico.val.string_val, "while")==0){
+		printf("(");
+		descompila(a->filhos[1]);
+		printf(")");
+		descompila(a->filhos[2]);
+		descompila(a->filhos[3]);
+		}
+
+            else if(strcmp(primeironeto2->nodo.valor_lexico.val.string_val, "do")==0){
+		descompila(a->filhos[1]);
+		descompila(a->filhos[2]);
+		printf("(");
+		descompila(a->filhos[3]);
+		printf(")");
+		}
+
+            else if(strcmp(primeironeto2->nodo.valor_lexico.val.string_val, "switch")==0){
+		printf("(");
+		descompila(a->filhos[1]);
+		printf(")");
+		descompila(a->filhos[2]);
+		}
+
             return;
-*/
+
         case(lista):
             descompila(a->filhos[0]);
             for(i=1; i<a->num_filhos; i++){
@@ -1048,29 +1055,8 @@ void descompila (void *arvore) {
                     descompila(a->filhos[i]);
             return;
 
-        //expressao:
+        //TODO: expressao:
         case(expressao):
-            if(a->filhos[0] != NULL){
-    		descompila(a->filhos[0]);
-            }
-    	    //val_expr:
-    	    descompila(a->filhos[1]);
-    	    //TODO: Caso especial '(' expressao ')'
-    	    //TODO: Caso especial TK_IDENTIFICADOR expr_vet
-
-    	    //expressao_cont:
-    	    //op_bin expressao
-            if(a->filhos[2] != NULL){
-    		descompila(a->filhos[2]);
-    		descompila(a->filhos[3]);
-            }
-    	    //'?' expressao ':' expressao
-            else{
-    		printf("?");
-    		descompila(a->filhos[3]);
-    		printf(":");
-    		descompila(a->filhos[4]);
-            }
             return;
 
 
