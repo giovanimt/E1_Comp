@@ -27,6 +27,19 @@ extern void libera (void *arvore);
 	NodoArvore* NodoArvore;
 }
 
+%token <valor_lexico> '&'
+%token <valor_lexico> '|'
+%token <valor_lexico> '+'
+%token <valor_lexico> '-'
+%token <valor_lexico> '*'
+%token <valor_lexico> '/'
+%token <valor_lexico> '%'
+%token <valor_lexico> '^'
+%token <valor_lexico> '!'
+%token <valor_lexico> '?'
+%token <valor_lexico> ':'
+%token <valor_lexico> '#'
+%token <valor_lexico> '.'
 %token <valor_lexico> TK_PR_INT
 %token <valor_lexico> TK_PR_FLOAT
 %token <valor_lexico> TK_PR_BOOL
@@ -69,15 +82,13 @@ extern void libera (void *arvore);
 %token <valor_lexico> TK_LIT_CHAR
 %token <valor_lexico> TK_LIT_STRING
 %token <valor_lexico> TK_IDENTIFICADOR
-%token TOKEN_ERRO
 
 %type <valor_lexico> literal
 %type <valor_lexico> pipes
 %type <valor_lexico> tipo_primario
 %type <valor_lexico> encapsulamento
 %type <valor_lexico> point
-%type <valor_lexico> op_un
-%type <valor_lexico> op_bin
+
 %type <NodoArvore> programa
 %type <NodoArvore> var_global
 %type <NodoArvore> novo_tipo
@@ -92,11 +103,14 @@ extern void libera (void *arvore);
 %type <NodoArvore> bloco_comandos
 %type <NodoArvore> sequencia_comandos_simples
 %type <NodoArvore> comando_simples
-%type <NodoArvore> comando_for
-
 %type <NodoArvore> var_local
 %type <NodoArvore> var_local_inic
 %type <NodoArvore> atribuicao
+%type <NodoArvore> expressao
+%type <NodoArvore> exp_literal
+%type <NodoArvore> exp_identificador
+
+%type <NodoArvore> comando_for
 %type <NodoArvore> entrada
 %type <NodoArvore> saida
 %type <NodoArvore> saida2
@@ -107,7 +121,6 @@ extern void libera (void *arvore);
 %type <NodoArvore> cham_func
 %type <NodoArvore> cham_func_arg
 %type <NodoArvore> cham_func_fim
-
 %type <NodoArvore> contr_fluxo
 %type <NodoArvore> constr_cond
 %type <NodoArvore> constr_cond_else
@@ -118,25 +131,26 @@ extern void libera (void *arvore);
 %type <NodoArvore> lista_foreach2
 %type <NodoArvore> lista_for
 %type <NodoArvore> lista_for2
-
 %type <NodoArvore> com_pipes
 %type <NodoArvore> com_shift
 %type <NodoArvore> com_shift_opcoes
 %type <NodoArvore> com_shift_dados
 %type <NodoArvore> com_shift_dados2
 %type <NodoArvore> com_shift_dir
-%type <NodoArvore> expressao
-%type <NodoArvore> expressao_cont
-%type <NodoArvore> val_expr
-%type <NodoArvore> expr_vet
-%type <NodoArvore> expr_cif
 
-
-%left '-' '+'
+%right '?' ':' 
+%left TK_OC_AND TK_OC_OR
+%left '&' '|' 
+%left TK_OC_LE TK_OC_GE TK_OC_EQ TK_OC_NE
+%left '+' '-'
 %left '*' '/' '%'
-%precedence NEG   /* negation--unary minus */
-%right '^'        /* exponentiation */
+%right '^'
+%right ENDERECO
+%right PONTEIRO
+%right NEG_LOGICA
+%right PLUS_NEG_UNARIO
 
+%token TOKEN_ERRO
 %start programa
 
 %%
@@ -180,7 +194,6 @@ pipes:
 point:
   '.'
 ;
-
 
 /* Declarações de Novos Tipos */
 novo_tipo:
@@ -376,16 +389,19 @@ var_local_inic:
     { $$ = cria_nodo(var_local_inic,2,cria_folha($1),cria_folha($2)); }
 ;
 
-///Atribuicao
+/*Atribuicao*/
 atribuicao:
   TK_IDENTIFICADOR '=' expressao
-{ $$ = cria_nodo(atribuicao,4,cria_folha($1), NULL, NULL,$3); }
+    { $$ = cria_nodo(atribuicao,4,cria_folha($1), NULL, NULL,$3); }
+
 | TK_IDENTIFICADOR '[' expressao ']' '=' expressao 
-{ $$ = cria_nodo(atribuicao,4,cria_folha($1), $3, NULL,$6); }
+    { $$ = cria_nodo(atribuicao,4,cria_folha($1), $3, NULL,$6); }
+
 | TK_IDENTIFICADOR '$' TK_IDENTIFICADOR '=' expressao
-{ $$ = cria_nodo(atribuicao,4,cria_folha($1), NULL, cria_folha($3), $5); }
+    { $$ = cria_nodo(atribuicao,4,cria_folha($1), NULL, cria_folha($3), $5); }
+
 | TK_IDENTIFICADOR '[' expressao ']' '$' TK_IDENTIFICADOR '=' expressao
-{ $$ = cria_nodo(atribuicao,4,cria_folha($1), $3, cria_folha($6), $8); }
+    { $$ = cria_nodo(atribuicao,4,cria_folha($1), $3, cria_folha($6), $8); }
 ;
 
 
@@ -647,102 +663,45 @@ adiciona_filho($$,$3);
 ;
 
 
-/* Expr. Aritméticas */
-
-val_expr:
-  literal
-{ $$ = cria_nodo(expressao,1,cria_folha($1));}
-| '(' expressao ')'
-{ $$ = cria_nodo(expressao,1,$2);}
-| com_pipes
-{ $$ = cria_nodo(expressao,1,$1);}
-| cham_func
-{ $$ = cria_nodo(expressao,1,$1);}
-| TK_IDENTIFICADOR expr_vet
-{ $$ = cria_nodo(expressao,1,cria_folha($1));
-	int i;
-	for(i=0 ; i<$2->num_filhos ; i++)
-		adiciona_filho($$,$2->filhos[i]);
-}
-;
-
-expr_vet:
-  '[' expressao ']' expr_cif
-{ $$ = cria_nodo(expressao,1,$2);
-	int i;
-	for(i=0 ; i<$4->num_filhos ; i++)
-		adiciona_filho($$,$4->filhos[i]);
-}
-|  expr_cif
-{ $$ = cria_nodo(expressao,0);
-	int i;
-	for(i=0 ; i<$1->num_filhos ; i++)
-		adiciona_filho($$,$1->filhos[i]);
-}
-;
-
-expr_cif:
-  '$' TK_IDENTIFICADOR
-{ $$ = cria_nodo(expressao,1,cria_folha($2));}
-| %empty
-{ $$ = cria_nodo(expressao,0);}
-;
-
-op_bin:
-  '+'
-| '-'
-| '*'
-| '/'
-| '%'
-| '|'
-| '&'
-| '^'
-| TK_OC_LE
-| TK_OC_GE
-| TK_OC_EQ
-| TK_OC_NE
-| TK_OC_AND
-| TK_OC_OR
-| TK_OC_SL
-| TK_OC_SR
-;
-
-op_un:
-  '+'
-| '-'
-| '!'
-| '&'
-| '*'
-| '?'
-| '#'
-;
+/* Expressoes */
 
 expressao:
-  op_un val_expr expressao_cont
-{ $$ = cria_nodo(expressao,1,cria_folha($1));
-	int i;
-	for(i=0 ; i<$2->num_filhos ; i++)
-		adiciona_filho($$,$2->filhos[i]);
-	for(i=0 ; i<$3->num_filhos ; i++)
-		adiciona_filho($$,$3->filhos[i]);
-}
-| val_expr expressao_cont
-{ $$ = cria_nodo(expressao,1,NULL); 
-	int i;
-	for(i=0 ; i<$1->num_filhos ; i++)
-		adiciona_filho($$,$1->filhos[i]);
-	for(i=0 ; i<$2->num_filhos ; i++)
-		adiciona_filho($$,$2->filhos[i]);
-}
+  exp_literal
+| exp_identificador
+| '(' expressao ')'
+| com_pipes
+| cham_func
+| expressao '?' expressao ':' expressao
+| expressao TK_OC_OR expressao 
+| expressao TK_OC_AND expressao 
+| expressao '&' expressao 
+| expressao '|' expressao 
+| expressao TK_OC_LE expressao 
+| expressao TK_OC_GE expressao 
+| expressao TK_OC_EQ expressao 
+| expressao TK_OC_NE expressao 
+| expressao '+' expressao
+| expressao '-' expressao
+| expressao '*' expressao
+| expressao '/' expressao
+| expressao '%' expressao
+| expressao '^' expressao
+| '&' expressao %prec ENDERECO
+| '*' expressao %prec PONTEIRO
+| '!' expressao %prec NEG_LOGICA
+| '+' expressao %prec PLUS_NEG_UNARIO
+| '-' expressao %prec PLUS_NEG_UNARIO
 ;
 
-expressao_cont:
-  op_bin expressao
-{ $$ = cria_nodo(expressao,3,cria_folha($1),$2,NULL);}
-| '?' expressao ':' expressao
-{ $$ = cria_nodo(expressao,3,NULL,$2,$4);}
-| %empty
-{ $$ = cria_nodo(expressao,0);}
+exp_identificador:
+  TK_IDENTIFICADOR
+| TK_IDENTIFICADOR '[' expressao ']'
+| TK_IDENTIFICADOR '$' TK_IDENTIFICADOR
+| TK_IDENTIFICADOR '[' expressao ']' '$' TK_IDENTIFICADOR
+;
+
+exp_literal:
+  literal
 ;
 
 %%
