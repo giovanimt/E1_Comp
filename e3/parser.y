@@ -29,6 +29,8 @@ extern void libera (void *arvore);
 
 %token <valor_lexico> '&'
 %token <valor_lexico> '|'
+%token <valor_lexico> '<'
+%token <valor_lexico> '>'
 %token <valor_lexico> '+'
 %token <valor_lexico> '-'
 %token <valor_lexico> '*'
@@ -108,6 +110,9 @@ extern void libera (void *arvore);
 %type <NodoArvore> expressao
 %type <NodoArvore> exp_literal
 %type <NodoArvore> exp_identificador
+%type <NodoArvore> exp_ternaria
+%type <NodoArvore> exp_binaria
+%type <NodoArvore> exp_unaria
 %type <NodoArvore> contr_fluxo
 %type <NodoArvore> constr_sel
 %type <NodoArvore> constr_cond
@@ -455,7 +460,7 @@ cham_func_arg:
 		adiciona_filho($$,$2->filhos[i]);
 }
 | point cham_func_fim
-{ $$ = cria_nodo(cham_func,1, $1);
+{ $$ = cria_nodo(cham_func,1, cria_folha($1));
 	int i;
 	for(i=0 ; i<$2->num_filhos ; i++)
 		adiciona_filho($$,$2->filhos[i]);
@@ -584,9 +589,9 @@ constr_iter:
 | TK_PR_FOR '(' lista_for ':' expressao ':' lista_for ')' bloco_comandos
 { $$ = cria_nodo(constr_for,5,cria_folha($1),$3,$5,$7,$9); }
 | TK_PR_WHILE '(' expressao ')' TK_PR_DO bloco_comandos
-{ $$ = cria_nodo(contr_fluxo,4,cria_folha($1),$3,cria_folha($5),$6); }
+{ $$ = cria_nodo(constr_while,4,cria_folha($1),$3,cria_folha($5),$6); }
 | TK_PR_DO bloco_comandos TK_PR_WHILE '(' expressao ')'
-{ $$ = cria_nodo(contr_fluxo,4,cria_folha($1),$2,cria_folha($3),$5); }
+{ $$ = cria_nodo(constr_do,4,cria_folha($1),$2,cria_folha($3),$5); }
 ;
 
 lista_foreach:
@@ -635,30 +640,30 @@ expressao:
   exp_literal	{ $$ = cria_nodo(exp_literal,0); adiciona_netos($$,$1); }
 | exp_identificador { $$ = cria_nodo(exp_identificador,0); adiciona_netos($$,$1); }
 | '(' expressao ')' { $$ = cria_nodo(exp_parenteses,0); adiciona_netos($$,$2); }
-| com_pipes
-| cham_func
-| expressao '?' expressao ':' expressao
-| expressao TK_OC_OR expressao 
-| expressao TK_OC_AND expressao 
-| expressao '&' expressao 
-| expressao '|' expressao 
-| expressao TK_OC_LE expressao 
-| expressao TK_OC_GE expressao 
-| expressao TK_OC_EQ expressao 
-| expressao TK_OC_NE expressao
-| expressao '<' expressao
-| expressao '>' expressao
-| expressao '+' expressao
-| expressao '-' expressao
-| expressao '*' expressao
-| expressao '/' expressao
-| expressao '%' expressao
-| expressao '^' expressao
-| '&' expressao %prec ENDERECO
-| '*' expressao %prec PONTEIRO
-| '!' expressao %prec NEG_LOGICA
-| '+' expressao %prec PLUS_NEG_UNARIO
-| '-' expressao %prec PLUS_NEG_UNARIO
+| com_pipes { $$ = $1; }
+| cham_func { $$ = $1; }
+| expressao '?' expressao ':' expressao { $$ = cria_nodo(exp_ternaria,5, $1,cria_folha($2), $3,cria_folha($4), $5); }
+| expressao TK_OC_OR expressao { $$ = cria_nodo(exp_binaria,3, $1, cria_folha($2), $3); }
+| expressao TK_OC_AND expressao { $$ = cria_nodo(exp_binaria,3, $1, cria_folha($2), $3); }
+| expressao '&' expressao { $$ = cria_nodo(exp_binaria,3, $1, cria_folha($2), $3); }
+| expressao '|' expressao { $$ = cria_nodo(exp_binaria,3, $1, cria_folha($2), $3); }
+| expressao TK_OC_LE expressao { $$ = cria_nodo(exp_binaria,3, $1, cria_folha($2), $3); }
+| expressao TK_OC_GE expressao { $$ = cria_nodo(exp_binaria,3, $1, cria_folha($2), $3); }
+| expressao TK_OC_EQ expressao { $$ = cria_nodo(exp_binaria,3, $1, cria_folha($2), $3); }
+| expressao TK_OC_NE expressao	{ $$ = cria_nodo(exp_binaria,3, $1, cria_folha($2), $3); }
+| expressao '<' expressao	{ $$ = cria_nodo(exp_binaria,3, $1, cria_folha($2), $3); }
+| expressao '>' expressao	{ $$ = cria_nodo(exp_binaria,3, $1, cria_folha($2), $3); }
+| expressao '+' expressao	{ $$ = cria_nodo(exp_binaria,3, $1, cria_folha($2), $3); }
+| expressao '-' expressao	{ $$ = cria_nodo(exp_binaria,3, $1, cria_folha($2), $3); }
+| expressao '*' expressao	{ $$ = cria_nodo(exp_binaria,3, $1, cria_folha($2), $3); }
+| expressao '/' expressao	{ $$ = cria_nodo(exp_binaria,3, $1, cria_folha($2), $3); }
+| expressao '%' expressao	{ $$ = cria_nodo(exp_binaria,3, $1, cria_folha($2), $3); }
+| expressao '^' expressao	{ $$ = cria_nodo(exp_binaria,3, $1, cria_folha($2), $3); }
+| '&' expressao %prec ENDERECO	{ $$ = cria_nodo(exp_unaria,2, cria_folha($1), $2); }
+| '*' expressao %prec PONTEIRO		{ $$ = cria_nodo(exp_unaria,2, cria_folha($1), $2); }
+| '!' expressao %prec NEG_LOGICA	{ $$ = cria_nodo(exp_unaria,2, cria_folha($1), $2); }
+| '+' expressao %prec PLUS_NEG_UNARIO	{ $$ = cria_nodo(exp_unaria,2, cria_folha($1), $2); }
+| '-' expressao %prec PLUS_NEG_UNARIO	{ $$ = cria_nodo(exp_unaria,2, cria_folha($1), $2); }
 ;
 
 exp_identificador:
@@ -1016,6 +1021,24 @@ void descompila (void *arvore) {
                 descompila(a->filhos[i]);
             }
             return;
+
+        case(constr_while):
+            descompila(a->filhos[0]);
+            printf("(");
+            descompila(a->filhos[1]);
+            printf(")");
+            descompila(a->filhos[2]);
+            descompila(a->filhos[3]);
+            return;
+
+        case(constr_do):
+            descompila(a->filhos[0]);
+            descompila(a->filhos[1]);
+            descompila(a->filhos[2]);
+            printf("(");
+            descompila(a->filhos[3]);
+            printf(")");
+            return;
         
 
         //Comandos com Pipes:
@@ -1049,8 +1072,26 @@ void descompila (void *arvore) {
             descompila(a->filhos[0]);
             printf(")");
             return;
-    }
+
+        case(exp_ternaria):
+            descompila(a->filhos[0]);
+            descompila(a->filhos[1]);
+            descompila(a->filhos[2]);
+            descompila(a->filhos[3]);
+            descompila(a->filhos[4]);
+            return;
     
+        case(exp_binaria):
+            descompila(a->filhos[0]);
+            descompila(a->filhos[1]);
+            descompila(a->filhos[2]);
+            return;
+
+        case(exp_unaria):
+            descompila(a->filhos[0]);
+            descompila(a->filhos[1]);
+            return;
+    }
     for(i=0; i<a->num_filhos; i++){
         descompila(a->filhos[i]);
     }

@@ -74,6 +74,9 @@ enum NaoTerminalType {
 	expressao,
 	exp_identificador,
 	exp_literal,
+	exp_ternaria,
+	exp_binaria,
+	exp_unaria,
 	exp_parenteses
 };
 
