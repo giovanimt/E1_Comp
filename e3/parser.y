@@ -94,7 +94,6 @@ extern void libera (void *arvore);
 %type <NodoArvore> novo_tipo
 %type <NodoArvore> novo_tipo_campo
 %type <NodoArvore> novo_tipo_lista_campos
-
 %type <NodoArvore> funcao
 %type <NodoArvore> cabecalho
 %type <NodoArvore> parametros
@@ -109,6 +108,15 @@ extern void libera (void *arvore);
 %type <NodoArvore> expressao
 %type <NodoArvore> exp_literal
 %type <NodoArvore> exp_identificador
+%type <NodoArvore> exp_parenteses
+%type <NodoArvore> contr_fluxo
+%type <NodoArvore> constr_sel
+%type <NodoArvore> constr_cond
+%type <NodoArvore> constr_cond_else
+%type <NodoArvore> constr_foreach
+%type <NodoArvore> lista_foreach
+%type <NodoArvore> lista_foreach2
+
 
 %type <NodoArvore> comando_for
 %type <NodoArvore> entrada
@@ -121,14 +129,11 @@ extern void libera (void *arvore);
 %type <NodoArvore> cham_func
 %type <NodoArvore> cham_func_arg
 %type <NodoArvore> cham_func_fim
-%type <NodoArvore> contr_fluxo
-%type <NodoArvore> constr_cond
-%type <NodoArvore> constr_cond_else
+
+
+
 %type <NodoArvore> constr_iter
-%type <NodoArvore> constr_sel
 %type <NodoArvore> lista
-%type <NodoArvore> lista_foreach
-%type <NodoArvore> lista_foreach2
 %type <NodoArvore> lista_for
 %type <NodoArvore> lista_for2
 %type <NodoArvore> com_pipes
@@ -315,7 +320,7 @@ comando_simples:
   bloco_comandos ';'	{ $$ = cria_nodo(comando_simples,1,$1); }
 | var_local ';'		{ $$ = cria_nodo(comando_simples,1,$1); }
 | atribuicao ';'	{ $$ = cria_nodo(comando_simples,1,$1); }	
-| contr_fluxo ';'	{ $$ = cria_nodo(comando_simples,1,$1); }	
+| contr_fluxo ';'  	{ $$ = cria_nodo(comando_simples,1,$1); }	
 | entrada ';'		{ $$ = cria_nodo(comando_simples,1,$1); }	
 | saida			{ $$ = cria_nodo(comando_simples,1,$1); }		
 | retorno ';'		{ $$ = cria_nodo(comando_simples,1,$1); }	
@@ -579,23 +584,22 @@ contr_fluxo:
 
 constr_cond:
   TK_PR_IF '(' expressao ')' TK_PR_THEN bloco_comandos constr_cond_else
-{ $$ = cria_nodo(contr_fluxo,4,cria_folha($1),$3,cria_folha($5), $6); 
-	int i;
-	for(i=0 ; i<$7->num_filhos ; i++)
-		adiciona_filho($$,$7->filhos[i]);
+{ $$ = cria_nodo(constr_cond,4,cria_folha($1),$3,cria_folha($5),$6,NULL); 
+  if($7 != NULL)
+    $$->filhos[4] = $7;
 }
 ;
 
 constr_cond_else:
   TK_PR_ELSE bloco_comandos
-{ $$ = cria_nodo(contr_fluxo,2,cria_folha($1),$2); }
+{ $$ = cria_nodo(constr_cond_else,2,cria_folha($1),$2); }
 | %empty
-{ $$ = cria_nodo(contr_fluxo,0); }
+{ $$ = cria_nodo(constr_cond_else,0); }
 ;
 
 constr_iter:
   TK_PR_FOREACH '(' TK_IDENTIFICADOR ':' lista_foreach ')' bloco_comandos
-{ $$ = cria_nodo(contr_fluxo,4,cria_folha($1),cria_folha($3),$5,$7); }
+{ $$ = cria_nodo(constr_foreach,4,cria_folha($1),cria_folha($3),$5,$7); }
 | TK_PR_FOR '(' lista_for ':' expressao ':' lista_for ')' bloco_comandos
 { $$ = cria_nodo(contr_fluxo,5,cria_folha($1),$3,$5,$7,$9); }
 | TK_PR_WHILE '(' expressao ')' TK_PR_DO bloco_comandos
@@ -605,23 +609,10 @@ constr_iter:
 ;
 
 lista_foreach:
-  expressao lista_foreach2
-{ $$ = cria_nodo(lista,1,$1);
-	int i;
-	for(i=0 ; i<$2->num_filhos ; i++)
-		adiciona_filho($$,$2->filhos[i]);
-}
-;
-
-lista_foreach2:
-  ',' expressao lista_foreach2
-{ $$ = cria_nodo(lista,1,$2);
-	int i;
-	for(i=0 ; i<$3->num_filhos ; i++)
-		adiciona_filho($$,$3->filhos[i]);
-}
-| %empty
-{ $$ = cria_nodo(lista,0);}
+  expressao
+    { $$ = cria_nodo(lista_foreach,1,$1); }
+| expressao ',' lista_foreach
+    { $$ = cria_nodo(lista_foreach,1,$1); adiciona_netos($$,$3); }
 ;
 
 lista_for:
@@ -646,7 +637,7 @@ lista_for2:
 
 constr_sel:
   TK_PR_SWITCH '(' expressao ')' bloco_comandos
-{ $$ = cria_nodo(contr_fluxo,3,cria_folha($1),$3,$5);}
+{ $$ = cria_nodo(constr_sel,3,cria_folha($1),$3,$5); }
 ;
 
 
@@ -668,7 +659,7 @@ adiciona_filho($$,$3);
 expressao:
   exp_literal	{ $$ = cria_nodo(exp_literal,0); adiciona_netos($$,$1); }
 | exp_identificador { $$ = cria_nodo(exp_identificador,0); adiciona_netos($$,$1); }
-| '(' expressao ')'
+| '(' expressao ')' { $$ = cria_nodo(exp_parenteses,0); adiciona_netos($$,$2); }
 | com_pipes
 | cham_func
 | expressao '?' expressao ':' expressao
@@ -686,8 +677,6 @@ expressao:
 | expressao '/' expressao
 | expressao '%' expressao
 | expressao '^' expressao
-| expressao '<' expressao
-| expressao '>' expressao
 | '&' expressao %prec ENDERECO
 | '*' expressao %prec PONTEIRO
 | '!' expressao %prec NEG_LOGICA
@@ -975,66 +964,34 @@ void descompila (void *arvore) {
             }
             return;
 
-        // Controle de Fluxo:
-        case(contr_fluxo):
+        // constr_sel:
+        // TK_PR_SWITCH '(' expressao ')' bloco_comandos 
+        case(constr_sel):
             descompila(a->filhos[0]);
-            NodoArvore *primeirofilho2 = a->filhos[0];
-            NodoArvore *primeironeto2 = primeirofilho2->filhos[0];
-            if(strcmp(primeironeto2->nodo.valor_lexico.val.string_val, "if")==0){
-		printf("(");
-		descompila(a->filhos[1]);
-		printf(")");
-		descompila(a->filhos[2]);
-		descompila(a->filhos[3]);
-		if(a->filhos[4] != NULL){
-			descompila(a->filhos[4]);
-			descompila(a->filhos[5]);
-		}
-		}
+            printf("(");
+            descompila(a->filhos[1]);
+            printf(")");
+            descompila(a->filhos[2]);
+            return;
+        
+        // constr_cond
+        // TK_PR_IF '(' expressao ')' TK_PR_THEN bloco_comandos constr_cond_else
+        case(constr_cond):
+            descompila(a->filhos[0]);
+            printf("(");
+            descompila(a->filhos[1]);
+            printf(")");
+            descompila(a->filhos[2]);
+            descompila(a->filhos[3]);
+            if(a->filhos[4]->num_filhos > 0)
+                descompila(a->filhos[4]);
+            return;
 
-            else if(strcmp(primeironeto2->nodo.valor_lexico.val.string_val, "foreach")==0){
-		printf("(");
-		descompila(a->filhos[1]);
-		printf(":");
-		descompila(a->filhos[2]);
-		printf(")");
-		descompila(a->filhos[3]);
-		}
-
-            else if(strcmp(primeironeto2->nodo.valor_lexico.val.string_val, "for")==0){
-		printf("(");
-		descompila(a->filhos[1]);
-		printf(":");
-		descompila(a->filhos[2]);
-		printf(":");
-		descompila(a->filhos[3]);
-		printf(")");
-		descompila(a->filhos[4]);
-		}
-
-            else if(strcmp(primeironeto2->nodo.valor_lexico.val.string_val, "while")==0){
-		printf("(");
-		descompila(a->filhos[1]);
-		printf(")");
-		descompila(a->filhos[2]);
-		descompila(a->filhos[3]);
-		}
-
-            else if(strcmp(primeironeto2->nodo.valor_lexico.val.string_val, "do")==0){
-		descompila(a->filhos[1]);
-		descompila(a->filhos[2]);
-		printf("(");
-		descompila(a->filhos[3]);
-		printf(")");
-		}
-
-            else if(strcmp(primeironeto2->nodo.valor_lexico.val.string_val, "switch")==0){
-		printf("(");
-		descompila(a->filhos[1]);
-		printf(")");
-		descompila(a->filhos[2]);
-		}
-
+        // constr_cond_else
+        // TK_PR_ELSE bloco_comandos 
+        case(constr_cond_else):
+            descompila(a->filhos[0]);
+            descompila(a->filhos[1]);
             return;
 
         case(lista):
@@ -1044,6 +1001,29 @@ void descompila (void *arvore) {
                     descompila(a->filhos[i]);
             }
             return;
+
+        // constr_foreach
+        // TK_PR_FOREACH '(' TK_IDENTIFICADOR ':' lista_foreach ')' bloco_comandos
+        case(constr_foreach):
+            descompila(a->filhos[0]);
+            printf("(");
+            descompila(a->filhos[1]);
+            printf(":");
+            descompila(a->filhos[2]);
+            printf(")");
+            descompila(a->filhos[3]);
+            return;
+
+        // lista_foreach
+        case(lista_foreach):
+            descompila(a->filhos[0]);
+            for(i=1; i<a->num_filhos; i++){
+                printf(",");
+                descompila(a->filhos[i]);
+            }
+            return;
+
+
 
         //Comandos com Pipes:
         case(com_pipes):
@@ -1064,12 +1044,18 @@ void descompila (void *arvore) {
                 printf("$"); descompila(a->filhos[2]);                
             }
             return;
-            
+        
+        //expressao: exp_literal
         case(exp_literal):
 			descompila(a->filhos[0]);
 			return;
-
-
+        
+        // ( expressao )
+        case(exp_parenteses):
+            printf("(");
+            descompila(a->filhos[0]);
+            printf(")");
+            return;
     }
     
     for(i=0; i<a->num_filhos; i++){

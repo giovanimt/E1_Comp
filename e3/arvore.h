@@ -48,9 +48,14 @@ enum NaoTerminalType {
 	comando_simples,
 	comando_for,
 	var_local,
-	var_local_inic,
-    
+	var_local_inic,    
     	atribuicao,
+	constr_sel,
+	constr_cond,
+	constr_cond_else,
+	constr_foreach,
+	lista_foreach,
+
 	contr_fluxo,
 	lista,
 	entrada,
@@ -64,7 +69,8 @@ enum NaoTerminalType {
 	com_pipes,	
 	expressao,
 	exp_identificador,
-	exp_literal
+	exp_literal,
+	exp_parenteses
 };
 
 union Nodo {
