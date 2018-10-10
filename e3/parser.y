@@ -108,17 +108,16 @@ extern void libera (void *arvore);
 %type <NodoArvore> expressao
 %type <NodoArvore> exp_literal
 %type <NodoArvore> exp_identificador
-%type <NodoArvore> exp_parenteses
 %type <NodoArvore> contr_fluxo
 %type <NodoArvore> constr_sel
 %type <NodoArvore> constr_cond
 %type <NodoArvore> constr_cond_else
-%type <NodoArvore> constr_foreach
 %type <NodoArvore> lista_foreach
-%type <NodoArvore> lista_foreach2
+%type <NodoArvore> lista_for
+%type <NodoArvore> lista_for_comando_valido
 
 
-%type <NodoArvore> comando_for
+%type <NodoArvore> constr_iter
 %type <NodoArvore> entrada
 %type <NodoArvore> saida
 %type <NodoArvore> saida2
@@ -132,10 +131,7 @@ extern void libera (void *arvore);
 
 
 
-%type <NodoArvore> constr_iter
 %type <NodoArvore> lista
-%type <NodoArvore> lista_for
-%type <NodoArvore> lista_for2
 %type <NodoArvore> com_pipes
 %type <NodoArvore> com_shift
 %type <NodoArvore> com_shift_opcoes
@@ -146,7 +142,7 @@ extern void libera (void *arvore);
 %right '?' ':' 
 %left TK_OC_AND TK_OC_OR
 %left '&' '|' 
-%left TK_OC_LE TK_OC_GE TK_OC_EQ TK_OC_NE
+%left TK_OC_LE TK_OC_GE TK_OC_EQ TK_OC_NE '<' '>'
 %left '+' '-'
 %left '*' '/' '%'
 %right '^'
@@ -330,21 +326,6 @@ comando_simples:
 | cham_func ';'		{ $$ = cria_nodo(comando_simples,1,$1); }	
 | com_shift ';'		{ $$ = cria_nodo(comando_simples,1,$1); }	
 | com_pipes ';'		{ $$ = cria_nodo(comando_simples,1,$1); }	
-;
-
-///comando_for usado em lista_for
-comando_for:
-  bloco_comandos	{ $$ = cria_nodo(bloco_comandos,1,$1); }
-| var_local	{ $$ = cria_nodo(comando_for,1,$1); }
-| atribuicao	{ $$ = cria_nodo(comando_for,1,$1); }
-| contr_fluxo	{ $$ = cria_nodo(comando_for,1,$1); }
-| entrada	{ $$ = cria_nodo(comando_for,1,$1); }
-| retorno	{ $$ = cria_nodo(comando_for,1,$1); }
-| break_t	{ $$ = cria_nodo(comando_for,1,$1); }
-| continue_t	{ $$ = cria_nodo(comando_for,1,$1); }
-| cham_func	{ $$ = cria_nodo(comando_for,1,$1); }
-| com_shift 	{ $$ = cria_nodo(comando_for,1,$1); }
-| com_pipes	{ $$ = cria_nodo(comando_for,1,$1); }
 ;
 
 /*Variavel Local*/
@@ -601,7 +582,7 @@ constr_iter:
   TK_PR_FOREACH '(' TK_IDENTIFICADOR ':' lista_foreach ')' bloco_comandos
 { $$ = cria_nodo(constr_foreach,4,cria_folha($1),cria_folha($3),$5,$7); }
 | TK_PR_FOR '(' lista_for ':' expressao ':' lista_for ')' bloco_comandos
-{ $$ = cria_nodo(contr_fluxo,5,cria_folha($1),$3,$5,$7,$9); }
+{ $$ = cria_nodo(constr_for,5,cria_folha($1),$3,$5,$7,$9); }
 | TK_PR_WHILE '(' expressao ')' TK_PR_DO bloco_comandos
 { $$ = cria_nodo(contr_fluxo,4,cria_folha($1),$3,cria_folha($5),$6); }
 | TK_PR_DO bloco_comandos TK_PR_WHILE '(' expressao ')'
@@ -615,24 +596,18 @@ lista_foreach:
     { $$ = cria_nodo(lista_foreach,1,$1); adiciona_netos($$,$3); }
 ;
 
-lista_for:
-  comando_for lista_for2
-{ $$ = cria_nodo(lista,1,$1);
-	int i;
-	for(i=0 ; i<$2->num_filhos ; i++)
-		adiciona_filho($$,$2->filhos[i]);
-}
+lista_for_comando_valido:
+  var_local  {$$ = cria_nodo(lista_for_comando_valido,1,$1); }
+| atribuicao {$$ = cria_nodo(lista_for_comando_valido,1,$1); } 
+| break_t {$$ = cria_nodo(lista_for_comando_valido,1,$1); } 
+| continue_t  {$$ = cria_nodo(lista_for_comando_valido,1,$1); }
 ;
 
-lista_for2:
-  ',' comando_for lista_for2
-{ $$ = cria_nodo(lista,1,$2);
-	int i;
-	for(i=0 ; i<$3->num_filhos ; i++)
-		adiciona_filho($$,$3->filhos[i]);
-}
-| %empty
-{ $$ = cria_nodo(lista,0);}
+lista_for:
+  lista_for_comando_valido 
+    { $$ = cria_nodo(lista_for,0); adiciona_netos($$,$1); }
+| lista_for ',' lista_for_comando_valido
+    { $$ = $1; adiciona_netos($$,$3);  }
 ;
 
 constr_sel:
@@ -670,7 +645,9 @@ expressao:
 | expressao TK_OC_LE expressao 
 | expressao TK_OC_GE expressao 
 | expressao TK_OC_EQ expressao 
-| expressao TK_OC_NE expressao 
+| expressao TK_OC_NE expressao
+| expressao '<' expressao
+| expressao '>' expressao
 | expressao '+' expressao
 | expressao '-' expressao
 | expressao '*' expressao
@@ -834,11 +811,6 @@ void descompila (void *arvore) {
             descompila(a->filhos[0]);
 		    if(a->filhos[0]->nodo.type != case_t && a->filhos[0]->nodo.type != saida)
                 printf(";");
-            return;
-
-        //comando_for:
-        case(comando_for):
-            descompila(a->filhos[0]);
             return;
 
         //var_local:
@@ -1023,7 +995,28 @@ void descompila (void *arvore) {
             }
             return;
 
+        // constr_for
+        // TK_PR_FOR '(' lista_for ':' expressao ':' lista_for ')' bloco_comandos
+        case(constr_for):
+            descompila(a->filhos[0]);
+            printf("(");
+            descompila(a->filhos[1]);
+            printf(":");
+            descompila(a->filhos[2]);
+            printf(":");
+            descompila(a->filhos[3]);
+            printf(")");
+            descompila(a->filhos[4]);
 
+        // lista_for
+        case(lista_for):
+            descompila(a->filhos[0]);
+            for(i=1; i<a->num_filhos; i++){
+                printf(",");
+                descompila(a->filhos[i]);
+            }
+            return;
+        
 
         //Comandos com Pipes:
         case(com_pipes):
