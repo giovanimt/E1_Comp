@@ -305,7 +305,7 @@ bloco_comandos:
 
 sequencia_comandos_simples:
   comando_simples
-	{ $$ = cria_nodo(bloco_comandos,1,$1); }
+	{ $$ = cria_nodo(sequencia_comandos_simples,1,$1); }
 
 | sequencia_comandos_simples comando_simples
 	{ $$ = $1; adiciona_filho($$,$2); }
@@ -666,8 +666,8 @@ adiciona_filho($$,$3);
 /* Expressoes */
 
 expressao:
-  exp_literal
-| exp_identificador
+  exp_literal	{ $$ = cria_nodo(exp_literal,0); adiciona_netos($$,$1); }
+| exp_identificador { $$ = cria_nodo(exp_identificador,0); adiciona_netos($$,$1); }
 | '(' expressao ')'
 | com_pipes
 | cham_func
@@ -696,14 +696,21 @@ expressao:
 ;
 
 exp_identificador:
-  TK_IDENTIFICADOR
-| TK_IDENTIFICADOR '[' expressao ']'
-| TK_IDENTIFICADOR '$' TK_IDENTIFICADOR
+  TK_IDENTIFICADOR  
+    { $$ = cria_nodo(exp_identificador,3,cria_folha($1),NULL,NULL); }
+
+| TK_IDENTIFICADOR '[' expressao ']' 
+    { $$ = cria_nodo(exp_identificador,3,cria_folha($1),$3,NULL); }
+
+| TK_IDENTIFICADOR '$' TK_IDENTIFICADOR 
+    { $$ = cria_nodo(exp_identificador,3,cria_folha($1),NULL,cria_folha($3)); }
+
 | TK_IDENTIFICADOR '[' expressao ']' '$' TK_IDENTIFICADOR
+    { $$ = cria_nodo(exp_identificador,3,cria_folha($1),$3,cria_folha($6)); }
 ;
 
 exp_literal:
-  literal
+  literal { $$ = cria_nodo(exp_literal,1,cria_folha($1)); }
 ;
 
 %%
@@ -729,8 +736,17 @@ void descompila (void *arvore) {
 				printf(" %f ",a->nodo.valor_lexico.val.float_val);
 				break;			
 			case(CHAR):
-				printf(" %c ",a->nodo.valor_lexico.val.char_val);
+				printf(" '%c' ",a->nodo.valor_lexico.val.char_val);
 				break;
+			case(STRING):
+				printf(" %s ",a->nodo.valor_lexico.val.string_val);
+				break;
+			case(BOOL):
+				if(a->nodo.valor_lexico.val.bool_val == 0)
+					printf(" true ",a->nodo.valor_lexico.val.bool_val);
+				else	
+					printf(" false ",a->nodo.valor_lexico.val.bool_val);
+				break;							
 			default:
 				printf(" %s ",a->nodo.valor_lexico.val.string_val);
 				break;
@@ -827,11 +843,8 @@ void descompila (void *arvore) {
         //comando_simples:
         case(comando_simples):
             descompila(a->filhos[0]);
-            NodoArvore *primeirofilho = a->filhos[0];
-            NodoArvore *primeironeto = primeirofilho->filhos[0];
-            if(strcmp(primeironeto->nodo.valor_lexico.val.string_val, "case") && strcmp(primeironeto->nodo.valor_lexico.val.string_val, "output"))
-		printf(";");
-
+		    if(a->filhos[0]->nodo.type != case_t && a->filhos[0]->nodo.type != saida)
+                printf(";");
             return;
 
         //comando_for:
@@ -862,38 +875,21 @@ void descompila (void *arvore) {
         case(atribuicao):
             //TK_IDENTIFICADOR
             descompila(a->filhos[0]);
-            if(a->filhos[1] == NULL){
-    		//'=' expressao
-    		if(a->filhos[2] == NULL){
-    			printf(" = ");
-    			descompila(a->filhos[3]);
-		}
-    		//'$' TK_IDENTIFICADOR '=' expressao
-    		else{
-    			printf("$");
-    			descompila(a->filhos[2]);
-    			printf("=");
-    			descompila(a->filhos[3]);
-		}
+            // [ expressao ]
+            if(a->filhos[1] != NULL){
+                printf("[");
+                descompila(a->filhos[1]);
+                printf("]");
             }
-            else{
-    		//'[' expressao ']' '=' expressao 
-    		if(a->filhos[2] == NULL){
-    			printf("[");
-    			descompila(a->filhos[1]);
-    			printf("] = ");
-    			descompila(a->filhos[3]);
-		}
-    		//'[' expressao ']' '$' TK_IDENTIFICADOR '=' expressao
-    		else{
-    			printf("[");
-    			descompila(a->filhos[1]);
-    			printf("]$");
-    			descompila(a->filhos[2]);
-    			printf(" = ");
-    			descompila(a->filhos[3]);
-		}
-            }
+            // $ TK_IDENTIFICADOR
+            if(a->filhos[2] != NULL){
+                printf("$");
+                descompila(a->filhos[2]);
+            }                                    
+            
+            // = expressao
+            printf("=");
+            descompila(a->filhos[3]);
             return;
 
         //entrada:
@@ -1055,10 +1051,23 @@ void descompila (void *arvore) {
                     descompila(a->filhos[i]);
             return;
 
-        //TODO: expressao:
-        case(expressao):
+        // expressao: exp_identificador
+        // TK_IDENTIFICADOR '[' expressao ']' '$' TK_IDENTIFICADOR
+        case(exp_identificador):
+            descompila(a->filhos[0]);
+            if(a->filhos[1] != NULL){
+                printf("["); 
+                descompila(a->filhos[1]);
+                printf("]");
+            }
+            if(a->filhos[2] != NULL){
+                printf("$"); descompila(a->filhos[2]);                
+            }
             return;
-
+            
+        case(exp_literal):
+			descompila(a->filhos[0]);
+			return;
 
 
     }

@@ -50,7 +50,7 @@ enum NaoTerminalType {
 	var_local,
 	var_local_inic,
     
-    atribuicao,
+    	atribuicao,
 	contr_fluxo,
 	lista,
 	entrada,
@@ -62,7 +62,9 @@ enum NaoTerminalType {
 	cham_func,
 	com_shift,
 	com_pipes,	
-	expressao,	
+	expressao,
+	exp_identificador,
+	exp_literal
 };
 
 union Nodo {

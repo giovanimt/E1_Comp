@@ -117,7 +117,7 @@ void add_valor_lexico(enum ValorLexicoType type){
 			yylval.valor_lexico.val.float_val = atof(yytext);
 			break;
 		case CHAR:
-			yylval.valor_lexico.val.char_val = yytext[0];
+			yylval.valor_lexico.val.char_val = yytext[1];
 			break;
 		case STRING:
 			yylval.valor_lexico.val.string_val = strdup(yytext);
