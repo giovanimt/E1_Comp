@@ -110,9 +110,6 @@ extern void libera (void *arvore);
 %type <NodoArvore> expressao
 %type <NodoArvore> exp_literal
 %type <NodoArvore> exp_identificador
-%type <NodoArvore> exp_ternaria
-%type <NodoArvore> exp_binaria
-%type <NodoArvore> exp_unaria
 %type <NodoArvore> contr_fluxo
 %type <NodoArvore> constr_sel
 %type <NodoArvore> constr_cond
@@ -120,8 +117,6 @@ extern void libera (void *arvore);
 %type <NodoArvore> lista_foreach
 %type <NodoArvore> lista_for
 %type <NodoArvore> lista_for_comando_valido
-
-
 %type <NodoArvore> constr_iter
 %type <NodoArvore> entrada
 %type <NodoArvore> saida
@@ -133,10 +128,6 @@ extern void libera (void *arvore);
 %type <NodoArvore> cham_func
 %type <NodoArvore> cham_func_arg
 %type <NodoArvore> cham_func_fim
-
-
-
-%type <NodoArvore> lista
 %type <NodoArvore> com_pipes
 %type <NodoArvore> com_shift
 %type <NodoArvore> com_shift_opcoes
@@ -639,7 +630,7 @@ adiciona_filho($$,$3);
 expressao:
   exp_literal	{ $$ = cria_nodo(exp_literal,0); adiciona_netos($$,$1); }
 | exp_identificador { $$ = cria_nodo(exp_identificador,0); adiciona_netos($$,$1); }
-| '(' expressao ')' { $$ = cria_nodo(exp_parenteses,0); adiciona_netos($$,$2); }
+| '(' expressao ')' { $$ = cria_nodo(exp_parenteses,0); adiciona_filho($$,$2); }
 | com_pipes { $$ = $1; }
 | cham_func { $$ = $1; }
 | expressao '?' expressao ':' expressao { $$ = cria_nodo(exp_ternaria,5, $1,cria_folha($2), $3,cria_folha($4), $5); }
@@ -1012,6 +1003,7 @@ void descompila (void *arvore) {
             descompila(a->filhos[3]);
             printf(")");
             descompila(a->filhos[4]);
+            return;
 
         // lista_for
         case(lista_for):
@@ -1099,4 +1091,13 @@ void descompila (void *arvore) {
 
 };
 
-void libera (void *arvore) {};
+void libera (void *arvore) {
+	int i;
+	NodoArvore *a = arvore;
+	for(i=0; i<a->num_filhos; i++){
+		if(a->filhos[i] != NULL){
+			libera(a->filhos[i]);
+			free(a->filhos[i]);	
+		}
+	}
+};
