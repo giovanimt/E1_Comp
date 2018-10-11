@@ -46,4 +46,5 @@ void adiciona_netos(NodoArvore *avo, NodoArvore *pai){
     int i;
     for(i=0; i<pai->num_filhos; i++)
         adiciona_filho(avo,pai->filhos[i]);
+    free(pai);
 }
