@@ -1,7 +1,19 @@
+/*
+Giovani Tirello 252741
+Vinicius Castro 193026
+*/
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdarg.h>
+
+#define TIPO_INT 	101
+#define TIPO_FLOAT 	102
+#define TIPO_CHAR 	103
+#define TIPO_BOOL 	104
+#define TIPO_STRING 	105
+#define TIPO_USR	106
 
 union Literal {
 	int bool_val;
@@ -88,6 +100,7 @@ union Nodo {
 typedef struct NodoArvore {
 	union Nodo nodo;
 	int type; // 0 valor_lexico, 1 nao_terminal
+	int tipo; //TODO: todos os nós da Árvore Sintática Abstrata (AST), gerada na etapa anterior, terão agora um campo que indica o seu tipo
 	int num_filhos;
 	struct NodoArvore **filhos;
 } NodoArvore;

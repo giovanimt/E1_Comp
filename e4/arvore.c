@@ -1,3 +1,8 @@
+/*
+Giovani Tirello 252741
+Vinicius Castro 193026
+*/
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>

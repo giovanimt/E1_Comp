@@ -14,11 +14,13 @@ extern int get_col_number();
 extern void *arvore;
 extern void descompila (void *arvore);
 extern void libera (void *arvore);
+void *pilha;
 
 %}
 
 %code requires {
 #include "arvore.h"
+#include "tabela.h"
 }
 
 
@@ -153,7 +155,10 @@ extern void libera (void *arvore);
 %%
 
 programa:   
-  %empty		        { $$ = cria_nodo(programa,0); arvore = $$; }
+  %empty
+	{ $$ = cria_nodo(programa,0); arvore = $$; 
+	//pilha = cria_pilha();
+	}
 | programa novo_tipo	{ $$ = $1; arvore = $$; adiciona_filho($$,$2); }
 | programa var_global	{ $$ = $1; arvore = $$; adiciona_filho($$,$2); }
 | programa funcao       { $$ = $1; arvore = $$; adiciona_filho($$,$2); }
@@ -195,7 +200,13 @@ point:
 /* Declarações de Novos Tipos */
 novo_tipo:
   TK_PR_CLASS TK_IDENTIFICADOR '[' novo_tipo_lista_campos ']' ';'
-	{ $$ = cria_nodo(novo_tipo,3,cria_folha($1),cria_folha($2),$4); }
+	{ $$ = cria_nodo(novo_tipo,3,cria_folha($1),cria_folha($2),$4);
+	/*
+	if(declarado(cria_folha($2)) == 1)
+		exit(ERR_DECLARED);
+	add_nt($$);
+	*/
+	}
 ;
 
 novo_tipo_campo:
@@ -216,28 +227,84 @@ novo_tipo_lista_campos:
 /* Declarações de Variáveis Globais */
 var_global:
   TK_IDENTIFICADOR tipo_primario ';' 
-	{ $$ = cria_nodo(var_global,4,cria_folha($1),NULL,NULL,cria_folha($2)); }
+	{ $$ = cria_nodo(var_global,4,cria_folha($1),NULL,NULL,cria_folha($2)); 
+	/*
+	if(declarado(cria_folha($1)) == 1)
+		exit(ERR_DECLARED);
+	add_vg($$);
+	*/
+	}
 
 | TK_IDENTIFICADOR TK_IDENTIFICADOR ';'	
-	{ $$ = cria_nodo(var_global,4,cria_folha($1),NULL,NULL,cria_folha($2)); }
+	{ $$ = cria_nodo(var_global,4,cria_folha($1),NULL,NULL,cria_folha($2)); 
+	/*
+	if(declarado(cria_folha($1)) == 1)
+		exit(ERR_DECLARED);
+	if(declarado(cria_folha($2)) == 0)
+		exit(ERR_UNDECLARED);
+	add_vg($$);
+	*/
+	}
 
 | TK_IDENTIFICADOR TK_PR_STATIC tipo_primario ';'
-	{ $$ = cria_nodo(var_global,4,cria_folha($1),NULL,cria_folha($2),cria_folha($3)); }
+	{ $$ = cria_nodo(var_global,4,cria_folha($1),NULL,cria_folha($2),cria_folha($3)); 
+	/*
+	if(declarado(cria_folha($1)) == 1)
+		exit(ERR_DECLARED);
+	add_vg($$);
+	*/
+}
 
 | TK_IDENTIFICADOR TK_PR_STATIC TK_IDENTIFICADOR ';' 
-	{ $$ = cria_nodo(var_global,4,cria_folha($1),NULL,cria_folha($2),cria_folha($3)); }
+	{ $$ = cria_nodo(var_global,4,cria_folha($1),NULL,cria_folha($2),cria_folha($3));
+	/*
+	if(declarado(cria_folha($1)) == 1)
+		exit(ERR_DECLARED);
+	if(declarado(cria_folha($3)) == 0)
+		exit(ERR_UNDECLARED);
+	add_vg($$);
+	*/
+	}
 
 | TK_IDENTIFICADOR '[' TK_LIT_INT ']' tipo_primario ';' 
-	{ $$ = cria_nodo(var_global,4,cria_folha($1),cria_folha($3),NULL,cria_folha($5)); }
+	{ $$ = cria_nodo(var_global,4,cria_folha($1),cria_folha($3),NULL,cria_folha($5));
+	/*
+	if(declarado(cria_folha($1)) == 1)
+		exit(ERR_DECLARED);
+	add_vg($$);
+	*/
+	}
 
 | TK_IDENTIFICADOR '[' TK_LIT_INT ']' TK_IDENTIFICADOR ';' 
-	{ $$ = cria_nodo(var_global,4,cria_folha($1),cria_folha($3),NULL,cria_folha($5)); }
+	{ $$ = cria_nodo(var_global,4,cria_folha($1),cria_folha($3),NULL,cria_folha($5));
+	/*
+	if(declarado(cria_folha($1)) == 1)
+		exit(ERR_DECLARED);
+	if(declarado(cria_folha($5)) == 0)
+		exit(ERR_UNDECLARED);
+	add_vg($$);
+	*/
+	}
 
 | TK_IDENTIFICADOR '[' TK_LIT_INT ']' TK_PR_STATIC tipo_primario ';' 
-	{ $$ = cria_nodo(var_global,4,cria_folha($1),cria_folha($3),cria_folha($5),cria_folha($6)); }
+	{ $$ = cria_nodo(var_global,4,cria_folha($1),cria_folha($3),cria_folha($5),cria_folha($6));
+	/*
+	if(declarado(cria_folha($1)) == 1)
+		exit(ERR_DECLARED);
+	add_vg($$);
+	*/
+	}
 
 | TK_IDENTIFICADOR '[' TK_LIT_INT ']' TK_PR_STATIC TK_IDENTIFICADOR ';'
-	{ $$ = cria_nodo(var_global,4,cria_folha($1),cria_folha($3),cria_folha($5),cria_folha($6)); }
+	{ $$ = cria_nodo(var_global,4,cria_folha($1),cria_folha($3),cria_folha($5),cria_folha($6)); 
+	/*
+	if(declarado(cria_folha($1)) == 1)
+		exit(ERR_DECLARED);
+	if(declarado(cria_folha($6)) == 0)
+		exit(ERR_UNDECLARED);
+	add_vg($$);
+	*/
+	}
 
 ;
 
