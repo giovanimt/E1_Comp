@@ -202,7 +202,7 @@ novo_tipo:
   TK_PR_CLASS TK_IDENTIFICADOR '[' novo_tipo_lista_campos ']' ';'
 	{ $$ = cria_nodo(novo_tipo,3,cria_folha($1),cria_folha($2),$4);
 	/*
-	if(declarado(cria_folha($2)) == 1)
+	if(declarado(pilha, cria_folha($2), NULL) == 1)
 		exit(ERR_DECLARED);
 	add_nt($$);
 	*/
@@ -229,7 +229,7 @@ var_global:
   TK_IDENTIFICADOR tipo_primario ';' 
 	{ $$ = cria_nodo(var_global,4,cria_folha($1),NULL,NULL,cria_folha($2)); 
 	/*
-	if(declarado(cria_folha($1)) == 1)
+	if(declarado(pilha, cria_folha($1), cria_folha($2)) == 1)
 		exit(ERR_DECLARED);
 	add_vg($$);
 	*/
@@ -238,9 +238,9 @@ var_global:
 | TK_IDENTIFICADOR TK_IDENTIFICADOR ';'	
 	{ $$ = cria_nodo(var_global,4,cria_folha($1),NULL,NULL,cria_folha($2)); 
 	/*
-	if(declarado(cria_folha($1)) == 1)
+	if(declarado(pilha, cria_folha($1), NULL) == 1)
 		exit(ERR_DECLARED);
-	if(declarado(cria_folha($2)) == 0)
+	if(declarado(pilha, cria_folha($2), NULL) == 0)
 		exit(ERR_UNDECLARED);
 	add_vg($$);
 	*/
@@ -249,7 +249,7 @@ var_global:
 | TK_IDENTIFICADOR TK_PR_STATIC tipo_primario ';'
 	{ $$ = cria_nodo(var_global,4,cria_folha($1),NULL,cria_folha($2),cria_folha($3)); 
 	/*
-	if(declarado(cria_folha($1)) == 1)
+	if(declarado(pilha, cria_folha($1), cria_folha($3)) == 1)
 		exit(ERR_DECLARED);
 	add_vg($$);
 	*/
@@ -258,9 +258,9 @@ var_global:
 | TK_IDENTIFICADOR TK_PR_STATIC TK_IDENTIFICADOR ';' 
 	{ $$ = cria_nodo(var_global,4,cria_folha($1),NULL,cria_folha($2),cria_folha($3));
 	/*
-	if(declarado(cria_folha($1)) == 1)
+	if(declarado(pilha, cria_folha($1), NULL) == 1)
 		exit(ERR_DECLARED);
-	if(declarado(cria_folha($3)) == 0)
+	if(declarado(pilha, cria_folha($3), NULL) == 0)
 		exit(ERR_UNDECLARED);
 	add_vg($$);
 	*/
@@ -269,7 +269,7 @@ var_global:
 | TK_IDENTIFICADOR '[' TK_LIT_INT ']' tipo_primario ';' 
 	{ $$ = cria_nodo(var_global,4,cria_folha($1),cria_folha($3),NULL,cria_folha($5));
 	/*
-	if(declarado(cria_folha($1)) == 1)
+	if(declarado(pilha, cria_folha($1), cria_folha($5)) == 1)
 		exit(ERR_DECLARED);
 	add_vg($$);
 	*/
@@ -278,9 +278,9 @@ var_global:
 | TK_IDENTIFICADOR '[' TK_LIT_INT ']' TK_IDENTIFICADOR ';' 
 	{ $$ = cria_nodo(var_global,4,cria_folha($1),cria_folha($3),NULL,cria_folha($5));
 	/*
-	if(declarado(cria_folha($1)) == 1)
+	if(declarado(pilha, cria_folha($1), NULL) == 1)
 		exit(ERR_DECLARED);
-	if(declarado(cria_folha($5)) == 0)
+	if(declarado(pilha, cria_folha($5), NULL) == 0)
 		exit(ERR_UNDECLARED);
 	add_vg($$);
 	*/
@@ -289,7 +289,7 @@ var_global:
 | TK_IDENTIFICADOR '[' TK_LIT_INT ']' TK_PR_STATIC tipo_primario ';' 
 	{ $$ = cria_nodo(var_global,4,cria_folha($1),cria_folha($3),cria_folha($5),cria_folha($6));
 	/*
-	if(declarado(cria_folha($1)) == 1)
+	if(declarado(pilha, cria_folha($1), cria_folha($6)) == 1)
 		exit(ERR_DECLARED);
 	add_vg($$);
 	*/
@@ -298,9 +298,9 @@ var_global:
 | TK_IDENTIFICADOR '[' TK_LIT_INT ']' TK_PR_STATIC TK_IDENTIFICADOR ';'
 	{ $$ = cria_nodo(var_global,4,cria_folha($1),cria_folha($3),cria_folha($5),cria_folha($6)); 
 	/*
-	if(declarado(cria_folha($1)) == 1)
+	if(declarado(pilha, cria_folha($1), NULL) == 1)
 		exit(ERR_DECLARED);
-	if(declarado(cria_folha($6)) == 0)
+	if(declarado(pilha, cria_folha($6), NULL) == 0)
 		exit(ERR_UNDECLARED);
 	add_vg($$);
 	*/
@@ -311,21 +311,49 @@ var_global:
 /* Definição de Funções */
 funcao:
   cabecalho bloco_comandos
-	{ $$ = cria_nodo(funcao,2,$1,$2); }
+	{ $$ = cria_nodo(funcao,2,$1,$2); 
+	/*
+		add_func($$);
+	*/
+	}
 ;
 
 cabecalho:
   tipo_primario TK_IDENTIFICADOR parametros
-	{ $$ = cria_nodo(cabecalho,4,NULL,cria_folha($1),cria_folha($2),$3); }	
+	{ $$ = cria_nodo(cabecalho,4,NULL,cria_folha($1),cria_folha($2),$3); 
+	/*
+	if(declarado(pilha, cria_folha($2), cria_folha($1)) == 1)
+		exit(ERR_DECLARED);
+	*/
+	}	
 	
 | TK_IDENTIFICADOR TK_IDENTIFICADOR parametros
-	{ $$ = cria_nodo(cabecalho,4,NULL,cria_folha($1),cria_folha($2),$3); }	
+	{ $$ = cria_nodo(cabecalho,4,NULL,cria_folha($1),cria_folha($2),$3); 
+	/*
+	if(declarado(pilha,cria_folha($1),NULL) == 0)
+		exit(ERR_UNDECLARED);
+	if(declarado(pilha,cria_folha($2),NULL) == 1)
+		exit(ERR_DECLARED);
+	*/
+	}	
 
 | TK_PR_STATIC tipo_primario TK_IDENTIFICADOR parametros
-	{ $$ = cria_nodo(cabecalho,4,cria_folha($1),cria_folha($2),cria_folha($3),$4); }		
+	{ $$ = cria_nodo(cabecalho,4,cria_folha($1),cria_folha($2),cria_folha($3),$4); 
+	/*
+	if(declarado(pilha, cria_folha($3), cria_folha($2)) == 1)
+		exit(ERR_DECLARED);
+	*/
+	}		
 
 | TK_PR_STATIC TK_IDENTIFICADOR TK_IDENTIFICADOR parametros
-	{ $$ = cria_nodo(cabecalho,4,cria_folha($1),cria_folha($2),cria_folha($3),$4); }
+	{ $$ = cria_nodo(cabecalho,4,cria_folha($1),cria_folha($2),cria_folha($3),$4); 
+	/*
+	if(declarado(pilha,cria_folha($2),NULL) == 0)
+		exit(ERR_UNDECLARED);
+	if(declarado(pilha,cria_folha($3),NULL) == 1)
+		exit(ERR_DECLARED);
+	*/
+	}
 ;
 
 parametros:
@@ -394,40 +422,120 @@ comando_simples:
 /*Variavel Local*/
 var_local:
   tipo_primario TK_IDENTIFICADOR
-    { $$ = cria_nodo(var_local,5,NULL,NULL,cria_folha($1),cria_folha($2),NULL); }
+    { $$ = cria_nodo(var_local,5,NULL,NULL,cria_folha($1),cria_folha($2),NULL); 
+	/*
+	if(declarado_tabela(pilha, cria_folha($2), cria_folha($1)) == 1)
+		exit(ERR_DECLARED);
+	add_vl($$);
+	*/
+	}
 
 | tipo_primario TK_IDENTIFICADOR var_local_inic
-    { $$ = cria_nodo(var_local,4,NULL,NULL,cria_folha($1),cria_folha($2)); adiciona_netos($$,$3); }
+    { $$ = cria_nodo(var_local,4,NULL,NULL,cria_folha($1),cria_folha($2)); adiciona_netos($$,$3); 
+	/*
+	if(declarado_tabela(pilha, cria_folha($2), cria_folha($1)) == 1)
+		exit(ERR_DECLARED);
+	add_vl($$);
+	*/
+	}
 
 | TK_IDENTIFICADOR TK_IDENTIFICADOR
-    { $$ = cria_nodo(var_local,5,NULL,NULL,cria_folha($1),cria_folha($2),NULL); }
+    { $$ = cria_nodo(var_local,5,NULL,NULL,cria_folha($1),cria_folha($2),NULL); 
+	/*
+	if(declarado(pilha,cria_folha($1),NULL) == 0)
+		exit(ERR_UNDECLARED);
+	if(declarado_tabela(pilha,cria_folha($2),NULL) == 1)
+		exit(ERR_DECLARED);
+	add_vl($$);
+	*/
+	}
 
 | TK_PR_STATIC tipo_primario TK_IDENTIFICADOR
-    { $$ = cria_nodo(var_local,5,cria_folha($1),NULL,cria_folha($2),cria_folha($3),NULL); }
+    { $$ = cria_nodo(var_local,5,cria_folha($1),NULL,cria_folha($2),cria_folha($3),NULL); 
+	/*
+	if(declarado_tabela(pilha, cria_folha($3), cria_folha($2)) == 1)
+		exit(ERR_DECLARED);
+	add_vl($$);
+	*/
+	}
 
 | TK_PR_STATIC tipo_primario TK_IDENTIFICADOR var_local_inic
-    { $$ = cria_nodo(var_local,4,cria_folha($1),NULL,cria_folha($2),cria_folha($3)); adiciona_netos($$,$4); }
+    { $$ = cria_nodo(var_local,4,cria_folha($1),NULL,cria_folha($2),cria_folha($3)); adiciona_netos($$,$4); 
+	/*
+	if(declarado_tabela(pilha, cria_folha($3), cria_folha($2)) == 1)
+		exit(ERR_DECLARED);
+	add_vl($$);
+	*/
+	}
 
 | TK_PR_STATIC TK_IDENTIFICADOR TK_IDENTIFICADOR
-    { $$ = cria_nodo(var_local,5,cria_folha($1),NULL,cria_folha($2),cria_folha($3),NULL); }
+    { $$ = cria_nodo(var_local,5,cria_folha($1),NULL,cria_folha($2),cria_folha($3),NULL); 
+	/*
+	if(declarado(pilha,cria_folha($2),NULL) == 0)
+		exit(ERR_UNDECLARED);
+	if(declarado_tabela(pilha,cria_folha($3),NULL) == 1)
+		exit(ERR_DECLARED);
+	add_vl($$);
+	*/
+	}
 
 | TK_PR_CONST tipo_primario TK_IDENTIFICADOR
-    { $$ = cria_nodo(var_local,5,NULL,cria_folha($1),cria_folha($2),cria_folha($3),NULL); }
+    { $$ = cria_nodo(var_local,5,NULL,cria_folha($1),cria_folha($2),cria_folha($3),NULL); 
+	/*
+	if(declarado_tabela(pilha, cria_folha($3), cria_folha($2)) == 1)
+		exit(ERR_DECLARED);
+	add_vl($$);
+	*/
+	}
 
 | TK_PR_CONST tipo_primario TK_IDENTIFICADOR var_local_inic
-    { $$ = cria_nodo(var_local,4,NULL,cria_folha($1),cria_folha($2),cria_folha($3)); adiciona_netos($$,$4); }
+    { $$ = cria_nodo(var_local,4,NULL,cria_folha($1),cria_folha($2),cria_folha($3)); adiciona_netos($$,$4); 
+	/*
+	if(declarado_tabela(pilha, cria_folha($3), cria_folha($2)) == 1)
+		exit(ERR_DECLARED);
+	add_vl($$);
+	*/
+	}
 
 | TK_PR_CONST TK_IDENTIFICADOR TK_IDENTIFICADOR
-    { $$ = cria_nodo(var_local,5,NULL,cria_folha($1),cria_folha($2),cria_folha($3),NULL); }
+    { $$ = cria_nodo(var_local,5,NULL,cria_folha($1),cria_folha($2),cria_folha($3),NULL);
+	/*
+	if(declarado(pilha,cria_folha($2),NULL) == 0)
+		exit(ERR_UNDECLARED);
+	if(declarado_tabela(pilha,cria_folha($3),NULL) == 1)
+		exit(ERR_DECLARED);
+	add_vl($$);
+	*/
+	}
 
 | TK_PR_STATIC TK_PR_CONST tipo_primario TK_IDENTIFICADOR
-    { $$ = cria_nodo(var_local,5,cria_folha($1),cria_folha($2),cria_folha($3),cria_folha($4),NULL); }
+    { $$ = cria_nodo(var_local,5,cria_folha($1),cria_folha($2),cria_folha($3),cria_folha($4),NULL); 
+	/*
+	if(declarado_tabela(pilha, cria_folha($4), cria_folha($3)) == 1)
+		exit(ERR_DECLARED);
+	add_vl($$);
+	*/
+	}
 
 | TK_PR_STATIC TK_PR_CONST tipo_primario TK_IDENTIFICADOR var_local_inic
-    { $$ = cria_nodo(var_local,4,cria_folha($1),cria_folha($2),cria_folha($3),cria_folha($4)); adiciona_netos($$,$5); }
+    { $$ = cria_nodo(var_local,4,cria_folha($1),cria_folha($2),cria_folha($3),cria_folha($4)); adiciona_netos($$,$5); 
+	/*
+	if(declarado_tabela(pilha, cria_folha($4), cria_folha($3)) == 1)
+		exit(ERR_DECLARED);
+	add_vl($$);
+	*/
+	}
 
 | TK_PR_STATIC TK_PR_CONST TK_IDENTIFICADOR TK_IDENTIFICADOR
-    { $$ = cria_nodo(var_local,5,cria_folha($1),cria_folha($2),cria_folha($3),cria_folha($4),NULL); }
+    { $$ = cria_nodo(var_local,5,cria_folha($1),cria_folha($2),cria_folha($3),cria_folha($4),NULL); 
+	/*
+	if(declarado(pilha,cria_folha($3),NULL) == 0)
+		exit(ERR_UNDECLARED);
+	if(declarado_tabela(pilha,cria_folha($4),NULL) == 1)
+		exit(ERR_DECLARED);
+	add_vl($$);
+	*/
+	}
 ;
 
 var_local_inic:
