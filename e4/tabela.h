@@ -12,7 +12,10 @@ E4:
 3 a 7 nao implementados
 */
 
+#ifndef __arvore__
 #include "arvore.h"
+#endif
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>

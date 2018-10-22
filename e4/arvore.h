@@ -3,6 +3,10 @@ Giovani Tirello 252741
 Vinicius Castro 193026
 */
 
+#ifndef __arvore__
+#define __arvore__
+
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -109,3 +113,5 @@ NodoArvore* cria_nodo(enum NaoTerminalType type, int num_filhos, ...);
 NodoArvore* cria_folha(struct valor_lexico valor_lexico);
 void adiciona_filho(NodoArvore *pai, NodoArvore *filho);
 void adiciona_netos(NodoArvore *avo, NodoArvore *pai);
+
+#endif

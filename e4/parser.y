@@ -19,7 +19,9 @@ void *pilha;
 %}
 
 %code requires {
+#ifndef __arvore__
 #include "arvore.h"
+#endif
 #include "tabela.h"
 }
 
