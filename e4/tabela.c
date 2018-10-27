@@ -31,13 +31,6 @@ void add_simbolo_tabela(Simbolo *s, Tabela *t){
 	t->num_simbolos++;
 }
 
-void add_argumento_tabela(Arg_Func *a, Tabela *t){
-	///TODO: como realocar argumentos numa tabela com simbolos?	
-	t->simbolos = (Simbolo**) realloc(t->simbolos, (t->num_simbolos + 1) * sizeof(Simbolo**));
-	t->simbolos[t->num_simbolos]= a;
-	t->num_simbolos++;
-}
-
 
 //Funcoes Pilha
 Pilha_Tabelas* inicializa_pilha(){
@@ -75,7 +68,7 @@ int declarado(Pilha_Tabelas *pilha, NodoArvore *n1, NodoArvore *n2){
 	}
 	for(int i=0; i < pilha->num_tabelas; i++){
 		for(int j =0; j < pilha->tabelas[i]->num_simbolos; j++){
-			if(strcmp(chave, pilha->tabelas[i]->simbolos[j]->chave) == 0 && tipo == pilha->tabelas[i]->simbolos[j]->tipo){
+			if(strcmp(chave, pilha->tabelas[i]->simbolos[j]->chave) && tipo == pilha->tabelas[i]->simbolos[j]->tipo){
 				return 1;
 			}
 		}
@@ -92,7 +85,7 @@ int declarado_tabela(Pilha_Tabelas *pilha, NodoArvore *n1, NodoArvore *n2){
 	}
 	int tabela_atual = pilha->num_tabelas -1;
 	for(int j =0; j < pilha->tabelas[tabela_atual]->num_simbolos; j++){
-		if(strcmp(chave, pilha->tabelas[tabela_atual]->simbolos[j]->chave) == 0 && tipo == pilha->tabelas[tabela_atual]->simbolos[j]->tipo){
+		if(strcmp(chave, pilha->tabelas[tabela_atual]->simbolos[j]->chave) && tipo == pilha->tabelas[tabela_atual]->simbolos[j]->tipo){
 			return 1;
 		}
 	}
@@ -133,9 +126,18 @@ void define_tipo(Simbolo *s, NodoArvore*n){
 	}
 }
 
-
-void tamanho_usr(Simbolo *s, NodoArvore*n){
-//TODO: soma o tamanho dos campos e coloca os em **Campos
+// busca o tamanho e os campos do tipo usuario
+void tamanho_usr(Pilha_Tabelas *pilha, Simbolo *s, NodoArvore*n){
+	char *chave = n->nodo.valor_lexico.val.string_val;
+	int tipo = TIPO_USR;
+	for(int i=0; i < pilha->num_tabelas; i++){
+		for(int j =0; j < pilha->tabelas[i]->num_simbolos; j++){
+			if(strcmp(chave, pilha->tabelas[i]->simbolos[j]->chave) && tipo == pilha->tabelas[i]->simbolos[j]->tipo){
+				s->Campos = pilha->tabelas[i]->simbolos[j]->Campos;
+				s->tamanho = pilha->tabelas[i]->simbolos[j]->tamanho;
+			}
+		}
+	}
 }
 
 //ajusta tamanho do vetor
@@ -149,13 +151,15 @@ void add_nt(Pilha_Tabelas *pilha, NodoArvore *n){
 	//inicializa simbolo
 	Simbolo *nt = (Simbolo*)malloc(sizeof(Simbolo));
 
-	//nao eh cons nem funcao nem static
+	//nao eh cons nem funcao nem static nem tem encapsulamento
 	nt->eh_cons = 0;
 	nt->Argumentos = NULL;
 	nt->eh_static = 0;
+	nt->encapsulamento = 0;
 
 	//eh tipo usuario
 	nt->tipo = TIPO_USR;
+	nt->tamanho = 0;
 
 	//define natureza TODO:nao entendi muito o sentido da natureza entao nao tenho certeza
 	nt->natureza = NATUREZA_IDENTIFICADOR;
@@ -173,10 +177,56 @@ void add_nt(Pilha_Tabelas *pilha, NodoArvore *n){
 
 	//pega o terceiro filho do nodo onde estao os campos
 	NodoArvore *f3 = (NodoArvore*)n->filhos[0];
-		///TODO: para cada campo... (defenir *chave, tipo encapsulamento, e colocar no **Campos e na tabela) (ir somando o tamanho de cada tipo para definir o tamanho total do tipo usuario)
-		for(int i=0; i<f3->num_filhos; i++){
-			f3->filhos[i];
+
+	nt->Campos = (Simbolo**)malloc(sizeof(Simbolo*));
+	NodoArvore *cam = (NodoArvore*)malloc(sizeof(NodoArvore));
+	NodoArvore *fc1 = (NodoArvore*)malloc(sizeof(NodoArvore));
+	NodoArvore *fc2 = (NodoArvore*)malloc(sizeof(NodoArvore));
+	NodoArvore *fc3 = (NodoArvore*)malloc(sizeof(NodoArvore));
+
+	/// para cada campo...
+	for(int i=0; i<f3->num_filhos; i++){
+		nt->Campos = (Simbolo**) realloc(nt->Campos, (i + 1) * sizeof(Simbolo*));
+
+		//Anula ou zera componentes de simbolo que nao sao necessarios para um campo
+		nt->Campos[i]->line = 0;
+		nt->Campos[i]->col = 0;
+		nt->Campos[i]->natureza = 0;
+		nt->Campos[i]->eh_static = 0;
+		nt->Campos[i]->eh_cons = 0;
+		nt->Campos[i]->Argumentos = NULL;
+		nt->Campos[i]->Campos = NULL;
+
+
+		cam = f3->filhos[i];
+		//pega o primeiro filho do campo para definir o encapsulamento
+		if(cam->filhos[0]){
+			NodoArvore *fc1 = (NodoArvore*)cam->filhos[0];
+			if(strcmp(fc1->nodo.valor_lexico.val.string_val, "protected"))
+				nt->Campos[i]->encapsulamento = 1;
+			if(strcmp(fc1->nodo.valor_lexico.val.string_val, "private"))
+				nt->Campos[i]->encapsulamento = 2;
+			if(strcmp(fc1->nodo.valor_lexico.val.string_val, "public"))
+				nt->Campos[i]->encapsulamento = 3;
+		}else{
+			nt->Campos[i]->encapsulamento = 0;
 		}
+
+		//pega o segundo filho do campo...
+		NodoArvore *fc2 = (NodoArvore*)cam->filhos[1];
+		//...para definir o tipo e tamanho
+		define_tipo(nt->Campos[i],fc2);
+		//...e somar o tamanho ao Tipo Usuario criado
+		nt->tamanho = nt->tamanho + nt->Campos[i]->tamanho;
+
+		//pega o terceiro filho do campo...
+		NodoArvore *fc3 = (NodoArvore*)cam->filhos[2];
+		//...para definir a *chave...
+		nt->Campos[i]->chave = fc3->nodo.valor_lexico.val.string_val; //TODO:pode causar ponteiro pendente?
+
+		//adiciona campo na tabela
+		add_simbolo_tabela(nt->Campos[i], pilha->tabelas[pilha->num_tabelas - 1]);
+	}
 }
 
 
@@ -214,7 +264,7 @@ void add_vg(Pilha_Tabelas *pilha, NodoArvore *n){
 
 	//se for tipo usuario eh necessario ajustar o tamanho e **Campos
 	if(vg->tipo == TIPO_USR){
-		tamanho_usr(vg,f4);
+		tamanho_usr(pilha,vg,f4);
 	}else{
 		vg->Campos = NULL;
 	}
@@ -230,13 +280,14 @@ void add_vg(Pilha_Tabelas *pilha, NodoArvore *n){
 }
 
 
-//TODO: Funcao Funcao
+//Funcao Funcao
 void add_func(Pilha_Tabelas *pilha, NodoArvore *n){
 	//inicializa simbolo
 	Simbolo *func = (Simbolo*)malloc(sizeof(Simbolo));
 
-	//nao eh cons
+	//nao eh cons nem tem encapsulamento
 	func->eh_cons = 0;
+	func->encapsulamento = 0;
 
 	//define natureza TODO:nao entendi muito o sentido da natureza entao nao tenho certeza
 	func->natureza = NATUREZA_IDENTIFICADOR;
@@ -257,7 +308,7 @@ void add_func(Pilha_Tabelas *pilha, NodoArvore *n){
 	define_tipo(func,fc2);
 	//se for tipo usuario eh necessario ajustar o tamanho e **Campos
 	if(func->tipo == TIPO_USR){
-		tamanho_usr(func,fc2);
+		tamanho_usr(pilha, func,fc2);
 	}else{
 		func->Campos = NULL;
 	}
@@ -279,13 +330,23 @@ void add_func(Pilha_Tabelas *pilha, NodoArvore *n){
 	if(fc4->num_filhos == 0){
 		func->Argumentos = NULL;
 	}else{
-		func->Argumentos = (Arg_Func**)malloc(sizeof(Arg_Func*));
+		func->Argumentos = (Simbolo**)malloc(sizeof(Simbolo*));
 		NodoArvore *param = (NodoArvore*)malloc(sizeof(NodoArvore));
 		NodoArvore *fp2 = (NodoArvore*)malloc(sizeof(NodoArvore));
 		NodoArvore *fp3 = (NodoArvore*)malloc(sizeof(NodoArvore));
 		//para cada parametro...
 		for(int i = 0; i < fc4->num_filhos; i++){
-			func->Argumentos = (Arg_Func**) realloc(func->Argumentos, (i + 1) * sizeof(Arg_Func*));
+			func->Argumentos = (Simbolo**) realloc(func->Argumentos, (i + 1) * sizeof(Simbolo*));
+			
+			//Anula ou zera componentes de simbolo que nao sao necessarios para um argumento
+			func->Argumentos[i]->line = 0;
+			func->Argumentos[i]->col = 0;
+			func->Argumentos[i]->natureza = 0;
+			func->Argumentos[i]->eh_static = 0;
+			func->Argumentos[i]->encapsulamento = 0;
+			func->Argumentos[i]->Argumentos = NULL;
+			func->Argumentos[i]->Campos = NULL;
+
 			param = fc4->filhos[i];
 			//pega o primeiro filho do parametro para ver se eh cons
 			if(param->filhos[0]==NULL){
@@ -297,7 +358,6 @@ void add_func(Pilha_Tabelas *pilha, NodoArvore *n){
 			//pega o segundo filho do parametro...
 			NodoArvore *fp2 = (NodoArvore*)param->filhos[1];
 			//...para definir o tipo e tamanho
-			//TODO: warning pois define_tipo espera um Simbolo e recebe um Arg_Func
 			define_tipo(func->Argumentos[i],fp2);
 
 			//pega o terceiro filho do parametro...
@@ -306,8 +366,7 @@ void add_func(Pilha_Tabelas *pilha, NodoArvore *n){
 			func->Argumentos[i]->chave = fp3->nodo.valor_lexico.val.string_val; //TODO:pode causar ponteiro pendente?
 
 			//adiciona parametro na tabela
-			////TODO:adicionar parametros na mesma tabela que a funcao (como esta sendo feito no momento) ou na tabela empilhada pela funcao?
-			add_argumento_tabela(func->Argumentos[i], pilha->tabelas[pilha->num_tabelas - 1]);
+			add_simbolo_tabela(func->Argumentos[i], pilha->tabelas[pilha->num_tabelas - 1]);
 		}
 	
 	}
@@ -324,8 +383,9 @@ void add_vl(Pilha_Tabelas *pilha, NodoArvore *n){
 	//inicializa simbolo
 	Simbolo *vl = (Simbolo*)malloc(sizeof(Simbolo));
 
-	//nao eh funcao
+	//nao eh funcao nem tem encapsulamento
 	vl->Argumentos = NULL;
+	vl->encapsulamento = 0;
 
 	//define natureza TODO:nao entendi muito o sentido da natureza entao nao tenho certeza
 	vl->natureza = NATUREZA_IDENTIFICADOR;
@@ -351,7 +411,7 @@ void add_vl(Pilha_Tabelas *pilha, NodoArvore *n){
 
 	//se for tipo usuario eh necessario ajustar o tamanho e **Campos
 	if(vl->tipo == TIPO_USR){
-		tamanho_usr(vl,f3);
+		tamanho_usr(pilha,vl,f3);
 	}else{
 		vl->Campos = NULL;
 	}

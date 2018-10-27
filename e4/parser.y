@@ -206,7 +206,7 @@ novo_tipo:
 	/*
 	if(declarado(pilha, cria_folha($2), NULL) == 1)
 		exit(ERR_DECLARED);
-	add_nt($$);
+	add_nt(pilha, $$);
 	*/
 	}
 ;
@@ -233,7 +233,7 @@ var_global:
 	/*
 	if(declarado(pilha, cria_folha($1), cria_folha($2)) == 1)
 		exit(ERR_DECLARED);
-	add_vg($$);
+	add_vg(pilha, $$);
 	*/
 	}
 
@@ -244,7 +244,7 @@ var_global:
 		exit(ERR_DECLARED);
 	if(declarado(pilha, cria_folha($2), NULL) == 0)
 		exit(ERR_UNDECLARED);
-	add_vg($$);
+	add_vg(pilha, $$);
 	*/
 	}
 
@@ -253,7 +253,7 @@ var_global:
 	/*
 	if(declarado(pilha, cria_folha($1), cria_folha($3)) == 1)
 		exit(ERR_DECLARED);
-	add_vg($$);
+	add_vg(pilha, $$);
 	*/
 }
 
@@ -264,7 +264,7 @@ var_global:
 		exit(ERR_DECLARED);
 	if(declarado(pilha, cria_folha($3), NULL) == 0)
 		exit(ERR_UNDECLARED);
-	add_vg($$);
+	add_vg(pilha, $$);
 	*/
 	}
 
@@ -273,7 +273,7 @@ var_global:
 	/*
 	if(declarado(pilha, cria_folha($1), cria_folha($5)) == 1)
 		exit(ERR_DECLARED);
-	add_vg($$);
+	add_vg(pilha, $$);
 	*/
 	}
 
@@ -284,7 +284,7 @@ var_global:
 		exit(ERR_DECLARED);
 	if(declarado(pilha, cria_folha($5), NULL) == 0)
 		exit(ERR_UNDECLARED);
-	add_vg($$);
+	add_vg(pilha, $$);
 	*/
 	}
 
@@ -293,7 +293,7 @@ var_global:
 	/*
 	if(declarado(pilha, cria_folha($1), cria_folha($6)) == 1)
 		exit(ERR_DECLARED);
-	add_vg($$);
+	add_vg(pilha, $$);
 	*/
 	}
 
@@ -304,7 +304,7 @@ var_global:
 		exit(ERR_DECLARED);
 	if(declarado(pilha, cria_folha($6), NULL) == 0)
 		exit(ERR_UNDECLARED);
-	add_vg($$);
+	add_vg(pilha, $$);
 	*/
 	}
 
@@ -315,7 +315,7 @@ funcao:
   cabecalho bloco_comandos
 	{ $$ = cria_nodo(funcao,2,$1,$2); 
 	/*
-		add_func($$);
+		add_func(pilha, $$);
 	*/
 	}
 ;
@@ -428,7 +428,7 @@ var_local:
 	/*
 	if(declarado_tabela(pilha, cria_folha($2), cria_folha($1)) == 1)
 		exit(ERR_DECLARED);
-	add_vl($$);
+	add_vl(pilha, $$);
 	*/
 	}
 
@@ -437,7 +437,7 @@ var_local:
 	/*
 	if(declarado_tabela(pilha, cria_folha($2), cria_folha($1)) == 1)
 		exit(ERR_DECLARED);
-	add_vl($$);
+	add_vl(pilha, $$);
 	*/
 	}
 
@@ -448,7 +448,7 @@ var_local:
 		exit(ERR_UNDECLARED);
 	if(declarado_tabela(pilha,cria_folha($2),NULL) == 1)
 		exit(ERR_DECLARED);
-	add_vl($$);
+	add_vl(pilha, $$);
 	*/
 	}
 
@@ -457,7 +457,7 @@ var_local:
 	/*
 	if(declarado_tabela(pilha, cria_folha($3), cria_folha($2)) == 1)
 		exit(ERR_DECLARED);
-	add_vl($$);
+	add_vl(pilha, $$);
 	*/
 	}
 
@@ -466,7 +466,7 @@ var_local:
 	/*
 	if(declarado_tabela(pilha, cria_folha($3), cria_folha($2)) == 1)
 		exit(ERR_DECLARED);
-	add_vl($$);
+	add_vl(pilha, $$);
 	*/
 	}
 
@@ -477,7 +477,7 @@ var_local:
 		exit(ERR_UNDECLARED);
 	if(declarado_tabela(pilha,cria_folha($3),NULL) == 1)
 		exit(ERR_DECLARED);
-	add_vl($$);
+	add_vl(pilha, $$);
 	*/
 	}
 
@@ -486,7 +486,7 @@ var_local:
 	/*
 	if(declarado_tabela(pilha, cria_folha($3), cria_folha($2)) == 1)
 		exit(ERR_DECLARED);
-	add_vl($$);
+	add_vl(pilha, $$);
 	*/
 	}
 
@@ -495,7 +495,7 @@ var_local:
 	/*
 	if(declarado_tabela(pilha, cria_folha($3), cria_folha($2)) == 1)
 		exit(ERR_DECLARED);
-	add_vl($$);
+	add_vl(pilha, $$);
 	*/
 	}
 
@@ -506,7 +506,7 @@ var_local:
 		exit(ERR_UNDECLARED);
 	if(declarado_tabela(pilha,cria_folha($3),NULL) == 1)
 		exit(ERR_DECLARED);
-	add_vl($$);
+	add_vl(pilha, $$);
 	*/
 	}
 
@@ -515,7 +515,7 @@ var_local:
 	/*
 	if(declarado_tabela(pilha, cria_folha($4), cria_folha($3)) == 1)
 		exit(ERR_DECLARED);
-	add_vl($$);
+	add_vl(pilha, $$);
 	*/
 	}
 
@@ -524,7 +524,7 @@ var_local:
 	/*
 	if(declarado_tabela(pilha, cria_folha($4), cria_folha($3)) == 1)
 		exit(ERR_DECLARED);
-	add_vl($$);
+	add_vl(pilha, $$);
 	*/
 	}
 
@@ -535,7 +535,7 @@ var_local:
 		exit(ERR_UNDECLARED);
 	if(declarado_tabela(pilha,cria_folha($4),NULL) == 1)
 		exit(ERR_DECLARED);
-	add_vl($$);
+	add_vl(pilha, $$);
 	*/
 	}
 ;

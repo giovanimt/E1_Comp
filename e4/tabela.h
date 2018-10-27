@@ -21,18 +21,8 @@ E4:
 #include <stdlib.h>
 #include <stdarg.h>
 
-typedef struct Arg_Func {
-	char *chave;
-	int tipo;
-	int eh_cons; //0 nao 1 sim
-	int tamanho; //apenas para poder usar define_tipo sem erros
-} Arg_Func;
-
-typedef struct Cmp_Usr {
-	char *chave;
-	int tipo;
-	int encapsulamento;
-} Cmp_Usr;
+//Arg_Func = *chave tipo eh_cons
+//Cmp_Usr = *chave tipo encapsulamento
 
 typedef struct Simbolo {
 	char *chave;
@@ -43,8 +33,9 @@ typedef struct Simbolo {
 	int tamanho;
 	int eh_static; /// 0 nao 1 sim
 	int eh_cons; /// 0 nao 1 sim
-	Arg_Func **Argumentos; //argumentos caso for uma funcao
-	Cmp_Usr **Campos; //campos do tipo usuario caso tipo==USR
+	int encapsulamento; //0 n/a 1 protected 2 private 3 public
+	struct Simbolo **Argumentos; //argumentos caso for uma funcao
+	struct Simbolo **Campos; //campos do tipo usuario caso tipo==USR
 	///TODO:demais informações do valor do token pelo yylval (veja E3)
 } Simbolo;
 
@@ -62,7 +53,6 @@ typedef struct Pilha_Tabelas {
 //Funcoes tabela
 Tabela* cria_tabela();
 void add_simbolo_tabela(Simbolo *s, Tabela *t);
-void add_argumento_tabela(Arg_Func *a, Tabela *t);
 
 //Funcoes Pilha
 Pilha_Tabelas* inicializa_pilha();
@@ -73,7 +63,7 @@ void desempilha(Pilha_Tabelas *pilha);
 int declarado(Pilha_Tabelas *pilha, NodoArvore *n1, NodoArvore *n2);
 int declarado_tabela(Pilha_Tabelas *pilha, NodoArvore *n1, NodoArvore *n2);
 void define_tipo(Simbolo *s, NodoArvore*n);
-void tamanho_usr(Simbolo *s, NodoArvore*n);
+void tamanho_usr(Pilha_Tabelas *pilha, Simbolo *s, NodoArvore*n);
 void tamanho_vetor(Simbolo *s, NodoArvore*n);
 
 //Funcao Novo Tipo
