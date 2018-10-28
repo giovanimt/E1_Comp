@@ -33,9 +33,12 @@ typedef struct Simbolo {
 	int tamanho;
 	int eh_static; /// 0 nao 1 sim
 	int eh_cons; /// 0 nao 1 sim
+	int var_ou_vet; /// 0 n/a 1 variavel 2 vetor
 	int encapsulamento; //0 n/a 1 protected 2 private 3 public
 	struct Simbolo **Argumentos; //argumentos caso for uma funcao
+	int num_argumentos;
 	struct Simbolo **Campos; //campos do tipo usuario caso tipo==USR
+	int num_campos;
 	///TODO:demais informações do valor do token pelo yylval (veja E3)
 } Simbolo;
 
@@ -77,4 +80,13 @@ void add_func(Pilha_Tabelas *pilha, NodoArvore *n);
 
 //Funcao Var Local
 void add_vl(Pilha_Tabelas *pilha, NodoArvore *n);
+
+//Outros
+int declarado_atr(Pilha_Tabelas *pilha, NodoArvore *n);
+int eh_vetor(Pilha_Tabelas *pilha, NodoArvore *n);
+int existe_campo(Pilha_Tabelas *pilha, NodoArvore *n1, NodoArvore *n2);
+//analisa se eh usr
+int eh_usr(Pilha_Tabelas *pilha, NodoArvore *n);
+//analisa se foram passados argumentos suficientes
+int analisa_args(Pilha_Tabelas *pilha, NodoArvore *n);
 

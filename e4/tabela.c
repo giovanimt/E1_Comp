@@ -134,6 +134,7 @@ void tamanho_usr(Pilha_Tabelas *pilha, Simbolo *s, NodoArvore*n){
 		for(int j =0; j < pilha->tabelas[i]->num_simbolos; j++){
 			if(strcmp(chave, pilha->tabelas[i]->simbolos[j]->chave) && tipo == pilha->tabelas[i]->simbolos[j]->tipo){
 				s->Campos = pilha->tabelas[i]->simbolos[j]->Campos;
+				s->num_campos = pilha->tabelas[i]->simbolos[j]->num_campos;
 				s->tamanho = pilha->tabelas[i]->simbolos[j]->tamanho;
 			}
 		}
@@ -154,8 +155,10 @@ void add_nt(Pilha_Tabelas *pilha, NodoArvore *n){
 	//nao eh cons nem funcao nem static nem tem encapsulamento
 	nt->eh_cons = 0;
 	nt->Argumentos = NULL;
+	nt->num_argumentos = 0;
 	nt->eh_static = 0;
 	nt->encapsulamento = 0;
+	nt->var_ou_vet = 0;
 
 	//eh tipo usuario
 	nt->tipo = TIPO_USR;
@@ -187,6 +190,7 @@ void add_nt(Pilha_Tabelas *pilha, NodoArvore *n){
 	/// para cada campo...
 	for(int i=0; i<f3->num_filhos; i++){
 		nt->Campos = (Simbolo**) realloc(nt->Campos, (i + 1) * sizeof(Simbolo*));
+		nt->num_campos = f3->num_filhos;
 
 		//Anula ou zera componentes de simbolo que nao sao necessarios para um campo
 		nt->Campos[i]->line = 0;
@@ -238,6 +242,7 @@ void add_vg(Pilha_Tabelas *pilha, NodoArvore *n){
 	//nao eh cons nem funcao
 	vg->eh_cons = 0;
 	vg->Argumentos = NULL;
+	vg->num_argumentos = 0;
 
 	//define natureza TODO:nao entendi muito o sentido da natureza entao nao tenho certeza
 	vg->natureza = NATUREZA_IDENTIFICADOR;
@@ -267,12 +272,16 @@ void add_vg(Pilha_Tabelas *pilha, NodoArvore *n){
 		tamanho_usr(pilha,vg,f4);
 	}else{
 		vg->Campos = NULL;
+		vg->num_campos = 0;
 	}
 
 	//pega o terceiro filho do nodo pra ver se eh vetor e ajustar o tamanho
 	if(n->filhos[2]!=NULL){
 		NodoArvore *f3 = (NodoArvore*)n->filhos[2];
+		vg->var_ou_vet = 2;
 		tamanho_vetor(vg,f3);
+	}else{
+		vg->var_ou_vet = 1;
 	}
 	
 	//adiciona simbolo na tabela
@@ -288,6 +297,7 @@ void add_func(Pilha_Tabelas *pilha, NodoArvore *n){
 	//nao eh cons nem tem encapsulamento
 	func->eh_cons = 0;
 	func->encapsulamento = 0;
+	func->var_ou_vet = 0;
 
 	//define natureza TODO:nao entendi muito o sentido da natureza entao nao tenho certeza
 	func->natureza = NATUREZA_IDENTIFICADOR;
@@ -311,6 +321,7 @@ void add_func(Pilha_Tabelas *pilha, NodoArvore *n){
 		tamanho_usr(pilha, func,fc2);
 	}else{
 		func->Campos = NULL;
+		func->num_campos = 0;
 	}
 
 	//pega o terceiro filho do cabecalho...
@@ -329,11 +340,13 @@ void add_func(Pilha_Tabelas *pilha, NodoArvore *n){
 	//testa se existem...
 	if(fc4->num_filhos == 0){
 		func->Argumentos = NULL;
+		func->num_argumentos = 0;
 	}else{
 		func->Argumentos = (Simbolo**)malloc(sizeof(Simbolo*));
 		NodoArvore *param = (NodoArvore*)malloc(sizeof(NodoArvore));
 		NodoArvore *fp2 = (NodoArvore*)malloc(sizeof(NodoArvore));
 		NodoArvore *fp3 = (NodoArvore*)malloc(sizeof(NodoArvore));
+		func->num_argumentos = fc4->num_filhos;
 		//para cada parametro...
 		for(int i = 0; i < fc4->num_filhos; i++){
 			func->Argumentos = (Simbolo**) realloc(func->Argumentos, (i + 1) * sizeof(Simbolo*));
@@ -385,7 +398,9 @@ void add_vl(Pilha_Tabelas *pilha, NodoArvore *n){
 
 	//nao eh funcao nem tem encapsulamento
 	vl->Argumentos = NULL;
+	vl->num_argumentos = 0;
 	vl->encapsulamento = 0;
+	vl->var_ou_vet = 1;
 
 	//define natureza TODO:nao entendi muito o sentido da natureza entao nao tenho certeza
 	vl->natureza = NATUREZA_IDENTIFICADOR;
@@ -414,6 +429,7 @@ void add_vl(Pilha_Tabelas *pilha, NodoArvore *n){
 		tamanho_usr(pilha,vl,f3);
 	}else{
 		vl->Campos = NULL;
+		vl->num_campos = 0;
 	}
 
 	//pega o quarto filho do nodo...
@@ -427,3 +443,91 @@ void add_vl(Pilha_Tabelas *pilha, NodoArvore *n){
 	//adiciona simbolo na tabela
 	add_simbolo_tabela(vl, pilha->tabelas[pilha->num_tabelas - 1]);
 }
+
+
+//Outros
+///ver se foi declarado 0 nao 1 sim (sem analisar tipo TODO:como comparar o tipo?)
+int declarado_atr(Pilha_Tabelas *pilha, NodoArvore *n){
+	char *chave = n->nodo.valor_lexico.val.string_val;
+	
+	for(int i=0; i < pilha->num_tabelas; i++){
+		for(int j =0; j < pilha->tabelas[i]->num_simbolos; j++){
+			if(strcmp(chave, pilha->tabelas[i]->simbolos[j]->chave)){
+				return 1;
+			}
+		}
+	}
+	return 0;
+}
+
+//analisa se eh vetor 0 nao 1 sim
+int eh_vetor(Pilha_Tabelas *pilha, NodoArvore *n){
+	char *chave = n->nodo.valor_lexico.val.string_val;
+	
+	for(int i=0; i < pilha->num_tabelas; i++){
+		for(int j =0; j < pilha->tabelas[i]->num_simbolos; j++){
+			if(strcmp(chave, pilha->tabelas[i]->simbolos[j]->chave) && pilha->tabelas[i]->simbolos[j]->var_ou_vet == 2){
+				return 1;
+			}
+		}
+	}
+	return 0;
+}
+
+//analisa se o campo existe 0 nao 1 sim
+int existe_campo(Pilha_Tabelas *pilha, NodoArvore *n1, NodoArvore *n2){
+	char *chave = n1->nodo.valor_lexico.val.string_val;
+	char *chave_campo = n2->nodo.valor_lexico.val.string_val;
+	Simbolo *camp = (Simbolo*)malloc(sizeof(Simbolo));
+	int num_campos;
+	
+	for(int i=0; i < pilha->num_tabelas; i++){
+		for(int j =0; j < pilha->tabelas[i]->num_simbolos; j++){
+			if(strcmp(chave, pilha->tabelas[i]->simbolos[j]->chave)){
+				camp = pilha->tabelas[i]->simbolos[j]->Campos;
+				num_campos = pilha->tabelas[i]->simbolos[j]->num_campos;
+			}
+		}
+	}
+	for(int k=0; k<num_campos; k++){
+		if(strcmp(camp[k].chave, chave_campo)){
+			return 1;
+		}
+	}
+	return 0;
+}
+						
+//analisa se eh usr
+int eh_usr(Pilha_Tabelas *pilha, NodoArvore *n){
+	char *chave = n->nodo.valor_lexico.val.string_val;
+	for(int i=0; i < pilha->num_tabelas; i++){
+		for(int j =0; j < pilha->tabelas[i]->num_simbolos; j++){
+			if(strcmp(chave, pilha->tabelas[i]->simbolos[j]->chave) && pilha->tabelas[i]->simbolos[j]->tipo == TIPO_USR){
+				return 1;
+			}
+		}
+	}
+	return 0;
+}
+
+//analisa se foram passados argumentos suficientes 0 erro 1 ok
+int analisa_args(Pilha_Tabelas *pilha, NodoArvore *n){
+	char *chave = n->filhos[0]->nodo.valor_lexico.val.string_val;
+	int num_args;
+	Simbolo *arg = (Simbolo*)malloc(sizeof(Simbolo));
+	for(int i=0; i < pilha->num_tabelas; i++){
+		for(int j =0; j < pilha->tabelas[i]->num_simbolos; j++){
+			if(strcmp(chave, pilha->tabelas[i]->simbolos[j]->chave)){
+				arg = pilha->tabelas[i]->simbolos[j]->Argumentos;
+				num_args = pilha->tabelas[i]->simbolos[j]->num_argumentos;
+			}
+		}
+	}
+	for(int k=0; k<num_args; k++){
+		if(arg[k].tipo != n->filhos[k+1]->tipo){
+			return 0;
+		}
+	}
+	return 1;
+}
+	
