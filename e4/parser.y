@@ -542,7 +542,12 @@ var_local:
 
 var_local_inic:
   TK_OC_LE TK_IDENTIFICADOR
-    { $$ = cria_nodo(var_local_inic,2,cria_folha($1),cria_folha($2)); }
+    { $$ = cria_nodo(var_local_inic,2,cria_folha($1),cria_folha($2)); 
+	/*
+	if(declarado_atr(pilha,cria_folha($2)) == 0)
+		exit(ERR_UNDECLARED);
+	*/
+	}
 
 | TK_OC_LE literal
     { $$ = cria_nodo(var_local_inic,2,cria_folha($1),cria_folha($2)); }
@@ -551,16 +556,52 @@ var_local_inic:
 /*Atribuicao*/
 atribuicao:
   TK_IDENTIFICADOR '=' expressao
-    { $$ = cria_nodo(atribuicao,4,cria_folha($1), NULL, NULL,$3); }
+    { $$ = cria_nodo(atribuicao,4,cria_folha($1), NULL, NULL,$3); 
+	/*
+	if(declarado_atr(pilha,cria_folha($1)) == 0)
+		exit(ERR_UNDECLARED);
+	if(eh_vetor(pilha,cria_folha($1)) == 1)
+		exit(ERR_VARIABLE);
+	if(eh_usr(pilha,cria_folha($1)) == 1)
+		exit(ERR_USER);
+	*/
+	}
 
 | TK_IDENTIFICADOR '[' expressao ']' '=' expressao 
-    { $$ = cria_nodo(atribuicao,4,cria_folha($1), $3, NULL,$6); }
+    { $$ = cria_nodo(atribuicao,4,cria_folha($1), $3, NULL,$6); 
+	/*
+	if(declarado_atr(pilha,cria_folha($1)) == 0)
+		exit(ERR_UNDECLARED);
+	if(eh_vetor(pilha,cria_folha($1)) == 0)
+		exit(ERR_VECTOR);
+	if(eh_usr(pilha,cria_folha($1)) == 1)
+		exit(ERR_USER);
+	*/
+}
 
 | TK_IDENTIFICADOR '$' TK_IDENTIFICADOR '=' expressao
-    { $$ = cria_nodo(atribuicao,4,cria_folha($1), NULL, cria_folha($3), $5); }
+    { $$ = cria_nodo(atribuicao,4,cria_folha($1), NULL, cria_folha($3), $5);
+	/*
+	if(declarado_atr(pilha,cria_folha($1)) == 0)
+		exit(ERR_UNDECLARED);
+	if(eh_vetor(pilha,cria_folha($1)) == 1)
+		exit(ERR_USER);
+	if(existe_campo(pilha,cria_folha($1),cria_folha($3)) == 0)
+		exit(ERR_USER);
+	*/
+}
 
 | TK_IDENTIFICADOR '[' expressao ']' '$' TK_IDENTIFICADOR '=' expressao
-    { $$ = cria_nodo(atribuicao,4,cria_folha($1), $3, cria_folha($6), $8); }
+    { $$ = cria_nodo(atribuicao,4,cria_folha($1), $3, cria_folha($6), $8); 
+	/*
+	if(declarado_atr(pilha,cria_folha($1)) == 0)
+		exit(ERR_UNDECLARED);
+	if(eh_vetor(pilha,cria_folha($1)) == 0)
+		exit(ERR_USER);
+	if(existe_campo(pilha,cria_folha($1),cria_folha($6)) == 0)
+		exit(ERR_USER);
+	*/
+}
 ;
 
 
@@ -617,6 +658,13 @@ cham_func:
 	int i;
 	for(i=0 ; i<$3->num_filhos ; i++)
 		adiciona_filho($$,$3->filhos[i]);
+	/*
+	if(declarado_atr(pilha,cria_folha($1)) == 0)
+		exit(ERR_UNDECLARED);
+	if(analisa_args(pilha,$$)) == 0)
+		exit(ERR_FUNCTION);
+	*/
+
 }
 ;
 
@@ -836,16 +884,52 @@ expressao:
 
 exp_identificador:
   TK_IDENTIFICADOR  
-    { $$ = cria_nodo(exp_identificador,3,cria_folha($1),NULL,NULL); }
+    { $$ = cria_nodo(exp_identificador,3,cria_folha($1),NULL,NULL); 
+	/*
+	if(declarado_atr(pilha,cria_folha($1)) == 0)
+		exit(ERR_UNDECLARED);
+	if(eh_vetor(pilha,cria_folha($1)) == 1)
+		exit(ERR_VECTOR);
+	if(eh_usr(pilha,cria_folha($1)) == 1)
+		exit(ERR_USER);
+	*/
+	}
 
 | TK_IDENTIFICADOR '[' expressao ']' 
-    { $$ = cria_nodo(exp_identificador,3,cria_folha($1),$3,NULL); }
+    { $$ = cria_nodo(exp_identificador,3,cria_folha($1),$3,NULL); 
+	/*
+	if(declarado_atr(pilha,cria_folha($1)) == 0)
+		exit(ERR_UNDECLARED);
+	if(eh_vetor(pilha,cria_folha($1)) == 0)
+		exit(ERR_VECTOR);
+	if(eh_usr(pilha,cria_folha($1)) == 1)
+		exit(ERR_USER);
+	*/
+	}
 
 | TK_IDENTIFICADOR '$' TK_IDENTIFICADOR 
-    { $$ = cria_nodo(exp_identificador,3,cria_folha($1),NULL,cria_folha($3)); }
+    { $$ = cria_nodo(exp_identificador,3,cria_folha($1),NULL,cria_folha($3)); 
+	/*
+	if(declarado_atr(pilha,cria_folha($1)) == 0)
+		exit(ERR_UNDECLARED);
+	if(eh_vetor(pilha,cria_folha($1)) == 1)
+		exit(ERR_VARIABLE);
+	if(existe_campo(pilha,cria_folha($1),cria_folha($3)) == 0)
+		exit(ERR_USER);
+	*/
+	}
 
 | TK_IDENTIFICADOR '[' expressao ']' '$' TK_IDENTIFICADOR
-    { $$ = cria_nodo(exp_identificador,3,cria_folha($1),$3,cria_folha($6)); }
+    { $$ = cria_nodo(exp_identificador,3,cria_folha($1),$3,cria_folha($6)); 
+	/*
+	if(declarado_atr(pilha,cria_folha($1)) == 0)
+		exit(ERR_UNDECLARED);
+	if(eh_vetor(pilha,cria_folha($1)) == 0)
+		exit(ERR_VECTOR);
+	if(existe_campo(pilha,cria_folha($1),cria_folha($6)) == 0)
+		exit(ERR_USER);
+	*/
+	}
 ;
 
 exp_literal:
