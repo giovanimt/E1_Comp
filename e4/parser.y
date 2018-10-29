@@ -11,6 +11,7 @@ Vinicius Castro 193026
 int i;
 int yylex(void);
 void yyerror (char const *s);
+void erro_semantico (int COD_ERR);
 extern int get_line_number();
 extern int get_col_number();
 extern void *arvore;
@@ -310,8 +311,10 @@ var_global:
 funcao:
   cabecalho bloco_comandos
 	{ $$ = cria_nodo(funcao,2,$1,$2); 
-        if(pilha == NULL)
+        if(pilha == NULL){
             pilha = inicializa_pilha();
+            empilha(pilha);
+        }
         add_func(pilha, $$);
 	}
 ;
@@ -938,6 +941,12 @@ exp_literal:
 void yyerror (char const *s)
 {
   fprintf (stderr, "linha %d coluna %ld: %s: token invalido: %s\n", get_line_number(), get_col_number()-strlen(yytext)+1, s, yytext);
+}
+
+void erro_semantico (int COD_ERR)
+{
+  fprintf (stderr, "linha coluna : erro semantico: %d\n", COD_ERR);
+
 }
 
 void descompila (void *arvore) {
