@@ -12,10 +12,12 @@ E4:
 3 a 7 nao implementados
 */
 
+#ifndef __tabela__
+#define __tabela__
+
 #ifndef __arvore__
 #include "arvore.h"
 #endif
-
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -90,3 +92,4 @@ int eh_usr(Pilha_Tabelas *pilha, NodoArvore *n);
 //analisa se foram passados argumentos suficientes
 int analisa_args(Pilha_Tabelas *pilha, NodoArvore *n);
 
+#endif

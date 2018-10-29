@@ -37,8 +37,6 @@ Pilha_Tabelas* inicializa_pilha(){
 	Pilha_Tabelas *pilha = (Pilha_Tabelas*)malloc(sizeof(Pilha_Tabelas));
 	pilha->tabelas = NULL;
 	pilha->num_tabelas = 0;
-	//Inicializa ja com a tabela "global":
-	empilha(pilha);
 	return pilha;
 }
 

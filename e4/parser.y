@@ -6,6 +6,8 @@ Vinicius Castro 193026
 %{
 #include <stdio.h>
 #include "lex.yy.h"
+#include "tabela.h"
+#include "arvore.h"
 int i;
 int yylex(void);
 void yyerror (char const *s);
@@ -14,17 +16,14 @@ extern int get_col_number();
 extern void *arvore;
 extern void descompila (void *arvore);
 extern void libera (void *arvore);
-void *pilha;
+Pilha_Tabelas *pilha;
 
 %}
 
 %code requires {
-#ifndef __arvore__
 #include "arvore.h"
-#endif
 #include "tabela.h"
 }
-
 
 %union {
 	struct valor_lexico valor_lexico;
@@ -159,7 +158,8 @@ void *pilha;
 programa:   
   %empty
 	{ $$ = cria_nodo(programa,0); arvore = $$; 
-	//pilha = cria_pilha();
+	  pilha = inicializa_pilha();
+      empilha(pilha);
 	}
 | programa novo_tipo	{ $$ = $1; arvore = $$; adiciona_filho($$,$2); }
 | programa var_global	{ $$ = $1; arvore = $$; adiciona_filho($$,$2); }
