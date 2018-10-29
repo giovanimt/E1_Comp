@@ -1,6 +1,6 @@
 all: bison flex gcc
 
-run: all
+run: all 
 	cp etapa4 tests && \
 	cd tests && \
 	./run_tests.sh

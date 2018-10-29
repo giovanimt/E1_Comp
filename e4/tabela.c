@@ -19,7 +19,7 @@ Vinicius Castro 193026
 
 //Funcoes tabela
 Tabela* cria_tabela(){
-	Tabela *t;
+	Tabela *t = (Tabela*)malloc(sizeof(Tabela));
 	t->simbolos = NULL;
 	t->num_simbolos = 0;
 	return t;
@@ -37,7 +37,7 @@ Pilha_Tabelas* inicializa_pilha(){
 	Pilha_Tabelas *pilha = (Pilha_Tabelas*)malloc(sizeof(Pilha_Tabelas));
 	pilha->tabelas = NULL;
 	pilha->num_tabelas = 0;
-	return pilha;
+    return pilha;
 }
 
 void empilha(Pilha_Tabelas *pilha){

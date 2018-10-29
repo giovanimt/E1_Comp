@@ -16,7 +16,7 @@ extern int get_col_number();
 extern void *arvore;
 extern void descompila (void *arvore);
 extern void libera (void *arvore);
-Pilha_Tabelas *pilha;
+Pilha_Tabelas *pilha = NULL;
 
 %}
 
@@ -156,11 +156,7 @@ Pilha_Tabelas *pilha;
 %%
 
 programa:   
-  %empty
-	{ $$ = cria_nodo(programa,0); arvore = $$; 
-	  pilha = inicializa_pilha();
-      empilha(pilha);
-	}
+  %empty            	{ $$ = cria_nodo(programa,0); arvore = $$; }
 | programa novo_tipo	{ $$ = $1; arvore = $$; adiciona_filho($$,$2); }
 | programa var_global	{ $$ = $1; arvore = $$; adiciona_filho($$,$2); }
 | programa funcao       { $$ = $1; arvore = $$; adiciona_filho($$,$2); }
@@ -314,9 +310,9 @@ var_global:
 funcao:
   cabecalho bloco_comandos
 	{ $$ = cria_nodo(funcao,2,$1,$2); 
-	/*
-		add_func(pilha, $$);
-	*/
+        if(pilha == NULL)
+            pilha = inicializa_pilha();
+        add_func(pilha, $$);
 	}
 ;
 
