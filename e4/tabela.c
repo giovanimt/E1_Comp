@@ -58,15 +58,10 @@ void desempilha(Pilha_Tabelas *pilha){
 
 //Funcoes simbolos
 // declarado: avalia se o simbolo ja foi declarado 0 nao 1 sim, recebe a pilha, o nodo com o nome e o nodo com o tipo
-int declarado(Pilha_Tabelas *pilha, NodoArvore *n1, NodoArvore *n2){
-	char *chave = n1->nodo.valor_lexico.val.string_val;
-	int tipo = TIPO_USR;
-	if(n2){
-		tipo = n2->tipo;
-	}
+int declarado(Pilha_Tabelas *pilha, char *chave){
 	for(int i=0; i < pilha->num_tabelas; i++){
 		for(int j =0; j < pilha->tabelas[i]->num_simbolos; j++){
-			if(strcmp(chave, pilha->tabelas[i]->simbolos[j]->chave) && tipo == pilha->tabelas[i]->simbolos[j]->tipo){
+			if(strcmp(chave, pilha->tabelas[i]->simbolos[j]->chave)){
 				return 1;
 			}
 		}

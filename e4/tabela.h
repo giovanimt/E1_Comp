@@ -65,7 +65,7 @@ void empilha(Pilha_Tabelas *pilha);
 void desempilha(Pilha_Tabelas *pilha);
 
 //Funcoes simbolos
-int declarado(Pilha_Tabelas *pilha, NodoArvore *n1, NodoArvore *n2);
+int declarado(Pilha_Tabelas *pilha, char *chave);
 int declarado_tabela(Pilha_Tabelas *pilha, NodoArvore *n1, NodoArvore *n2);
 void define_tipo(Simbolo *s, NodoArvore*n);
 void tamanho_usr(Pilha_Tabelas *pilha, Simbolo *s, NodoArvore*n);
