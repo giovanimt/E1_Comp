@@ -226,13 +226,7 @@ point:
 /* Declarações de Novos Tipos */
 novo_tipo:
   TK_PR_CLASS TK_IDENTIFICADOR '[' novo_tipo_lista_campos ']' ';'
-	{ $$ = cria_nodo(novo_tipo,3,cria_folha($1),cria_folha($2),$4);
-	
-//	if(declarado(pilha, cria_folha($2), NULL) == 1)
-//		;//erro_semantico(ERR_DECLARED);
-//	add_nt(pilha, $$);
-	
-	}
+	{ $$ = cria_nodo(novo_tipo,3,cria_folha($1),cria_folha($2),$4); }
 ;
 
 novo_tipo_campo:
@@ -488,15 +482,7 @@ var_local:
 	}
 
 | TK_IDENTIFICADOR TK_IDENTIFICADOR
-    { $$ = cria_nodo(var_local,5,NULL,NULL,cria_folha($1),cria_folha($2),NULL); 
-	
-//	if(declarado(pilha,cria_folha($1),NULL) == 0)
-//		;//erro_semantico(ERR_UNDECLARED);
-//	if(declarado_tabela(pilha,cria_folha($2),NULL) == 1)
-//		;//erro_semantico(ERR_DECLARED);
-//	add_vl(pilha, $$);
-	
-	}
+    { $$ = cria_nodo(var_local,5,NULL,NULL,cria_folha($1),cria_folha($2),NULL); }
 
 | TK_PR_STATIC tipo_primario TK_IDENTIFICADOR
     { $$ = cria_nodo(var_local,5,cria_folha($1),NULL,cria_folha($2),cria_folha($3),NULL); 
@@ -517,15 +503,7 @@ var_local:
 	}
 
 | TK_PR_STATIC TK_IDENTIFICADOR TK_IDENTIFICADOR
-    { $$ = cria_nodo(var_local,5,cria_folha($1),NULL,cria_folha($2),cria_folha($3),NULL); 
-	
-//	if(declarado(pilha,cria_folha($2),NULL) == 0)
-//		;//erro_semantico(ERR_UNDECLARED);
-//	if(declarado_tabela(pilha,cria_folha($3),NULL) == 1)
-//		;//erro_semantico(ERR_DECLARED);
-//	add_vl(pilha, $$);
-	
-	}
+    { $$ = cria_nodo(var_local,5,cria_folha($1),NULL,cria_folha($2),cria_folha($3),NULL); }
 
 | TK_PR_CONST tipo_primario TK_IDENTIFICADOR
     { $$ = cria_nodo(var_local,5,NULL,cria_folha($1),cria_folha($2),cria_folha($3),NULL); 
@@ -546,15 +524,7 @@ var_local:
 	}
 
 | TK_PR_CONST TK_IDENTIFICADOR TK_IDENTIFICADOR
-    { $$ = cria_nodo(var_local,5,NULL,cria_folha($1),cria_folha($2),cria_folha($3),NULL);
-	
-//	if(declarado(pilha,cria_folha($2),NULL) == 0)
-//		;//erro_semantico(ERR_UNDECLARED);
-	if(declarado_tabela(pilha,cria_folha($3),NULL) == 1)
-		;//erro_semantico(ERR_DECLARED);
-	add_vl(pilha, $$);
-	
-	}
+    { $$ = cria_nodo(var_local,5,NULL,cria_folha($1),cria_folha($2),cria_folha($3),NULL); }
 
 | TK_PR_STATIC TK_PR_CONST tipo_primario TK_IDENTIFICADOR
     { $$ = cria_nodo(var_local,5,cria_folha($1),cria_folha($2),cria_folha($3),cria_folha($4),NULL); 
@@ -575,15 +545,7 @@ var_local:
 	}
 
 | TK_PR_STATIC TK_PR_CONST TK_IDENTIFICADOR TK_IDENTIFICADOR
-    { $$ = cria_nodo(var_local,5,cria_folha($1),cria_folha($2),cria_folha($3),cria_folha($4),NULL); 
-	
-//	if(declarado(pilha,cria_folha($3),NULL) == 0)
-//		;//erro_semantico(ERR_UNDECLARED);
-	if(declarado_tabela(pilha,cria_folha($4),NULL) == 1)
-		;//erro_semantico(ERR_DECLARED);
-	add_vl(pilha, $$);
-	
-	}
+    { $$ = cria_nodo(var_local,5,cria_folha($1),cria_folha($2),cria_folha($3),cria_folha($4),NULL); }
 ;
 
 var_local_inic:
@@ -618,40 +580,11 @@ atribuicao:
 	}
 
 | TK_IDENTIFICADOR '[' expressao ']' '=' expressao 
-    { $$ = cria_nodo(atribuicao,4,cria_folha($1), $3, NULL,$6); 
-	
-	if(declarado_atr(pilha,cria_folha($1)) == 0)
-		;//erro_semantico(ERR_UNDECLARED);
-	if(eh_vetor(pilha,cria_folha($1)) == 0)
-		;//erro_semantico(ERR_VECTOR);
-	if(eh_usr(pilha,cria_folha($1)) == 1)
-		;//erro_semantico(ERR_USER);
-	
-}
-
+    { $$ = cria_nodo(atribuicao,4,cria_folha($1), $3, NULL,$6); }
 | TK_IDENTIFICADOR '$' TK_IDENTIFICADOR '=' expressao
-    { $$ = cria_nodo(atribuicao,4,cria_folha($1), NULL, cria_folha($3), $5);
-	
-	if(declarado_atr(pilha,cria_folha($1)) == 0)
-		;//erro_semantico(ERR_UNDECLARED);
-	if(eh_vetor(pilha,cria_folha($1)) == 1)
-		;//erro_semantico(ERR_USER);
-	if(existe_campo(pilha,cria_folha($1),cria_folha($3)) == 0)
-		;//erro_semantico(ERR_USER);
-	
-}
-
+    { $$ = cria_nodo(atribuicao,4,cria_folha($1), NULL, cria_folha($3), $5); }
 | TK_IDENTIFICADOR '[' expressao ']' '$' TK_IDENTIFICADOR '=' expressao
-    { $$ = cria_nodo(atribuicao,4,cria_folha($1), $3, cria_folha($6), $8); 
-	
-	if(declarado_atr(pilha,cria_folha($1)) == 0)
-		;//erro_semantico(ERR_UNDECLARED);
-	if(eh_vetor(pilha,cria_folha($1)) == 0)
-		;//erro_semantico(ERR_USER);
-	if(existe_campo(pilha,cria_folha($1),cria_folha($6)) == 0)
-		;//erro_semantico(ERR_USER);
-	
-}
+    { $$ = cria_nodo(atribuicao,4,cria_folha($1), $3, cria_folha($6), $8); }
 ;
 
 
@@ -883,7 +816,7 @@ lista_for:
 
 constr_sel:
   TK_PR_SWITCH '(' expressao ')' bloco_comandos
-{ $$ = cria_nodo(constr_sel,3,cria_folha($1),$3,$5); }
+    { $$ = cria_nodo(constr_sel,3,cria_folha($1),$3,$5); }
 ;
 
 
@@ -891,12 +824,12 @@ constr_sel:
 /// Comandos com Pipes
 com_pipes:
   cham_func pipes cham_func
-{ $$ = cria_nodo(com_pipes,3,$1,cria_folha($2),$3);}
+    { $$ = cria_nodo(com_pipes,3,$1,cria_folha($2),$3);}
 | com_pipes pipes cham_func
-{ $$ = $1;
-adiciona_filho($$,cria_folha($2));
-adiciona_filho($$,$3);
-}
+    { $$ = $1;
+        adiciona_filho($$,cria_folha($2));
+        adiciona_filho($$,$3);
+    }
 ;
 
 
@@ -946,40 +879,11 @@ exp_identificador:
 	}
 
 | TK_IDENTIFICADOR '[' expressao ']' 
-    { $$ = cria_nodo(exp_identificador,3,cria_folha($1),$3,NULL); 
-	
-	if(declarado_atr(pilha,cria_folha($1)) == 0)
-		;//erro_semantico(ERR_UNDECLARED);
-	if(eh_vetor(pilha,cria_folha($1)) == 0)
-		;//erro_semantico(ERR_VECTOR);
-	if(eh_usr(pilha,cria_folha($1)) == 1)
-		;//erro_semantico(ERR_USER);
-	
-	}
-
+    { $$ = cria_nodo(exp_identificador,3,cria_folha($1),$3,NULL); }
 | TK_IDENTIFICADOR '$' TK_IDENTIFICADOR 
-    { $$ = cria_nodo(exp_identificador,3,cria_folha($1),NULL,cria_folha($3)); 
-	
-	if(declarado_atr(pilha,cria_folha($1)) == 0)
-		;//erro_semantico(ERR_UNDECLARED);
-	if(eh_vetor(pilha,cria_folha($1)) == 1)
-		;//erro_semantico(ERR_VARIABLE);
-	if(existe_campo(pilha,cria_folha($1),cria_folha($3)) == 0)
-		;//erro_semantico(ERR_USER);
-	
-	}
-
+    { $$ = cria_nodo(exp_identificador,3,cria_folha($1),NULL,cria_folha($3)); }
 | TK_IDENTIFICADOR '[' expressao ']' '$' TK_IDENTIFICADOR
-    { $$ = cria_nodo(exp_identificador,3,cria_folha($1),$3,cria_folha($6)); 
-	
-	if(declarado_atr(pilha,cria_folha($1)) == 0)
-		;//erro_semantico(ERR_UNDECLARED);
-	if(eh_vetor(pilha,cria_folha($1)) == 0)
-		;//erro_semantico(ERR_VECTOR);
-	if(existe_campo(pilha,cria_folha($1),cria_folha($6)) == 0)
-		;//erro_semantico(ERR_USER);
-	
-	}
+    { $$ = cria_nodo(exp_identificador,3,cria_folha($1),$3,cria_folha($6));	}
 ;
 
 exp_literal:
