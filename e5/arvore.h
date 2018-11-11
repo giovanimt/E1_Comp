@@ -107,6 +107,7 @@ typedef struct NodoArvore {
 	int tipo; //TODO: todos os nós da Árvore Sintática Abstrata (AST), gerada na etapa anterior, terão agora um campo que indica o seu tipo
 	int num_filhos;
 	struct NodoArvore **filhos;
+	struct iloc_list code;
 } NodoArvore;
 
 NodoArvore* cria_nodo(enum NaoTerminalType type, int num_filhos, ...);

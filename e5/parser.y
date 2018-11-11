@@ -50,7 +50,7 @@ Pilha_Tabelas *pilha = NULL;
 %code requires {
 #include "arvore.h"
 #include "tabela.h"
-#include "codigo.c"
+#include "codigo.h"
 }
 
 %union {
