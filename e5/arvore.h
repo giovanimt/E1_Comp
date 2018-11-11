@@ -10,7 +10,6 @@ Vinicius Castro 193026
 #include <string.h>
 #include <stdlib.h>
 #include <stdarg.h>
-#include "codigo.h"
 
 #define TIPO_INT 	101
 #define TIPO_FLOAT 	102
@@ -18,6 +17,20 @@ Vinicius Castro 193026
 #define TIPO_BOOL 	104
 #define TIPO_STRING 	105
 #define TIPO_USR	106
+
+// Instrucao ILOC
+typedef struct iloc {
+    char *opcode;
+    char *op1;
+    char *op2;
+    char *op3;
+}ILOC;
+
+// Lista de instrucoes. Aponta para a instrucao anterior
+typedef struct iloc_list {
+    ILOC iloc;
+    ILOC *prev;     
+}iloc_list;
 
 union Literal {
 	int bool_val;
@@ -107,7 +120,7 @@ typedef struct NodoArvore {
 	int tipo; //TODO: todos os nós da Árvore Sintática Abstrata (AST), gerada na etapa anterior, terão agora um campo que indica o seu tipo
 	int num_filhos;
 	struct NodoArvore **filhos;
-	struct iloc_list code;
+	struct iloc_list *code;
 } NodoArvore;
 
 NodoArvore* cria_nodo(enum NaoTerminalType type, int num_filhos, ...);

@@ -186,7 +186,9 @@ Pilha_Tabelas *pilha = NULL;
 %%
 
 programa:   
-  %empty            	{ $$ = cria_nodo(programa,0); arvore = $$; }
+  %empty            	{ $$ = cria_nodo(programa,0); arvore = $$; 
+			gera_codigo_inicio_programa(1024,1024,512);
+			}
 | programa novo_tipo	{ $$ = $1; arvore = $$; adiciona_filho($$,$2); }
 | programa var_global	{ $$ = $1; arvore = $$; adiciona_filho($$,$2); }
 | programa funcao       { $$ = $1; arvore = $$; adiciona_filho($$,$2); }
@@ -260,7 +262,7 @@ var_global:
     	//if(declarado(pilha,$1.val.string_val) == 1)
 		//    erro_semantico(ERR_DECLARED,$1);
     	add_vg(pilha, $$);
-	    gera_codigo_vg($$);
+	gera_codigo_vg($$);
 	}
 
 | TK_IDENTIFICADOR TK_IDENTIFICADOR ';'	
@@ -471,19 +473,21 @@ var_local:
   tipo_primario TK_IDENTIFICADOR
     { $$ = cria_nodo(var_local,5,NULL,NULL,cria_folha($1),cria_folha($2),NULL); 
 	
-	if(declarado_tabela(pilha, cria_folha($2), cria_folha($1)) == 1)
-		;//erro_semantico(ERR_DECLARED);
+	/*if(declarado_tabela(pilha, cria_folha($2), cria_folha($1)) == 1)
+		;//erro_semantico(ERR_DECLARED);*/
 	add_vl(pilha, $$);
 	
+	//TODO E5: gera_codigo_vl($$);
 	}
 
 | tipo_primario TK_IDENTIFICADOR var_local_inic
     { $$ = cria_nodo(var_local,4,NULL,NULL,cria_folha($1),cria_folha($2)); adiciona_netos($$,$3); 
 	
-	if(declarado_tabela(pilha, cria_folha($2), cria_folha($1)) == 1)
-		;//erro_semantico(ERR_DECLARED);
+	/*if(declarado_tabela(pilha, cria_folha($2), cria_folha($1)) == 1)
+		;//erro_semantico(ERR_DECLARED);*/
 	add_vl(pilha, $$);
 	
+	//TODO E5: gera_codigo_vl($$);
 	}
 
 | TK_IDENTIFICADOR TK_IDENTIFICADOR
@@ -574,13 +578,16 @@ atribuicao:
             pilha = inicializa_pilha();
             empilha(pilha);
         }
-    	if(declarado(pilha,$1.val.string_val) == 0)
+/*    	if(declarado(pilha,$1.val.string_val) == 0)
     	    erro_semantico(ERR_UNDECLARED,$1);
 
-//    if(eh_vetor(pilha,cria_folha($1)) == 1)
-//		;//erro_semantico(ERR_VARIABLE);
-//	if(eh_usr(pilha,cria_folha($1)) == 1)
-//		;//erro_semantico(ERR_USER);
+        if(eh_vetor(pilha,cria_folha($1)) == 1)
+		;//erro_semantico(ERR_VARIABLE);
+	if(eh_usr(pilha,cria_folha($1)) == 1)
+		;//erro_semantico(ERR_USER);
+*/
+
+	//TODO E5: gera_codigo_atr($$);
 	
 	}
 
@@ -777,6 +784,8 @@ constr_cond:
 { $$ = cria_nodo(constr_cond,4,cria_folha($1),$3,cria_folha($5),$6,NULL); 
   if($7 != NULL)
     $$->filhos[4] = $7;
+
+	//TODO E5: gera_codigo_if($$);
 }
 ;
 
@@ -793,9 +802,13 @@ constr_iter:
 | TK_PR_FOR '(' lista_for ':' expressao ':' lista_for ')' bloco_comandos
 { $$ = cria_nodo(constr_for,5,cria_folha($1),$3,$5,$7,$9); }
 | TK_PR_WHILE '(' expressao ')' TK_PR_DO bloco_comandos
-{ $$ = cria_nodo(constr_while,4,cria_folha($1),$3,cria_folha($5),$6); }
+{ $$ = cria_nodo(constr_while,4,cria_folha($1),$3,cria_folha($5),$6); 
+//TODO E5: gera_codigo_while($$);
+}
 | TK_PR_DO bloco_comandos TK_PR_WHILE '(' expressao ')'
-{ $$ = cria_nodo(constr_do,4,cria_folha($1),$2,cria_folha($3),$5); }
+{ $$ = cria_nodo(constr_do,4,cria_folha($1),$2,cria_folha($3),$5); 
+//TODO E5: gera_codigo_do($$);
+}
 ;
 
 lista_foreach:

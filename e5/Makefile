@@ -1,9 +1,5 @@
 all: bison flex gcc
 
-run: all 
-	cp etapa5 tests && \
-	cd tests && \
-	./run_tests.sh
 bison:
 	bison -d parser.y -r all
 flex:

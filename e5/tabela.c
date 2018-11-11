@@ -139,7 +139,7 @@ void tamanho_vetor(Simbolo *s, NodoArvore*n){
 	s->tamanho = s->tamanho * n->nodo.valor_lexico.val.int_val;
 }
 
-
+/** DESNECESSARIO P/ E5
 //Funcao Novo Tipo
 void add_nt(Pilha_Tabelas *pilha, NodoArvore *n){
 	//inicializa simbolo
@@ -224,7 +224,7 @@ void add_nt(Pilha_Tabelas *pilha, NodoArvore *n){
 		//adiciona campo na tabela
 		add_simbolo_tabela(nt->Campos[i], pilha->tabelas[pilha->num_tabelas - 1]);
 	}
-}
+}*/
 
 
 //Funcao Variavel Global
