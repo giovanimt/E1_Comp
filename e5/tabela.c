@@ -61,7 +61,7 @@ void desempilha(Pilha_Tabelas *pilha){
 int declarado(Pilha_Tabelas *pilha, char *chave){
 	for(int i=0; i < pilha->num_tabelas; i++){
 		for(int j =0; j < pilha->tabelas[i]->num_simbolos; j++){
-			if(strcmp(chave, pilha->tabelas[i]->simbolos[j]->chave)){
+			if(!strcmp(chave, pilha->tabelas[i]->simbolos[j]->chave)){
 				return 1;
 			}
 		}
@@ -78,7 +78,7 @@ int declarado_tabela(Pilha_Tabelas *pilha, NodoArvore *n1, NodoArvore *n2){
 	}
 	int tabela_atual = pilha->num_tabelas -1;
 	for(int j =0; j < pilha->tabelas[tabela_atual]->num_simbolos; j++){
-		if(strcmp(chave, pilha->tabelas[tabela_atual]->simbolos[j]->chave) && tipo == pilha->tabelas[tabela_atual]->simbolos[j]->tipo){
+		if(!strcmp(chave, pilha->tabelas[tabela_atual]->simbolos[j]->chave) && tipo == pilha->tabelas[tabela_atual]->simbolos[j]->tipo){
 			return 1;
 		}
 	}
@@ -254,7 +254,7 @@ void add_vg(Pilha_Tabelas *pilha, NodoArvore *n){
 	}else{
 		vg->eh_static = 1;
 	}
-
+/*
 	//pega o quarto filho do nodo...
 	NodoArvore *f4 = (NodoArvore*)n->filhos[3];
 	//...para definir o tipo e tamanho
@@ -276,10 +276,14 @@ void add_vg(Pilha_Tabelas *pilha, NodoArvore *n){
 	}else{
 		vg->var_ou_vet = 1;
 	}
-	
+*/	
 	//E5: considerar somente INT
+	vg->var_ou_vet = 1;
+	vg->Campos = NULL;
+	vg->num_campos = 0;
+	vg->tipo = TIPO_INT;
 	vg->tamanho = 4;
-	vg->deslocamento = vg->tamanho*pilha->num_tabelas;
+	vg->deslocamento = vg->tamanho*pilha->tabelas[pilha->num_tabelas - 1]->num_simbolos;
 	
 	//adiciona simbolo na tabela
 	add_simbolo_tabela(vg, pilha->tabelas[pilha->num_tabelas - 1]);
@@ -437,6 +441,14 @@ void add_vl(Pilha_Tabelas *pilha, NodoArvore *n){
 	vl->line = f4->nodo.valor_lexico.line;
 	vl->col = f4->nodo.valor_lexico.col;
 
+	//E5: considerar somente INT
+	vl->var_ou_vet = 1;
+	vl->Campos = NULL;
+	vl->num_campos = 0;
+	vl->tipo = TIPO_INT;
+	vl->tamanho = 4;
+	vl->deslocamento = vl->tamanho*pilha->tabelas[pilha->num_tabelas - 1]->num_simbolos;
+
 	//adiciona simbolo na tabela
 	add_simbolo_tabela(vl, pilha->tabelas[pilha->num_tabelas - 1]);
 }
@@ -527,4 +539,25 @@ int analisa_args(Pilha_Tabelas *pilha, NodoArvore *n){
 	}
 	return 1;
 }
-	
+
+
+//E5: procura simbolos e os retorna
+Simbolo* search_sim_stack(Pilha_Tabelas *pilha, char *chave){
+	for(int i=0; i < pilha->num_tabelas; i++){
+		for(int j =0; j < pilha->tabelas[i]->num_simbolos; j++){
+			if(!strcmp(chave, pilha->tabelas[i]->simbolos[j]->chave)){
+				return pilha->tabelas[i]->simbolos[j];
+			}
+		}
+	}
+	return NULL;
+}
+
+Simbolo* search_sim_table(Pilha_Tabelas *pilha, char *chave){
+	for(int j =0; j < pilha->tabelas[pilha->num_tabelas - 1]->num_simbolos; j++){
+		if(!strcmp(chave, pilha->tabelas[pilha->num_tabelas - 1]->simbolos[j]->chave)){
+			return pilha->tabelas[pilha->num_tabelas - 1]->simbolos[j];
+		}
+	}
+	return NULL;
+}

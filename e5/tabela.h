@@ -93,4 +93,9 @@ int eh_usr(Pilha_Tabelas *pilha, NodoArvore *n);
 //analisa se foram passados argumentos suficientes
 int analisa_args(Pilha_Tabelas *pilha, NodoArvore *n);
 
+//E5: procura simbolos e os retorna
+Simbolo* search_sim_stack(Pilha_Tabelas *pilha, char *chave);
+Simbolo* search_sim_table(Pilha_Tabelas *pilha, char *chave);
+
+
 #endif

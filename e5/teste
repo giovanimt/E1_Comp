@@ -1,1 +1,7 @@
+y int;
+z int;
 x int;
+int f(){
+x = x-7;
+x = 3+y;
+}

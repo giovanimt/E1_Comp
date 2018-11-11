@@ -587,7 +587,8 @@ atribuicao:
 		;//erro_semantico(ERR_USER);
 */
 
-	//TODO E5: gera_codigo_atr($$);
+	//TODO E5: 
+	gera_codigo_atr(pilha, $$);
 	
 	}
 
@@ -951,9 +952,9 @@ void descompila (void *arvore) {
 				break;
 			case(BOOL):
 				if(a->nodo.valor_lexico.val.bool_val == 0)
-					printf(" true ",a->nodo.valor_lexico.val.bool_val);
+					printf(" true ");
 				else	
-					printf(" false ",a->nodo.valor_lexico.val.bool_val);
+					printf(" false ");
 				break;							
 			default:
 				printf(" %s ",a->nodo.valor_lexico.val.string_val);

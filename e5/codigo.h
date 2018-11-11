@@ -6,6 +6,7 @@ Vinicius Castro 193026
 #ifndef __codigo__
 #define __codigo__
 #include "arvore.h"
+#include "tabela.h"
 
 //Função que gera o nome de um rótulo
 char* gera_rotulo();
@@ -15,6 +16,7 @@ char* gera_registrador();
 void gera_codigo_inicio_programa(int rfp, int rsp, int rbss);
 //Gera codigo de declaracao de var_global
 void gera_codigo_vg(NodoArvore *n);
+void gera_codigo_atr(Pilha_Tabelas *pilha, NodoArvore *n);
 //Inicializa atributo code de no da AST
 void gera_codigo_init(NodoArvore *n);
 
