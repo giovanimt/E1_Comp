@@ -4,6 +4,8 @@
 #include <stdarg.h>
 #include "codigo.h"
 
+
+
 int num_rotulos = 0;
 int num_regs = 0;
 
