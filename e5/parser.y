@@ -8,6 +8,7 @@ Vinicius Castro 193026
 #include "lex.yy.h"
 #include "tabela.h"
 #include "arvore.h"
+#include "codigo.h"
 int i;
 int yylex(void);
 void yyerror (char const *s);
@@ -249,14 +250,17 @@ novo_tipo_lista_campos:
 var_global:
   TK_IDENTIFICADOR tipo_primario ';' 
 	{ $$ = cria_nodo(var_global,4,cria_folha($1),NULL,NULL,cria_folha($2)); 
+        
+        //E4: pilha
         if(pilha == NULL){
             pilha = inicializa_pilha();
             empilha(pilha);
         }
-    	if(declarado(pilha,$1.val.string_val) == 1)
-		    erro_semantico(ERR_DECLARED,$1);
-//	add_vg(pilha, $$);
-	
+        //E5: entradas estarao semanticamente corretas
+    	//if(declarado(pilha,$1.val.string_val) == 1)
+		//    erro_semantico(ERR_DECLARED,$1);
+    	add_vg(pilha, $$);
+	    gera_codigo_vg($$);
 	}
 
 | TK_IDENTIFICADOR TK_IDENTIFICADOR ';'	

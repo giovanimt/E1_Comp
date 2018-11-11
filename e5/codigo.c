@@ -22,3 +22,19 @@ char* gera_registrador(){
 	num_regs++;		
 	return nome_reg;
 }
+
+//Gera codigo de declaracao de var_global
+void gera_codigo_vg(NodoArvore *n){
+    gera_codigo_init(n);
+
+
+}
+
+//Inicializa atributo code de no da AST
+void gera_codigo_init(NodoArvore *n){
+    n->code.prev = NULL;
+    n->code.iloc.opcode = NULL;
+    n->code.iloc.op1 = NULL;
+    n->code.iloc.op2 = NULL;
+    n->code.iloc.op3 = NULL;
+}

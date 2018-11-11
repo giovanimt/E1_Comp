@@ -277,6 +277,10 @@ void add_vg(Pilha_Tabelas *pilha, NodoArvore *n){
 		vg->var_ou_vet = 1;
 	}
 	
+	//E5: considerar somente INT
+	vg->tamanho = 4;
+	vg->deslocamento = vg->tamanho*pilha->num_tabelas;
+	
 	//adiciona simbolo na tabela
 	add_simbolo_tabela(vg, pilha->tabelas[pilha->num_tabelas - 1]);
 }
@@ -477,7 +481,7 @@ int existe_campo(Pilha_Tabelas *pilha, NodoArvore *n1, NodoArvore *n2){
 	for(int i=0; i < pilha->num_tabelas; i++){
 		for(int j =0; j < pilha->tabelas[i]->num_simbolos; j++){
 			if(strcmp(chave, pilha->tabelas[i]->simbolos[j]->chave)){
-				camp = pilha->tabelas[i]->simbolos[j]->Campos;
+				camp->Campos = pilha->tabelas[i]->simbolos[j]->Campos;
 				num_campos = pilha->tabelas[i]->simbolos[j]->num_campos;
 			}
 		}
@@ -511,7 +515,7 @@ int analisa_args(Pilha_Tabelas *pilha, NodoArvore *n){
 	for(int i=0; i < pilha->num_tabelas; i++){
 		for(int j =0; j < pilha->tabelas[i]->num_simbolos; j++){
 			if(strcmp(chave, pilha->tabelas[i]->simbolos[j]->chave)){
-				arg = pilha->tabelas[i]->simbolos[j]->Argumentos;
+				arg->Argumentos = pilha->tabelas[i]->simbolos[j]->Argumentos;
 				num_args = pilha->tabelas[i]->simbolos[j]->num_argumentos;
 			}
 		}

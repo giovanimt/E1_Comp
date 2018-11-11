@@ -42,6 +42,7 @@ typedef struct Simbolo {
 	struct Simbolo **Campos; //campos do tipo usuario caso tipo==USR
 	int num_campos;
 	///TODO:demais informações do valor do token pelo yylval (veja E3)
+	int deslocamento; // E5: deslocamento em bytes em relaçãõ ao endereço base da pilha/seg dados
 } Simbolo;
 
 typedef struct Tabela {

@@ -1,4 +1,1 @@
-loadI 10 => r1
-loadI 5 => r2
-add r1,r2 => r3
-store r3 => rbss
+x int;

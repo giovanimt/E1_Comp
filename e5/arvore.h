@@ -6,11 +6,11 @@ Vinicius Castro 193026
 #ifndef __arvore__
 #define __arvore__
 
-
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include "codigo.h"
 
 #define TIPO_INT 	101
 #define TIPO_FLOAT 	102
