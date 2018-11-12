@@ -1,3 +1,8 @@
+/*
+Giovani Tirello 252741
+Vinicius Castro 193026
+*/
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -101,6 +106,7 @@ void gera_codigo_atr(Pilha_Tabelas *pilha, NodoArvore *n){
     // Gera código pro store e apenda no atributo code da AST
     printf("addI %s, %d => %s\n", vg_ou_vl, s->deslocamento, reg_var);
 	printf("store reg_expressao_foi_carregada => %s\n", reg_var);
+	//TODO: trocar reg_expressao_foi_carregada pelo registrador vindo do op
 	char *op_addI = "addI";
 	char *op_store = "store";
 	char valor[50];
@@ -207,7 +213,7 @@ void gera_codigo_atr(Pilha_Tabelas *pilha, NodoArvore *n){
 
 
 
-	/*TODO: para os casos:
+	/* para os casos:
 	exp_literal
 	exp_identificador
 

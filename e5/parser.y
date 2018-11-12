@@ -825,8 +825,6 @@ constr_cond:
 { $$ = cria_nodo(constr_cond,4,cria_folha($1),$3,cria_folha($5),$6,NULL); 
   if($7 != NULL)
     $$->filhos[4] = $7;
-
-	//TODO E5: gera_codigo_if($$);
 }
 ;
 
@@ -844,11 +842,9 @@ constr_iter:
 { $$ = cria_nodo(constr_for,5,cria_folha($1),$3,$5,$7,$9); }
 | TK_PR_WHILE '(' expressao ')' TK_PR_DO bloco_comandos
 { $$ = cria_nodo(constr_while,4,cria_folha($1),$3,cria_folha($5),$6); 
-//TODO E5: gera_codigo_while($$);
 }
 | TK_PR_DO bloco_comandos TK_PR_WHILE '(' expressao ')'
 { $$ = cria_nodo(constr_do,4,cria_folha($1),$2,cria_folha($3),$5); 
-//TODO E5: gera_codigo_do($$);
 }
 ;
 
@@ -928,7 +924,7 @@ expressao:
 	//TODO: iloc_list_append_code($1, $$);
 	//TODO: iloc_list_append_code($2, $$);
 	/*$$->code->op1 = */ char *reg_aux_e = gera_registrador();
-	/*$$->code->iloc->opcode = */ printf("addI %d, %d => %s\n",$1->valor, $3->valor, reg_aux_e); //TODO:não eh pra ser $1-> valor, $3->valor e sim os registradores carregados
+	/*$$->code->iloc->opcode = */ printf("addI %d, %d => %s\n",$1->valor, $3->valor, reg_aux_e); //TODO:não eh pra ser $1-> valor, $3->valor e sim os registradores carregados (pegar no op)
 }
 | expressao '-' expressao	{ $$ = cria_nodo(exp_binaria,3, $1, cria_folha($2), $3); }
 | expressao '*' expressao	{ $$ = cria_nodo(exp_binaria,3, $1, cria_folha($2), $3); }
@@ -969,7 +965,7 @@ exp_identificador:
 		    s = search_sim_stack(pilha, cria_folha($1)->nodo.valor_lexico.val.string_val);
 		    vg_ou_vl = "rbss";
 	    }
-	    /*$$->code->op1 = */ char *reg_aux_e1 = gera_registrador();
+	    /*TODO:*$$->code->op1 = */ char *reg_aux_e1 = gera_registrador();
 	    /*$$->code->opcode = */ printf("loadAI %s, %d => %s\n", vg_ou_vl, s->deslocamento, reg_aux_e1);
 	    $$->valor = s->valor;
 	}
@@ -988,6 +984,8 @@ exp_literal:
         $$ = cria_nodo(exp_literal,1,cria_folha($1));
 	    $$->valor =  $1.val.int_val;
 	    iloc_list_init($$);
+	    /*TODO:$$->code->op1 = */ char *reg_aux_e1 = gera_registrador();
+	    /*TODO:$$->code->opcode = */ printf("loadI %d => %s\n", $$->valor, reg_aux_e1);
     }
 ;
 
