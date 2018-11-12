@@ -262,7 +262,7 @@ var_global:
     	//if(declarado(pilha,$1.val.string_val) == 1)
 		//    erro_semantico(ERR_DECLARED,$1);
     	add_vg(pilha, $$);
-	gera_codigo_vg($$);
+	    gera_codigo_vg($$);
 	}
 
 | TK_IDENTIFICADOR TK_IDENTIFICADOR ';'	
@@ -579,11 +579,24 @@ var_local_inic:
 /*Atribuicao*/
 atribuicao:
   TK_IDENTIFICADOR '=' expressao
-    { $$ = cria_nodo(atribuicao,4,cria_folha($1), NULL, NULL,$3); 
+    { $$ = cria_nodo(atribuicao,4,cria_folha($1), NULL, NULL,$3);
+    
+        //Escopo global não inicializado na pilha 
         if(pilha == NULL){
             pilha = inicializa_pilha();
             empilha(pilha);
         }
+        
+        //Escopo local não inicializado na pilha
+        if(pilha->num_tabelas == 1)
+            empilha(pilha);  
+            
+        // Copia o valor do nodo expressao para o valor do nodo atribuicao          
+        $$->valor = $3->valor;
+        
+        
+         
+       
 /*    	if(declarado(pilha,$1.val.string_val) == 0)
     	    erro_semantico(ERR_UNDECLARED,$1);
 
@@ -593,8 +606,8 @@ atribuicao:
 		;//erro_semantico(ERR_USER);
 */
 
-	//TODO E5: 
-	gera_codigo_atr(pilha, $$);
+	    //TODO E5: 
+	    gera_codigo_atr(pilha, $$);
 	
 	}
 
@@ -861,8 +874,19 @@ com_pipes:
 /* Expressoes */
 
 expressao:
-  exp_literal	{ $$ = cria_nodo(exp_literal,0); adiciona_netos($$,$1); }
-| exp_identificador { $$ = cria_nodo(exp_identificador,0); adiciona_netos($$,$1); }
+  exp_literal	
+  { $$ = cria_nodo(exp_literal,0); adiciona_netos($$,$1); 
+    $$->valor = $1->nodo.valor_lexico.val.int_val;
+  }
+  
+| exp_identificador 
+    { $$ = cria_nodo(exp_identificador,0); adiciona_netos($$,$1); 
+        
+
+
+
+    }
+    
 | '(' expressao ')' { $$ = cria_nodo(exp_parenteses,0); adiciona_filho($$,$2); }
 | com_pipes { $$ = $1; }
 | cham_func { $$ = $1; }
@@ -893,13 +917,29 @@ expressao:
 exp_identificador:
   TK_IDENTIFICADOR  
     { $$ = cria_nodo(exp_identificador,3,cria_folha($1),NULL,NULL); 
-	
+
+    /* 	
 	if(declarado_atr(pilha,cria_folha($1)) == 0)
 		;//erro_semantico(ERR_UNDECLARED);
 	if(eh_vetor(pilha,cria_folha($1)) == 1)
 		;//erro_semantico(ERR_VECTOR);
 	if(eh_usr(pilha,cria_folha($1)) == 1)
 		;//erro_semantico(ERR_USER);
+	*/
+	
+	    //Escopo global não inicializado na pilha 
+        if(pilha == NULL){
+            pilha = inicializa_pilha();
+            empilha(pilha);
+        }
+        
+        //Escopo local não inicializado na pilha
+        if(pilha->num_tabelas == 1)
+            empilha(pilha);  
+	
+	    //recupera simbolo pilha ou stack
+	
+	
 	
 	}
 

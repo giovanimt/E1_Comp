@@ -43,6 +43,7 @@ typedef struct Simbolo {
 	int num_campos;
 	///TODO:demais informações do valor do token pelo yylval (veja E3)
 	int deslocamento; // E5: deslocamento em bytes em relaçãõ ao endereço base da pilha/seg dados
+	int valor;
 } Simbolo;
 
 typedef struct Tabela {

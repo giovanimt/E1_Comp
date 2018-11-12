@@ -32,7 +32,7 @@ void gera_codigo_inicio_programa(int rfp, int rsp, int rbss){
 
 //Gera codigo de declaracao de var_global
 void gera_codigo_vg(NodoArvore *n){
-    printf("nop\n");
+    n->valor = 0;
 }
 
 //Gera codigo de declaracao de var_local
@@ -78,6 +78,17 @@ void gera_codigo_vl(Pilha_Tabelas *pilha, NodoArvore *n){
 
 //Gera codigo de atribuicao TK_IDENTIFICADOR '=' expressao
 void gera_codigo_atr(Pilha_Tabelas *pilha, NodoArvore *n){
+    // Inicializa atributo code da AST
+    iloc_list_init(n);
+
+    // Apendar o codigo da expressao ao codigo da atribuicao (nova funcao para apendar o codigo)
+    
+    // Recupera simbolo da pilha e calcula deslocamentos
+    
+    // Gera código pro store e apenda no atributo code da AST
+
+
+    /* Vinicius: a geracao de codigo da atribuicao assume que o código e o valor da expressao estão disponiveis no no da AST; é necessário apendar o código da  expressao no codigo da atribuicao e por ultimo gerar um store usando o valor ja disponivel no nodo da AST da  expressao (novo campo valor)
 	//TODO: conferir se a equacao para achar o deslocamento em vg e vl no tabela.c estao corretos
 	printf("\nAtribuicao\n");
 	char *reg_var = gera_registrador();
@@ -185,6 +196,7 @@ void gera_codigo_atr(Pilha_Tabelas *pilha, NodoArvore *n){
 	expressao TK_OC_NE expressao
 	expressao '<' expressao
 	expressao '>' expressao
+
 	*/
 }
 
@@ -202,10 +214,22 @@ void gera_codigo_do(NodoArvore *n){
 
 
 //Inicializa atributo code de no da AST
-void gera_codigo_init(NodoArvore *n){
-    n->code->prev = NULL;
-    n->code->iloc.opcode = NULL;
-    n->code->iloc.op1 = NULL;
-    n->code->iloc.op2 = NULL;
-    n->code->iloc.op3 = NULL;
+void iloc_list_init(NodoArvore *n){
+    ILOC *i = (ILOC*)malloc(sizeof(ILOC));
+    i->opcode = NULL;
+    i->op1 = NULL;
+    i->op2 = NULL;
+    i->op3 = NULL;
+    n->code.iloc = i;
+    n->code.size = 0;
+    n->code.prev = NULL;
+}
+
+void iloc_list_append_code(NodoArvore *origem, NodoArvore *destino){
+    for(int i = 0; i<origem->code.size; i++)
+    {
+        
+    
+    
+    }
 }

@@ -21,6 +21,8 @@ void gera_codigo_vl(Pilha_Tabelas *pilha, NodoArvore *n);
 //Gera codigo para atribuicao
 void gera_codigo_atr(Pilha_Tabelas *pilha, NodoArvore *n);
 //Inicializa atributo code de no da AST
-void gera_codigo_init(NodoArvore *n);
+void iloc_list_init(NodoArvore *n);
+//Apenda o codigo do no origem da AST no codigo do no destino
+void iloc_list_append_code(NodoArvore *origem, NodoArvore *destino);
 
 #endif
