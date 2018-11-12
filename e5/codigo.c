@@ -74,33 +74,41 @@ void gera_codigo_vl(Pilha_Tabelas *pilha, NodoArvore *n){
 //Gera codigo de atribuicao TK_IDENTIFICADOR '=' expressao
 void gera_codigo_atr(Pilha_Tabelas *pilha, NodoArvore *n){
     // Inicializa atributo code da AST
-    //iloc_list_init(n);
+    iloc_list_init(n);
 
     // Apendar o codigo da expressao ao codigo da atribuicao (nova funcao para apendar o codigo)
-	//printf("%d\n", n->filhos[3]->filhos[0]->valor);
-	//printf("%d", n->filhos[3]->filhos[0]->valor);
-	//iloc_list_append_code(NodoArvore *origem, NodoArvore *destino);
+    // Do parser: $$ = cria_nodo(atribuicao,4,cria_folha($1), NULL, NULL,$3);
+	iloc_list_append_code(n->filhos[3], n);
     
     // Recupera simbolo da pilha e calcula deslocamentos
 	char *reg_var = gera_registrador();
 	char *nome_var = n->filhos[0]->nodo.valor_lexico.val.string_val;
+    char* vg_ou_vl;
+	
 	Simbolo *s = search_sim_table(pilha, nome_var);
-	char* vg_ou_vl = "rfp";
-	//se nao achou eh VG
 	if(s == NULL){
+	    //o simbolo esta no escopo global
 		s = search_sim_stack(pilha, nome_var);
 		vg_ou_vl = "rbss";
 	}
-	if(s){	//se o simbolo estava na pilha
-		//salva o local da variavel na no reg_var
-		printf("addI %s, %d => %s\n", vg_ou_vl, s->deslocamento, reg_var);
+	else{
+		//o simbolo estava no escopo local
+		vg_ou_vl = "rfp";
+		
 	}
 	s->valor = n->valor;
-	
-
     
     // Gera código pro store e apenda no atributo code da AST
+    printf("addI %s, %d => %s\n", vg_ou_vl, s->deslocamento, reg_var);
 	printf("store reg_expressao_foi_carregada => %s\n", reg_var);
+	char *op_addI = "addI";
+	char *op_store = "store";
+	char valor[50];
+	char desloc[50];
+    sprintf(valor, "%d", n->valor); 
+    sprintf(desloc, "%d", s->deslocamento); 
+	iloc_list_append_op(n->code, iloc_create_op(op_addI,vg_ou_vl,desloc,NULL,reg_var));
+	iloc_list_append_op(n->code, iloc_create_op(op_store,valor,NULL,reg_var,NULL));
 
 
     /* Vinicius: a geracao de codigo da atribuicao assume que o código e o valor da expressao estão disponiveis no no da AST; é necessário apendar o código da  expressao no codigo da atribuicao e por ultimo gerar um store usando o valor ja disponivel no nodo da AST da  expressao (novo campo valor)
@@ -230,6 +238,8 @@ void gera_codigo_do(NodoArvore *n){
 
 //Inicializa atributo code de no da AST
 void iloc_list_init(NodoArvore *n){
+    struct iloc_list *code = (struct iloc_list*)malloc(sizeof(struct iloc_list));
+    n->code = code;
     n->code->iloc = NULL;
     n->code->size = 0;
 }
@@ -238,6 +248,26 @@ void iloc_list_append_op(struct iloc_list *code, ILOC *op){
     op->prev = code->iloc;
     code->iloc = op;
     code->size = code->size+1;
+}
+
+ILOC* iloc_create_op(char *opcode, char *op1, char *op2, char *op3, char *op4){
+    ILOC *op = (ILOC*)malloc(sizeof(ILOC));
+    op->prev = NULL;
+    op->opcode = strdup(opcode);
+    op->op1 = NULL;
+    op->op2 = NULL;
+    op->op3 = NULL;
+    op->op4 = NULL;
+    if(op1 != NULL)
+        op->op1 = strdup(op1);
+    if(op2 != NULL)
+        op->op2 = strdup(op2);
+    if(op3 != NULL)
+        op->op3 = strdup(op3);
+    if(op4 != NULL)
+        op->op4 = strdup(op4);
+    
+    return op;    
 }
 
 void iloc_list_append_code(NodoArvore *origem, NodoArvore *destino){

@@ -22,9 +22,10 @@ Vinicius Castro 193026
 typedef struct iloc {
     struct iloc *prev;
     char *opcode;
-    char *op1;
-    char *op2;
-    char *op3;
+    char *op1; // antes da flecha
+    char *op2; 
+    char *op3; // depois da flecha
+    char *op4;
 }ILOC;
 
 // Lista de instrucoes. Aponta para a instrucao anterior
@@ -78,7 +79,7 @@ enum NaoTerminalType {
 	comando_simples,
 	var_local,
 	var_local_inic,    
-    	atribuicao,
+    atribuicao,
 	constr_sel,
 	constr_cond,
 	constr_cond_else,
@@ -87,7 +88,6 @@ enum NaoTerminalType {
 	constr_for,
 	lista_for,
 	lista_for_comando_valido,
-
 	constr_while,
 	constr_do,
 	contr_fluxo,

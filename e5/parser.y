@@ -186,12 +186,19 @@ Pilha_Tabelas *pilha = NULL;
 %%
 
 programa:   
-  %empty            	{ $$ = cria_nodo(programa,0); arvore = $$; 
-			gera_codigo_inicio_programa(1024,1024,512);
-			}
+  %empty
+    { 
+        $$ = cria_nodo(programa,0); arvore = $$; 
+	}
 | programa novo_tipo	{ $$ = $1; arvore = $$; adiciona_filho($$,$2); }
 | programa var_global	{ $$ = $1; arvore = $$; adiciona_filho($$,$2); }
-| programa funcao       { $$ = $1; arvore = $$; adiciona_filho($$,$2); }
+| programa funcao       
+    { 
+        $$ = $1; arvore = $$; adiciona_filho($$,$2);
+	    iloc_list_init($$);
+        iloc_list_append_code($2,$1);
+        iloc_list_append_code($1,$$);                
+    }
 ;
 
 tipo_primario:   
@@ -363,7 +370,10 @@ var_global:
 /* Definição de Funções */
 funcao:
   cabecalho bloco_comandos
-	{ $$ = cria_nodo(funcao,2,$1,$2); 
+	{ 
+	    $$ = cria_nodo(funcao,2,$1,$2); 
+	    iloc_list_init($$);
+        iloc_list_append_code($2,$$);	    	    
 	}
 ;
 
@@ -441,28 +451,45 @@ parametro:
 /* Bloco de Comandos */
 bloco_comandos:
   '{' '}'
-	{ $$ = cria_nodo(bloco_comandos,0); 
-	desempilha(pilha);
+	{ 
+	    $$ = cria_nodo(bloco_comandos,0); 
+	    iloc_list_init($$);
 	}
 
 | '{' sequencia_comandos_simples '}'
-	{ $$ = cria_nodo(bloco_comandos,0); adiciona_netos($$,$2);
-	desempilha(pilha);
+	{ 
+	    $$ = cria_nodo(bloco_comandos,0); adiciona_netos($$,$2);
+	    iloc_list_init($$);
+        iloc_list_append_code($2,$$);
 	}
 ;
 
 sequencia_comandos_simples:
   comando_simples
-	{ $$ = cria_nodo(sequencia_comandos_simples,1,$1); }
+	{ 
+	    $$ = cria_nodo(sequencia_comandos_simples,1,$1); 
+	    iloc_list_init($$);
+        iloc_list_append_code($1,$$);
+	}
 
 | sequencia_comandos_simples comando_simples
-	{ $$ = $1; adiciona_filho($$,$2); }
+	{ 
+	    $$ = $1; adiciona_filho($$,$2); 
+        iloc_list_init($$);
+        iloc_list_append_code($2,$1);
+        iloc_list_append_code($1,$$);	    
+	}
 ;
 
 comando_simples:
   bloco_comandos ';'	{ $$ = cria_nodo(comando_simples,1,$1); }
 | var_local ';'		{ $$ = cria_nodo(comando_simples,1,$1); }
-| atribuicao ';'    { $$ = cria_nodo(comando_simples,1,$1); }
+| atribuicao ';'    
+    { 
+        $$ = cria_nodo(comando_simples,1,$1); 
+        iloc_list_init($$);
+        iloc_list_append_code($1,$$);
+    }
 | contr_fluxo ';'  	{ $$ = cria_nodo(comando_simples,1,$1); }	
 | entrada ';'		{ $$ = cria_nodo(comando_simples,1,$1); }	
 | saida			{ $$ = cria_nodo(comando_simples,1,$1); }		
@@ -587,12 +614,6 @@ atribuicao:
         if(pilha->num_tabelas == 1)
             empilha(pilha);  
             
-        // Copia o valor do nodo expressao para o valor do nodo atribuicao          
-        $$->valor = $3->valor;
-	    $$->code = $3->code;
-        
-        
-         
         /* E5: nao necessario       
     	if(declarado(pilha,$1.val.string_val) == 0)
     	    erro_semantico(ERR_UNDECLARED,$1);
@@ -602,7 +623,9 @@ atribuicao:
 	    if(eh_usr(pilha,cria_folha($1)) == 1)
 		;//erro_semantico(ERR_USER);
         */
- 
+
+        // Copia o valor do nodo expressao para o valor do nodo atribuicao          
+        $$->valor = $3->valor;
 	    gera_codigo_atr(pilha, $$);
 	
 	}
@@ -871,10 +894,12 @@ com_pipes:
 
 expressao:
   exp_literal	
-  { $$ = cria_nodo(exp_literal,0); adiciona_netos($$,$1); 
-    $$->valor = $1->valor;
-    //TODO: iloc_list_append_code($1, $$);
-  }
+    { 
+        $$ = cria_nodo(exp_literal,0); adiciona_netos($$,$1); 
+        $$->valor = $1->valor;
+        iloc_list_init($$);
+        iloc_list_append_code($1,$$);
+    }
   
 | exp_identificador 
     { $$ = cria_nodo(exp_identificador,0); adiciona_netos($$,$1); 
@@ -956,11 +981,12 @@ exp_identificador:
 ;
 
 exp_literal:
-  literal { $$ = cria_nodo(exp_literal,1,cria_folha($1));
-	$$->valor =  cria_folha($1)->nodo.valor_lexico.val.int_val;
-	/*$$->code->op1 = */ char *reg_aux_e1 = gera_registrador();
-	/*$$->code->opcode = */ printf("loadI %d => %s\n", $$->valor, reg_aux_e1);
-	}
+  literal 
+    { 
+        $$ = cria_nodo(exp_literal,1,cria_folha($1));
+	    $$->valor =  $1.val.int_val;
+	    iloc_list_init($$);
+    }
 ;
 
 %%
