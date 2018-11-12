@@ -254,19 +254,17 @@ var_global:
 	{ $$ = cria_nodo(var_global,4,cria_folha($1),NULL,NULL,cria_folha($2)); 
         
         //E4: pilha
-        if(pilha == NULL){
-            pilha = inicializa_pilha();
-            empilha(pilha);
-        }
+        inicializa_pilha(&pilha);
+
         //E5: entradas estarao semanticamente corretas
     	//if(declarado(pilha,$1.val.string_val) == 1)
 		//    erro_semantico(ERR_DECLARED,$1);
     	add_vg(pilha, $$);
-	    gera_codigo_vg($$);
 	}
 
 | TK_IDENTIFICADOR TK_IDENTIFICADOR ';'	
-	{ $$ = cria_nodo(var_global,4,cria_folha($1),NULL,NULL,cria_folha($2)); 
+	{   /* E5: nao necessario
+	    $$ = cria_nodo(var_global,4,cria_folha($1),NULL,NULL,cria_folha($2)); 
         if(pilha == NULL){
             pilha = inicializa_pilha();
             empilha(pilha);
@@ -275,26 +273,26 @@ var_global:
 		    erro_semantico(ERR_DECLARED,$1);
     	if(declarado(pilha,$2.val.string_val) == 0)
 		    erro_semantico(ERR_UNDECLARED,$1);
-
-//	add_vg(pilha, $$);
-	
+		*/
 	}
 
 | TK_IDENTIFICADOR TK_PR_STATIC tipo_primario ';'
-	{ $$ = cria_nodo(var_global,4,cria_folha($1),NULL,cria_folha($2),cria_folha($3)); 
-        if(pilha == NULL){
-            pilha = inicializa_pilha();
-            empilha(pilha);
-        }
+	{ 
+	    $$ = cria_nodo(var_global,4,cria_folha($1),NULL,cria_folha($2),cria_folha($3)); 
+        inicializa_pilha(&pilha);    
+    
+        /* E5: nao necessario
     	if(declarado(pilha,$1.val.string_val) == 1)
 		    erro_semantico(ERR_DECLARED,$1);
-
-//	add_vg(pilha, $$);
+        */
+        
+        add_vg(pilha, $$);
 	
 }
 
 | TK_IDENTIFICADOR TK_PR_STATIC TK_IDENTIFICADOR ';' 
-	{ $$ = cria_nodo(var_global,4,cria_folha($1),NULL,cria_folha($2),cria_folha($3));
+	{   /* E5: nao necessario
+	    $$ = cria_nodo(var_global,4,cria_folha($1),NULL,cria_folha($2),cria_folha($3));
         if(pilha == NULL){
             pilha = inicializa_pilha();
             empilha(pilha);
@@ -303,24 +301,25 @@ var_global:
 		    erro_semantico(ERR_DECLARED,$1);
     	if(declarado(pilha,$3.val.string_val) == 0)
 		    erro_semantico(ERR_UNDECLARED,$1);
-//	add_vg(pilha, $$);
-	
+		*/	
 	}
 
 | TK_IDENTIFICADOR '[' TK_LIT_INT ']' tipo_primario ';' 
-	{ $$ = cria_nodo(var_global,4,cria_folha($1),cria_folha($3),NULL,cria_folha($5));
+	{   /* E5: nao necessario
+	    $$ = cria_nodo(var_global,4,cria_folha($1),cria_folha($3),NULL,cria_folha($5));
         if(pilha == NULL){
             pilha = inicializa_pilha();
             empilha(pilha);
         }
     	if(declarado(pilha,$1.val.string_val) == 1)
 		    erro_semantico(ERR_DECLARED,$1);
-//	add_vg(pilha, $$);
-	
+		    
+		*/	
 	}
 
 | TK_IDENTIFICADOR '[' TK_LIT_INT ']' TK_IDENTIFICADOR ';' 
-	{ $$ = cria_nodo(var_global,4,cria_folha($1),cria_folha($3),NULL,cria_folha($5));
+	{   /* E5: nao necessario
+	    $$ = cria_nodo(var_global,4,cria_folha($1),cria_folha($3),NULL,cria_folha($5));
         if(pilha == NULL){
             pilha = inicializa_pilha();
             empilha(pilha);
@@ -329,23 +328,25 @@ var_global:
 		    erro_semantico(ERR_DECLARED,$1);
     	if(declarado(pilha,$5.val.string_val) == 0)
 		    erro_semantico(ERR_UNDECLARED,$1);
-//	add_vg(pilha, $$);
-	
+		*/	
 	}
 
 | TK_IDENTIFICADOR '[' TK_LIT_INT ']' TK_PR_STATIC tipo_primario ';' 
-	{ $$ = cria_nodo(var_global,4,cria_folha($1),cria_folha($3),cria_folha($5),cria_folha($6));
+	{   /* E5: nao necessario
+	    $$ = cria_nodo(var_global,4,cria_folha($1),cria_folha($3),cria_folha($5),cria_folha($6));
         if(pilha == NULL){
             pilha = inicializa_pilha();
             empilha(pilha);
         }
     	if(declarado(pilha,$1.val.string_val) == 1)
 		    erro_semantico(ERR_DECLARED,$1);
-//	add_vg(pilha, $$);
+		    
+		*/
 	}
 
 | TK_IDENTIFICADOR '[' TK_LIT_INT ']' TK_PR_STATIC TK_IDENTIFICADOR ';'
-	{ $$ = cria_nodo(var_global,4,cria_folha($1),cria_folha($3),cria_folha($5),cria_folha($6)); 
+	{   /* E5: nao necessario
+	    $$ = cria_nodo(var_global,4,cria_folha($1),cria_folha($3),cria_folha($5),cria_folha($6)); 
         if(pilha == NULL){
             pilha = inicializa_pilha();
             empilha(pilha);
@@ -354,7 +355,7 @@ var_global:
 		    erro_semantico(ERR_DECLARED,$1);
     	if(declarado(pilha,$6.val.string_val) == 0)
 		    erro_semantico(ERR_UNDECLARED,$1);
-//	add_vg(pilha, $$);
+		*/
 	}
 
 ;
@@ -579,33 +580,28 @@ var_local_inic:
 /*Atribuicao*/
 atribuicao:
   TK_IDENTIFICADOR '=' expressao
-    { $$ = cria_nodo(atribuicao,4,cria_folha($1), NULL, NULL,$3);
-    
-        //Escopo global não inicializado na pilha 
-        if(pilha == NULL){
-            pilha = inicializa_pilha();
-            empilha(pilha);
-        }
-        
+    {
+        $$ = cria_nodo(atribuicao,4,cria_folha($1), NULL, NULL,$3);
+        inicializa_pilha(&pilha);
         //Escopo local não inicializado na pilha
         if(pilha->num_tabelas == 1)
             empilha(pilha);  
             
         // Copia o valor do nodo expressao para o valor do nodo atribuicao          
         $$->valor = $3->valor;
-	$$->code = $3->code;
+	    $$->code = $3->code;
         
         
          
-       
-/*    	if(declarado(pilha,$1.val.string_val) == 0)
+        /* E5: nao necessario       
+    	if(declarado(pilha,$1.val.string_val) == 0)
     	    erro_semantico(ERR_UNDECLARED,$1);
 
         if(eh_vetor(pilha,cria_folha($1)) == 1)
 		;//erro_semantico(ERR_VARIABLE);
-	if(eh_usr(pilha,cria_folha($1)) == 1)
+	    if(eh_usr(pilha,cria_folha($1)) == 1)
 		;//erro_semantico(ERR_USER);
-*/
+        */
  
 	    gera_codigo_atr(pilha, $$);
 	
@@ -921,38 +917,34 @@ expressao:
 
 exp_identificador:
   TK_IDENTIFICADOR  
-    { $$ = cria_nodo(exp_identificador,3,cria_folha($1),NULL,NULL); 
+    { 
+        $$ = cria_nodo(exp_identificador,3,cria_folha($1),NULL,NULL); 
 
-    /* 	
-	if(declarado_atr(pilha,cria_folha($1)) == 0)
-		;//erro_semantico(ERR_UNDECLARED);
-	if(eh_vetor(pilha,cria_folha($1)) == 1)
-		;//erro_semantico(ERR_VECTOR);
-	if(eh_usr(pilha,cria_folha($1)) == 1)
-		;//erro_semantico(ERR_USER);
-	*/
-	
-	//Escopo global não inicializado na pilha 
-        if(pilha == NULL){
-            pilha = inicializa_pilha();
-            empilha(pilha);
-        }
-        
+        inicializa_pilha(&pilha);
         //Escopo local não inicializado na pilha
         if(pilha->num_tabelas == 1)
-            empilha(pilha);  
+            empilha(pilha);          
+
+        /* E5: nao necessario	
+	    if(declarado_atr(pilha,cria_folha($1)) == 0)
+		    ;//erro_semantico(ERR_UNDECLARED);
+	    if(eh_vetor(pilha,cria_folha($1)) == 1)
+		    ;//erro_semantico(ERR_VECTOR);
+	    if(eh_usr(pilha,cria_folha($1)) == 1)
+		    ;//erro_semantico(ERR_USER);
+	    */
 	
-	//recupera simbolo pilha ou stack
-	Simbolo *s = search_sim_table(pilha, cria_folha($1)->nodo.valor_lexico.val.string_val);
-	char* vg_ou_vl = "rfp";
-	//se nao achou eh VG
-	if(s == NULL){
-		s = search_sim_stack(pilha, cria_folha($1)->nodo.valor_lexico.val.string_val);
-		vg_ou_vl = "rbss";
-	}
-	/*$$->code->op1 = */ char *reg_aux_e1 = gera_registrador();
-	/*$$->code->opcode = */ printf("loadAI %s, %d => %s\n", vg_ou_vl, s->deslocamento, reg_aux_e1);
-	$$->valor = s->valor;
+	    //recupera simbolo pilha ou stack
+	    Simbolo *s = search_sim_table(pilha, cria_folha($1)->nodo.valor_lexico.val.string_val);
+	    char* vg_ou_vl = "rfp";
+	    //se nao achou eh VG
+	    if(s == NULL){
+		    s = search_sim_stack(pilha, cria_folha($1)->nodo.valor_lexico.val.string_val);
+		    vg_ou_vl = "rbss";
+	    }
+	    /*$$->code->op1 = */ char *reg_aux_e1 = gera_registrador();
+	    /*$$->code->opcode = */ printf("loadAI %s, %d => %s\n", vg_ou_vl, s->deslocamento, reg_aux_e1);
+	    $$->valor = s->valor;
 	}
 
 | TK_IDENTIFICADOR '[' expressao ']' 

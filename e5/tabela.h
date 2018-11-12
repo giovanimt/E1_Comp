@@ -62,7 +62,7 @@ Tabela* cria_tabela();
 void add_simbolo_tabela(Simbolo *s, Tabela *t);
 
 //Funcoes Pilha
-Pilha_Tabelas* inicializa_pilha();
+void inicializa_pilha(Pilha_Tabelas** pilha);
 void empilha(Pilha_Tabelas *pilha);
 void desempilha(Pilha_Tabelas *pilha);
 

@@ -30,11 +30,6 @@ void gera_codigo_inicio_programa(int rfp, int rsp, int rbss){
 	printf("loadI %d => rbss\n", rbss);
 }
 
-//Gera codigo de declaracao de var_global
-void gera_codigo_vg(NodoArvore *n){
-    //n->valor = 0; coloquei no add_vg
-}
-
 //Gera codigo de declaracao de var_local
 void gera_codigo_vl(Pilha_Tabelas *pilha, NodoArvore *n){
     printf("\nvl\n");
@@ -235,21 +230,28 @@ void gera_codigo_do(NodoArvore *n){
 
 //Inicializa atributo code de no da AST
 void iloc_list_init(NodoArvore *n){
-    ILOC *i = (ILOC*)malloc(sizeof(ILOC));
-    i->opcode = NULL;
-    i->op1 = NULL;
-    i->op2 = NULL;
-    i->op3 = NULL;
-    n->code->iloc = i;
+    n->code->iloc = NULL;
     n->code->size = 0;
-    n->code->prev = NULL;
+}
+
+void iloc_list_append_op(struct iloc_list *code, ILOC *op){
+    op->prev = code->iloc;
+    code->iloc = op;
+    code->size = code->size+1;
 }
 
 void iloc_list_append_code(NodoArvore *origem, NodoArvore *destino){
-    for(int i = 0; i<origem->code->size; i++)
+    ILOC **code = (ILOC**)malloc(sizeof(ILOC*)*origem->code->size);
+
+    ILOC *op = origem->code->iloc;
+    for(int i=origem->code->size-1; i>=0; i--)
     {
-        
-    
-    
+        code[i] = op;
+        op = origem->code->iloc->prev;    
     }
+    
+    for(int i=0; i<origem->code->size; i++)
+        iloc_list_append_op(destino->code,code[i]);    
+        
+    free(code);   
 }

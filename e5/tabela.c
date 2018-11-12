@@ -33,11 +33,13 @@ void add_simbolo_tabela(Simbolo *s, Tabela *t){
 
 
 //Funcoes Pilha
-Pilha_Tabelas* inicializa_pilha(){
-	Pilha_Tabelas *pilha = (Pilha_Tabelas*)malloc(sizeof(Pilha_Tabelas));
-	pilha->tabelas = NULL;
-	pilha->num_tabelas = 0;
-    return pilha;
+void inicializa_pilha(Pilha_Tabelas** pilha){
+	if(*pilha == NULL){
+	    *pilha = (Pilha_Tabelas*)malloc(sizeof(Pilha_Tabelas));
+	    (*pilha)->tabelas = NULL;
+	    (*pilha)->num_tabelas = 0;
+	    empilha(*pilha);
+    }
 }
 
 void empilha(Pilha_Tabelas *pilha){
@@ -233,7 +235,6 @@ void add_vg(Pilha_Tabelas *pilha, NodoArvore *n){
 	Simbolo *vg = (Simbolo*)malloc(sizeof(Simbolo));
 
 	//nao eh cons nem funcao
-	vg->valor = 0;
 	vg->eh_cons = 0;
 	vg->Argumentos = NULL;
 	vg->num_argumentos = 0;
@@ -279,15 +280,16 @@ void add_vg(Pilha_Tabelas *pilha, NodoArvore *n){
 	}
 */	
 	//E5: considerar somente INT
+    vg->valor = 0;
 	vg->var_ou_vet = 1;
 	vg->Campos = NULL;
 	vg->num_campos = 0;
 	vg->tipo = TIPO_INT;
 	vg->tamanho = 4;
-	vg->deslocamento = vg->tamanho*pilha->tabelas[pilha->num_tabelas - 1]->num_simbolos;
+	vg->deslocamento = vg->tamanho*pilha->tabelas[0]->num_simbolos;
 	
-	//adiciona simbolo na tabela
-	add_simbolo_tabela(vg, pilha->tabelas[pilha->num_tabelas - 1]);
+	//adiciona simbolo na tabela do escopo global
+	add_simbolo_tabela(vg, pilha->tabelas[0]);
 }
 
 

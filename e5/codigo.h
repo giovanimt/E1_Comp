@@ -14,14 +14,14 @@ char* gera_rotulo();
 char* gera_registrador();
 //Inicializa registradores iniciais e pula para L0
 void gera_codigo_inicio_programa(int rfp, int rsp, int rbss);
-//Gera codigo de declaracao de var_global
-void gera_codigo_vg(NodoArvore *n);
 //Gera codigo de declaracao de var_local
 void gera_codigo_vl(Pilha_Tabelas *pilha, NodoArvore *n);
 //Gera codigo para atribuicao
 void gera_codigo_atr(Pilha_Tabelas *pilha, NodoArvore *n);
 //Inicializa atributo code de no da AST
 void iloc_list_init(NodoArvore *n);
+//Apenda operacao iloc em uma codigo (iloc_list)
+void iloc_list_append_op(struct iloc_list *code, ILOC *op);
 //Apenda o codigo do no origem da AST no codigo do no destino
 void iloc_list_append_code(NodoArvore *origem, NodoArvore *destino);
 

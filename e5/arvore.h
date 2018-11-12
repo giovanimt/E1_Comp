@@ -20,6 +20,7 @@ Vinicius Castro 193026
 
 // Instrucao ILOC
 typedef struct iloc {
+    struct iloc *prev;
     char *opcode;
     char *op1;
     char *op2;
@@ -27,11 +28,10 @@ typedef struct iloc {
 }ILOC;
 
 // Lista de instrucoes. Aponta para a instrucao anterior
-typedef struct iloc_list {
+struct iloc_list {
     ILOC *iloc;
-    ILOC *prev;
     int size; 
-}iloc_list;
+};
 
 union Literal {
 	int bool_val;
