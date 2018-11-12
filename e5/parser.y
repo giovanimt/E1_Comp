@@ -189,6 +189,7 @@ programa:
   %empty
     { 
         $$ = cria_nodo(programa,0); arvore = $$; 
+   	    iloc_list_init($$);
 	}
 | programa novo_tipo	{ $$ = $1; arvore = $$; adiciona_filho($$,$2); }
 | programa var_global	{ $$ = $1; arvore = $$; adiciona_filho($$,$2); }
@@ -196,8 +197,9 @@ programa:
     { 
         $$ = $1; arvore = $$; adiciona_filho($$,$2);
 	    iloc_list_init($$);
-        iloc_list_append_code($2,$1);
-        iloc_list_append_code($1,$$);                
+        iloc_list_append_code($1,$$);                	    
+        iloc_list_append_code($2,$$);
+
     }
 ;
 
