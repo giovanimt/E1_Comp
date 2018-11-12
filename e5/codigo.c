@@ -32,7 +32,7 @@ void gera_codigo_inicio_programa(int rfp, int rsp, int rbss){
 
 //Gera codigo de declaracao de var_global
 void gera_codigo_vg(NodoArvore *n){
-    n->valor = 0;
+    //n->valor = 0; coloquei no add_vg
 }
 
 //Gera codigo de declaracao de var_local
@@ -79,13 +79,33 @@ void gera_codigo_vl(Pilha_Tabelas *pilha, NodoArvore *n){
 //Gera codigo de atribuicao TK_IDENTIFICADOR '=' expressao
 void gera_codigo_atr(Pilha_Tabelas *pilha, NodoArvore *n){
     // Inicializa atributo code da AST
-    iloc_list_init(n);
+    //iloc_list_init(n);
 
     // Apendar o codigo da expressao ao codigo da atribuicao (nova funcao para apendar o codigo)
+	//printf("%d\n", n->filhos[3]->filhos[0]->valor);
+	//printf("%d", n->filhos[3]->filhos[0]->valor);
+	//iloc_list_append_code(NodoArvore *origem, NodoArvore *destino);
     
     // Recupera simbolo da pilha e calcula deslocamentos
+	char *reg_var = gera_registrador();
+	char *nome_var = n->filhos[0]->nodo.valor_lexico.val.string_val;
+	Simbolo *s = search_sim_table(pilha, nome_var);
+	char* vg_ou_vl = "rfp";
+	//se nao achou eh VG
+	if(s == NULL){
+		s = search_sim_stack(pilha, nome_var);
+		vg_ou_vl = "rbss";
+	}
+	if(s){	//se o simbolo estava na pilha
+		//salva o local da variavel na no reg_var
+		printf("addI %s, %d => %s\n", vg_ou_vl, s->deslocamento, reg_var);
+	}
+	s->valor = n->valor;
+	
+
     
     // Gera código pro store e apenda no atributo code da AST
+	printf("store reg_expressao_foi_carregada => %s\n", reg_var);
 
 
     /* Vinicius: a geracao de codigo da atribuicao assume que o código e o valor da expressao estão disponiveis no no da AST; é necessário apendar o código da  expressao no codigo da atribuicao e por ultimo gerar um store usando o valor ja disponivel no nodo da AST da  expressao (novo campo valor)
@@ -220,13 +240,13 @@ void iloc_list_init(NodoArvore *n){
     i->op1 = NULL;
     i->op2 = NULL;
     i->op3 = NULL;
-    n->code.iloc = i;
-    n->code.size = 0;
-    n->code.prev = NULL;
+    n->code->iloc = i;
+    n->code->size = 0;
+    n->code->prev = NULL;
 }
 
 void iloc_list_append_code(NodoArvore *origem, NodoArvore *destino){
-    for(int i = 0; i<origem->code.size; i++)
+    for(int i = 0; i<origem->code->size; i++)
     {
         
     

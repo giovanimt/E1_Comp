@@ -28,7 +28,7 @@ typedef struct iloc {
 
 // Lista de instrucoes. Aponta para a instrucao anterior
 typedef struct iloc_list {
-    ILOC iloc;
+    ILOC *iloc;
     ILOC *prev;
     int size; 
 }iloc_list;
@@ -121,7 +121,7 @@ typedef struct NodoArvore {
 	int tipo; //TODO: todos os nós da Árvore Sintática Abstrata (AST), gerada na etapa anterior, terão agora um campo que indica o seu tipo
 	int num_filhos;
 	struct NodoArvore **filhos;
-	struct iloc_list code;
+	struct iloc_list *code;
 	int valor;
 } NodoArvore;
 

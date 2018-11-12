@@ -233,6 +233,7 @@ void add_vg(Pilha_Tabelas *pilha, NodoArvore *n){
 	Simbolo *vg = (Simbolo*)malloc(sizeof(Simbolo));
 
 	//nao eh cons nem funcao
+	vg->valor = 0;
 	vg->eh_cons = 0;
 	vg->Argumentos = NULL;
 	vg->num_argumentos = 0;
@@ -422,7 +423,7 @@ void add_vl(Pilha_Tabelas *pilha, NodoArvore *n){
 	}else{
 		vl->eh_cons = 1;
 	}
-
+	/* E5: DESNECESSARIO
 	//pega o terceiro filho do nodo...
 	NodoArvore *f3 = (NodoArvore*)n->filhos[2];
 	//...para definir o tipo e tamanho
@@ -434,7 +435,7 @@ void add_vl(Pilha_Tabelas *pilha, NodoArvore *n){
 	}else{
 		vl->Campos = NULL;
 		vl->num_campos = 0;
-	}
+	}*/
 
 	//pega o quarto filho do nodo...
 	NodoArvore *f4 = (NodoArvore*)n->filhos[3];
@@ -451,7 +452,22 @@ void add_vl(Pilha_Tabelas *pilha, NodoArvore *n){
 	vl->tipo = TIPO_INT;
 	vl->tamanho = 4;
 	vl->deslocamento = vl->tamanho*pilha->tabelas[pilha->num_tabelas - 1]->num_simbolos;
-
+	
+	//Definir valor
+    	//Se existe atribuicao juntamente com a declaracao:
+   	 if(n->filhos[4]){
+		//se a atribuicao for um INT
+        	if(n->filhos[5]->nodo.valor_lexico.type == INTEIRO) {
+			vl->valor = n->filhos[5]->nodo.valor_lexico.val.int_val;
+		}else{//se for um TK_IDENTIFICADOR
+			char *nome_atr = n->filhos[5]->nodo.valor_lexico.val.string_val;
+			//procura o simbolo na ultima tabela
+			Simbolo *s = search_sim_stack(pilha, nome_atr);
+			vl->valor = s->valor;
+		}
+	}else{
+		vl->valor = 0;
+	}
 	//adiciona simbolo na tabela
 	add_simbolo_tabela(vl, pilha->tabelas[pilha->num_tabelas - 1]);
 }
@@ -546,7 +562,7 @@ int analisa_args(Pilha_Tabelas *pilha, NodoArvore *n){
 
 //E5: procura simbolos e os retorna
 Simbolo* search_sim_stack(Pilha_Tabelas *pilha, char *chave){
-	for(int i=0; i < pilha->num_tabelas; i++){
+	for(int i=pilha->num_tabelas - 1; i >= 0; i--){//alterado para pegar sempre a tabela mais em cima da pilha
 		for(int j =0; j < pilha->tabelas[i]->num_simbolos; j++){
 			if(!strcmp(chave, pilha->tabelas[i]->simbolos[j]->chave)){
 				return pilha->tabelas[i]->simbolos[j];

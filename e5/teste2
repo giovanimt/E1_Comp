@@ -1,0 +1,11 @@
+y int;
+z int;
+x int;
+int f(){
+int k;
+int l <= 7;
+x = x-7;
+x = 3+y;
+int m <=x;
+z = l+m;
+}
