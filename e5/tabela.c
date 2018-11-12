@@ -291,7 +291,7 @@ void add_vg(Pilha_Tabelas *pilha, NodoArvore *n){
 
 
 //Funcao Funcao
-void add_func(Pilha_Tabelas *pilha, NodoArvore *n){
+void add_func(Pilha_Tabelas *pilha, NodoArvore *f1){
 	//inicializa simbolo
 	Simbolo *func = (Simbolo*)malloc(sizeof(Simbolo));
 
@@ -304,9 +304,8 @@ void add_func(Pilha_Tabelas *pilha, NodoArvore *n){
 	func->natureza = NATUREZA_IDENTIFICADOR;
 
 	//pega o primeiro filho do nodo que eh o cabecalho...
-	NodoArvore *f1 = (NodoArvore*)n->filhos[0];
-
-	//...pega o primeiro filho do cabecalho pra ver se eh static
+	//NodoArvore *f1 = (NodoArvore*)n->filhos[0];
+/*	//...pega o primeiro filho do cabecalho pra ver se eh static
 	if(f1->filhos[0]==NULL){
 		func->eh_static = 0;
 	}else{
@@ -323,7 +322,7 @@ void add_func(Pilha_Tabelas *pilha, NodoArvore *n){
 	}else{
 		func->Campos = NULL;
 		func->num_campos = 0;
-	}
+	}*/
 
 	//pega o terceiro filho do cabecalho...
 	NodoArvore *fc3 = (NodoArvore*)f1->filhos[2];
@@ -333,9 +332,16 @@ void add_func(Pilha_Tabelas *pilha, NodoArvore *n){
 	func->line = fc3->nodo.valor_lexico.line;
 	func->col = fc3->nodo.valor_lexico.col;
 
+	//E5: sempre tipo int
+	func->Campos = NULL;
+	func->num_campos = 0;
+	func->tipo = TIPO_INT;
+	func->tamanho = 4;
+
 	//adiciona simbolo na tabela
 	add_simbolo_tabela(func, pilha->tabelas[pilha->num_tabelas - 1]);
 
+/*
 	//pega o quarto filho do cabecalho que sao os parametros(= argumentos)...
 	NodoArvore *fc4 = (NodoArvore*)f1->filhos[2];
 	//testa se existem...
@@ -384,11 +390,8 @@ void add_func(Pilha_Tabelas *pilha, NodoArvore *n){
 		}
 	
 	}
+*/	
 	
-	//pega o segundo filho do nodo que eh o bloco_comandos e se ele nao for apenas {}, ou seja, tiver filhos, empilha nova tabela
-	if(n->filhos[1]->num_filhos != 0){
-		empilha(pilha);
-	}
 }
 
 

@@ -36,59 +36,71 @@ void gera_codigo_vg(NodoArvore *n){
 }
 
 //Gera codigo de declaracao de var_local
-void gera_codigo_vl(NodoArvore *n){
+void gera_codigo_vl(Pilha_Tabelas *pilha, NodoArvore *n){
+    printf("\nvl\n");
+    char *desl_vl = gera_registrador();
+    char *vg_ou_vl;
+
+    //Salva deslocamento da vl em des_vl
+    printf("load rsp => %s\n", desl_vl);
+    //Altera o topo da pilha
     printf("addI rsp, 4 => rsp\n");
+
     //Se existe atribuicao juntamente com a declaracao:
-/*    if(n->filhos[5]){
-        switch(n->filhos[5]->nodo.valor_lexico.type) {
-
-        // Vinicius: Comentando, pois não compila (não pode ter declaração dentro dos case)
-		//se for inteiro
-		case(INTEIRO):
-			int des_vl = 0; //TODO:descobrir deslocamento da variavel declarada em relacao a rfp
-			char* reg_temp = gera_registrador();
-			printf("loadI %d => %s\n",n->filho[5]->nodo.valor_lexico.val.int_val, reg_temp);
-			printf("storeAI %s => rfp, %d\n", reg_temp, des_vl);
-			break;
-
-		//se for TK_IDENTIFICADOR
-		default:
-		    // Vinicius: Comentando, pois não compila e não entendi (não pode ter declaração dentro dos case)
-			//int des_ident = 0; //TODO:descobrir deslocamento da variavel de TK_IDENTIFICADOR em relacao a rfp
-			//int des_vl = 0; //TODO:descobrir deslocamento da variavel declarada em relacao a rfp
-
-            // Vinicius: Comentando, pois não compila e não entendi o if(true)
-			if(true){//TODO: fazer if para descobrir se TK_IDENTIFICADOR eh vl ou vg, se for vg:
-				char* reg_temp2 = gera_registrador();
-				printf("loadAI rbss,%d => %s\n", des_ident, reg_temp2);
-				printf("storeAI %s => rfp, %d\n", reg_temp2, des_vl);
-			}else{//se TK_IDENT for vl:
-				char* reg_temp2 = gera_registrador();
-				printf("loadAI rfp,%d => %s\n", des_ident, reg_temp2);
-				printf("storeAI %s => rfp, %d\n", reg_temp2, des_vl);
-			break; 
-        }
-    }*/
+    if(n->filhos[4]){
+	//se a atribuicao for um INT
+        if(n->filhos[5]->nodo.valor_lexico.type == INTEIRO) {
+		char* reg_temp = gera_registrador();
+		//Carrega o valor de INT no reg_temp
+		printf("loadI %d => %s\n",n->filhos[5]->nodo.valor_lexico.val.int_val, reg_temp);
+		//Salva na vl
+		printf("store %s => %s\n", reg_temp, desl_vl);
+	}else{ //se for TK_IDENTIFICADOR
+		//pega seu nome
+		char *nome_var = n->filhos[5]->nodo.valor_lexico.val.string_val;
+		//procura o simbolo na ultima tabela
+		Simbolo *s = search_sim_table(pilha, nome_var);
+		vg_ou_vl = "rfp";
+		//se nao achou eh VG
+		if(s==NULL){
+			s = search_sim_stack(pilha, nome_var);
+			vg_ou_vl = "rbss";
+		}
+		char* reg_temp2 = gera_registrador();
+		//carrega o valor do IDENT
+		printf("loadAI %s, %d => %s\n", vg_ou_vl, s->deslocamento, reg_temp2);
+		//salva na VL
+		printf("store %s => %s\n", reg_temp2, desl_vl);
+	}
+    }
 }
 
 
 //Gera codigo de atribuicao TK_IDENTIFICADOR '=' expressao
 void gera_codigo_atr(Pilha_Tabelas *pilha, NodoArvore *n){
-	printf("Atribuicao\n");
+	//TODO: conferir se a equacao para achar o deslocamento em vg e vl no tabela.c estao corretos
+	printf("\nAtribuicao\n");
 	char *reg_var = gera_registrador();
 	char *reg_aux_e1 = gera_registrador();
 	char *reg_aux_e2 = gera_registrador();
 	char *op_bin;
+	char *vg_ou_vl;
 
-	//ATE O MOMENTO: CASO IDENT1(VG) = e1(VG) op_bin e2(VG):
+	//ATE O MOMENTO: CASO IDENT1 = e1 op_bin e2:
 
 	//Pega o nome da variavel que sera atribuida
 	char *nome_var = n->filhos[0]->nodo.valor_lexico.val.string_val;
-	//E procura o simbolo na pilha
-	Simbolo *s = search_sim_stack(pilha, nome_var);
+	//E procura o simbolo na ultima tabela
+	Simbolo *s = search_sim_table(pilha, nome_var);
+	vg_ou_vl = "rfp";
+	//se nao achou eh VG
+	if(s == NULL){
+		s = search_sim_stack(pilha, nome_var);
+		vg_ou_vl = "rbss";
+	}
 	if(s){	//se o simbolo estava na pilha
 		//salva o local da variavel na no reg_var
-		printf("addI rbss, %d => %s\n", s->deslocamento, reg_var);
+		printf("addI %s, %d => %s\n", vg_ou_vl, s->deslocamento, reg_var);
 	}
 
 
@@ -96,11 +108,17 @@ void gera_codigo_atr(Pilha_Tabelas *pilha, NodoArvore *n){
 	if(n->filhos[3]->filhos[0]->filhos[0]->nodo.valor_lexico.type == IDENT){	//se o primeiro filho de expressao for IDENT
 		//Pega o nome
 		char *nome_e1 = n->filhos[3]->filhos[0]->filhos[0]->nodo.valor_lexico.val.string_val;
-		//E procura o simbolo na pilha
-		Simbolo *s_e1 = search_sim_stack(pilha, nome_e1);
+		//E procura o simbolo na tabela
+		Simbolo *s_e1 = search_sim_table(pilha, nome_e1);
+		vg_ou_vl = "rfp";
+		//se nao achou eh VG
+		if(!s_e1){
+			s_e1 = search_sim_stack(pilha, nome_e1);
+			vg_ou_vl = "rbss";
+		}
 		if(s_e1){//se o simbolo estava na pilha
 			//carrega seu conteudo em reg_aux_e1
-			printf("loadAI rbss, %d => %s\n", s_e1->deslocamento, reg_aux_e1);
+			printf("loadAI %s, %d => %s\n", vg_ou_vl, s_e1->deslocamento, reg_aux_e1);
 		}
 	}else{//se o primeiro filho de expressao for INT
 		//Pega seu valor
@@ -126,11 +144,17 @@ void gera_codigo_atr(Pilha_Tabelas *pilha, NodoArvore *n){
 	if(n->filhos[3]->filhos[2]->filhos[0]->nodo.valor_lexico.type == IDENT){	//se o terceiro filho (e2) de expressao for IDENT
 		//Pega o nome
 		char *nome_e2 = n->filhos[3]->filhos[2]->filhos[0]->nodo.valor_lexico.val.string_val;
-		//E procura o simbolo na pilha
-		Simbolo *s_e2 = search_sim_stack(pilha, nome_e2);
+		//E procura o simbolo na tabela
+		Simbolo *s_e2 = search_sim_table(pilha, nome_e2);
+		vg_ou_vl = "rfp";
+		//se nao achou eh VG
+		if(!s_e2){
+			s_e2 = search_sim_stack(pilha, nome_e2);
+			vg_ou_vl = "rbss";
+		}
 		if(s_e2){//se o simbolo estava na pilha
 			//carrega seu conteudo em reg_aux_e2
-			printf("loadAI rbss, %d => %s\n", s_e2->deslocamento, reg_aux_e2);
+			printf("loadAI %s, %d => %s\n", vg_ou_vl, s_e2->deslocamento, reg_aux_e2);
 			//faz a op_bin com reg_aux_e1 e coloca em reg_aux_e1
 			printf("%s %s, %s => %s\n", op_bin, reg_aux_e1, reg_aux_e2, reg_aux_e1);
 		}

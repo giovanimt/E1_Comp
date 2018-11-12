@@ -363,7 +363,6 @@ var_global:
 funcao:
   cabecalho bloco_comandos
 	{ $$ = cria_nodo(funcao,2,$1,$2); 
-//        add_func(pilha, $$);
 	}
 ;
 
@@ -373,7 +372,7 @@ cabecalho:
 	
 //	if(declarado(pilha, cria_folha($2), cria_folha($1)) == 1)
 //		;//erro_semantico(ERR_DECLARED);
-	
+	        add_func(pilha, $$);
 	}	
 	
 | TK_IDENTIFICADOR TK_IDENTIFICADOR parametros
@@ -391,7 +390,6 @@ cabecalho:
 	
 //	if(declarado(pilha, cria_folha($3), cria_folha($2)) == 1)
 //		;//erro_semantico(ERR_DECLARED);
-	
 	}		
 
 | TK_PR_STATIC TK_IDENTIFICADOR TK_IDENTIFICADOR parametros
@@ -407,10 +405,14 @@ cabecalho:
 
 parametros:
   '(' ')'
-	{ $$ = cria_nodo(parametros,0); }
+	{ $$ = cria_nodo(parametros,0); 
+	empilha(pilha);
+	}
 
 | '(' lista_parametros ')'
-	{ $$ = cria_nodo(parametros,0); adiciona_netos($$,$2); }
+	{ $$ = cria_nodo(parametros,0); adiciona_netos($$,$2); 
+	empilha(pilha);
+	}
 ;
 
 lista_parametros:
@@ -438,10 +440,14 @@ parametro:
 /* Bloco de Comandos */
 bloco_comandos:
   '{' '}'
-	{ $$ = cria_nodo(bloco_comandos,0); }
+	{ $$ = cria_nodo(bloco_comandos,0); 
+	desempilha(pilha);
+	}
 
 | '{' sequencia_comandos_simples '}'
-	{ $$ = cria_nodo(bloco_comandos,0); adiciona_netos($$,$2); }
+	{ $$ = cria_nodo(bloco_comandos,0); adiciona_netos($$,$2);
+	desempilha(pilha);
+	}
 ;
 
 sequencia_comandos_simples:
@@ -477,7 +483,7 @@ var_local:
 		;//erro_semantico(ERR_DECLARED);*/
 	add_vl(pilha, $$);
 	
-	//TODO E5: gera_codigo_vl($$);
+	gera_codigo_vl(pilha, $$);
 	}
 
 | tipo_primario TK_IDENTIFICADOR var_local_inic
@@ -487,7 +493,7 @@ var_local:
 		;//erro_semantico(ERR_DECLARED);*/
 	add_vl(pilha, $$);
 	
-	//TODO E5: gera_codigo_vl($$);
+	gera_codigo_vl(pilha, $$);
 	}
 
 | TK_IDENTIFICADOR TK_IDENTIFICADOR
