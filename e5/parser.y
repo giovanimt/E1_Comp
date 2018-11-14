@@ -892,14 +892,13 @@ com_pipes:
 
 expressao:
   exp_literal	
-    { 
+    {       
         $$ = cria_nodo(exp_literal,0); adiciona_netos($$,$1); 
         $$->valor = $1->valor;
-        iloc_list_init($$);
-        iloc_list_append_code($1,$$);
+        gera_codigo_exp_literal($$);
     }
   
-| exp_identificador 
+| exp_identificador
     { $$ = cria_nodo(exp_identificador,0); adiciona_netos($$,$1); 
         $$->valor = $1->valor;
 	//TODO: iloc_list_append_code($1, $$);
@@ -919,12 +918,16 @@ expressao:
 | expressao TK_OC_NE expressao	{ $$ = cria_nodo(exp_binaria,3, $1, cria_folha($2), $3); }
 | expressao '<' expressao	{ $$ = cria_nodo(exp_binaria,3, $1, cria_folha($2), $3); }
 | expressao '>' expressao	{ $$ = cria_nodo(exp_binaria,3, $1, cria_folha($2), $3); }
-| expressao '+' expressao	{ $$ = cria_nodo(exp_binaria,3, $1, cria_folha($2), $3);
-	$$->valor = $1->valor + $3->valor;
-	//TODO: iloc_list_append_code($1, $$);
-	//TODO: iloc_list_append_code($2, $$);
-	/*$$->code->op1 = */ char *reg_aux_e = gera_registrador();
-	/*$$->code->iloc->opcode = */ printf("addI %d, %d => %s\n",$1->valor, $3->valor, reg_aux_e); //TODO:não eh pra ser $1-> valor, $3->valor e sim os registradores carregados (pegar no op)
+| expressao '+' expressao	
+    { 
+        $$ = cria_nodo(exp_binaria,3, $1, cria_folha($2), $3);
+        inicializa_pilha(&pilha);
+        //Escopo local não inicializado na pilha
+        if(pilha->num_tabelas == 1)
+            empilha(pilha);       
+        
+        $$->valor = $1->valor + $3->valor;
+        gera_codigo_arit(pilha,$$,"add");
 }
 | expressao '-' expressao	{ $$ = cria_nodo(exp_binaria,3, $1, cria_folha($2), $3); }
 | expressao '*' expressao	{ $$ = cria_nodo(exp_binaria,3, $1, cria_folha($2), $3); }
@@ -984,8 +987,6 @@ exp_literal:
         $$ = cria_nodo(exp_literal,1,cria_folha($1));
 	    $$->valor =  $1.val.int_val;
 	    iloc_list_init($$);
-	    /*TODO:$$->code->op1 = */ char *reg_aux_e1 = gera_registrador();
-	    /*TODO:$$->code->opcode = */ printf("loadI %d => %s\n", $$->valor, reg_aux_e1);
     }
 ;
 

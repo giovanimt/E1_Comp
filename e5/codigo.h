@@ -8,6 +8,8 @@ Vinicius Castro 193026
 #include "arvore.h"
 #include "tabela.h"
 
+
+void imprime_codigo(NodoArvore *arvore);
 //Função que gera o nome de um rótulo
 char* gera_rotulo();
 //Função que gera o nome de um registrador
@@ -18,6 +20,12 @@ void gera_codigo_inicio_programa(int rfp, int rsp, int rbss);
 void gera_codigo_vl(Pilha_Tabelas *pilha, NodoArvore *n);
 //Gera codigo para atribuicao
 void gera_codigo_atr(Pilha_Tabelas *pilha, NodoArvore *n);
+//Gera codigo para exp aritmeticas
+void gera_codigo_arit(Pilha_Tabelas *pilha, NodoArvore *n, char *op);
+//
+void gera_codigo_exp_literal(NodoArvore *n);
+//
+void gera_codigo_exp_identificador(Pilha_Tabelas *pilha, NodoArvore *n);
 //Inicializa atributo code de no da AST
 void iloc_list_init(NodoArvore *n);
 //Apenda operacao iloc em uma codigo (iloc_list)

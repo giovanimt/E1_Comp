@@ -109,12 +109,10 @@ void gera_codigo_atr(Pilha_Tabelas *pilha, NodoArvore *n){
 	//TODO: trocar reg_expressao_foi_carregada pelo registrador vindo do op
 	char *op_addI = "addI";
 	char *op_store = "store";
-	char valor[50];
 	char desloc[50];
-    sprintf(valor, "%d", n->valor); 
     sprintf(desloc, "%d", s->deslocamento); 
 	iloc_list_append_op(n->code, iloc_create_op(op_addI,vg_ou_vl,desloc,NULL,reg_var));
-	iloc_list_append_op(n->code, iloc_create_op(op_store,valor,NULL,reg_var,NULL));
+	iloc_list_append_op(n->code, iloc_create_op(op_store,n->filhos[3]->reg,NULL,reg_var,NULL));
 
 
     /* Vinicius: a geracao de codigo da atribuicao assume que o código e o valor da expressao estão disponiveis no no da AST; é necessário apendar o código da  expressao no codigo da atribuicao e por ultimo gerar um store usando o valor ja disponivel no nodo da AST da  expressao (novo campo valor)
@@ -291,3 +289,47 @@ void iloc_list_append_code(NodoArvore *origem, NodoArvore *destino){
         
     free(code);   
 }
+
+void gera_codigo_arit(Pilha_Tabelas *pilha, NodoArvore *n, char *op){
+    iloc_list_init(n);
+    
+	iloc_list_append_code(n->filhos[2], n);
+	iloc_list_append_code(n->filhos[0], n);
+	
+    char *reg = gera_registrador();	
+    iloc_list_append_op(n->code, iloc_create_op(op,n->filhos[0]->reg,n->filhos[2]->reg,reg,NULL));    
+    n->reg = reg;
+    
+}
+
+void gera_codigo_exp_literal(NodoArvore *n){
+    // Inicializa atributo code da AST
+    iloc_list_init(n);
+    
+    char *op_loadI = "loadI";
+	char valor[50];
+    sprintf(valor, "%d", n->valor);     
+    
+    char *reg = gera_registrador();
+	iloc_list_append_op(n->code, iloc_create_op(op_loadI,valor,NULL,reg,NULL));
+	n->reg = reg;
+}
+
+void imprime_codigo(NodoArvore *arvore){
+    ILOC *iloc = arvore->code->iloc;
+    for(int i=0; i<arvore->code->size; i++){
+        printf("%s ",iloc->opcode);
+        if(iloc->op1 != NULL)
+            printf("%s",iloc->op1);
+        if(iloc->op2 != NULL)
+            printf(", %s",iloc->op2);
+        printf(" => ");
+        if(iloc->op3 != NULL)
+            printf("%s ",iloc->op3);
+        if(iloc->op4 != NULL)
+            printf(", %s",iloc->op4);        
+        printf("\n");
+        iloc = arvore->code->iloc->prev;
+    }
+}
+

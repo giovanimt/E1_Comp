@@ -123,6 +123,7 @@ typedef struct NodoArvore {
 	struct NodoArvore **filhos;
 	struct iloc_list *code;
 	int valor;
+	char *reg;
 } NodoArvore;
 
 NodoArvore* cria_nodo(enum NaoTerminalType type, int num_filhos, ...);
