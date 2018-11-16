@@ -478,8 +478,8 @@ sequencia_comandos_simples:
 	{ 
 	    $$ = $1; adiciona_filho($$,$2); 
         iloc_list_init($$);
-        iloc_list_append_code($2,$1);
-        iloc_list_append_code($1,$$);	    
+        iloc_list_append_code($1,$1);
+        iloc_list_append_code($2,$$);	    
 	}
 ;
 

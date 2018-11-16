@@ -104,127 +104,13 @@ void gera_codigo_atr(Pilha_Tabelas *pilha, NodoArvore *n){
 	s->valor = n->valor;
     
     // Gera código pro store e apenda no atributo code da AST
-    printf("addI %s, %d => %s\n", vg_ou_vl, s->deslocamento, reg_var);
-	printf("store reg_expressao_foi_carregada => %s\n", reg_var);
-	//TODO: trocar reg_expressao_foi_carregada pelo registrador vindo do op
 	char *op_addI = "addI";
 	char *op_store = "store";
 	char desloc[50];
     sprintf(desloc, "%d", s->deslocamento); 
-	iloc_list_append_op(n->code, iloc_create_op(op_addI,vg_ou_vl,desloc,NULL,reg_var));
+	iloc_list_append_op(n->code, iloc_create_op(op_addI,vg_ou_vl,desloc,reg_var,NULL));
 	iloc_list_append_op(n->code, iloc_create_op(op_store,n->filhos[3]->reg,NULL,reg_var,NULL));
-
-
-    /* Vinicius: a geracao de codigo da atribuicao assume que o código e o valor da expressao estão disponiveis no no da AST; é necessário apendar o código da  expressao no codigo da atribuicao e por ultimo gerar um store usando o valor ja disponivel no nodo da AST da  expressao (novo campo valor)
-	//TODO: conferir se a equacao para achar o deslocamento em vg e vl no tabela.c estao corretos
-	printf("\nAtribuicao\n");
-	char *reg_var = gera_registrador();
-	char *reg_aux_e1 = gera_registrador();
-	char *reg_aux_e2 = gera_registrador();
-	char *op_bin;
-	char *vg_ou_vl;
-
-	//ATE O MOMENTO: CASO IDENT1 = e1 op_bin e2:
-
-	//Pega o nome da variavel que sera atribuida
-	char *nome_var = n->filhos[0]->nodo.valor_lexico.val.string_val;
-	//E procura o simbolo na ultima tabela
-	Simbolo *s = search_sim_table(pilha, nome_var);
-	vg_ou_vl = "rfp";
-	//se nao achou eh VG
-	if(s == NULL){
-		s = search_sim_stack(pilha, nome_var);
-		vg_ou_vl = "rbss";
-	}
-	if(s){	//se o simbolo estava na pilha
-		//salva o local da variavel na no reg_var
-		printf("addI %s, %d => %s\n", vg_ou_vl, s->deslocamento, reg_var);
-	}
-
-
-	//e1:
-	if(n->filhos[3]->filhos[0]->filhos[0]->nodo.valor_lexico.type == IDENT){	//se o primeiro filho de expressao for IDENT
-		//Pega o nome
-		char *nome_e1 = n->filhos[3]->filhos[0]->filhos[0]->nodo.valor_lexico.val.string_val;
-		//E procura o simbolo na tabela
-		Simbolo *s_e1 = search_sim_table(pilha, nome_e1);
-		vg_ou_vl = "rfp";
-		//se nao achou eh VG
-		if(!s_e1){
-			s_e1 = search_sim_stack(pilha, nome_e1);
-			vg_ou_vl = "rbss";
-		}
-		if(s_e1){//se o simbolo estava na pilha
-			//carrega seu conteudo em reg_aux_e1
-			printf("loadAI %s, %d => %s\n", vg_ou_vl, s_e1->deslocamento, reg_aux_e1);
-		}
-	}else{//se o primeiro filho de expressao for INT
-		//Pega seu valor
-		int val_e1 = n->filhos[3]->filhos[0]->filhos[0]->nodo.valor_lexico.val.int_val;
-		//salva no registrador reg_aux_e1
-		printf("loadI %d => %s\n", val_e1, reg_aux_e1);
-	}
-
-
-	//operador binario
-	if(!strcmp(n->filhos[3]->filhos[1]->nodo.valor_lexico.val.string_val, "+")){
-		op_bin = "add";
-	}else if(!strcmp(n->filhos[3]->filhos[1]->nodo.valor_lexico.val.string_val, "-")){
-		op_bin = "sub";
-	}else if(!strcmp(n->filhos[3]->filhos[1]->nodo.valor_lexico.val.string_val, "/")){
-		op_bin = "div";
-	}else if(!strcmp(n->filhos[3]->filhos[1]->nodo.valor_lexico.val.string_val, "-")){
-		op_bin = "mult";
-	}
-
-
-	//e2:
-	if(n->filhos[3]->filhos[2]->filhos[0]->nodo.valor_lexico.type == IDENT){	//se o terceiro filho (e2) de expressao for IDENT
-		//Pega o nome
-		char *nome_e2 = n->filhos[3]->filhos[2]->filhos[0]->nodo.valor_lexico.val.string_val;
-		//E procura o simbolo na tabela
-		Simbolo *s_e2 = search_sim_table(pilha, nome_e2);
-		vg_ou_vl = "rfp";
-		//se nao achou eh VG
-		if(!s_e2){
-			s_e2 = search_sim_stack(pilha, nome_e2);
-			vg_ou_vl = "rbss";
-		}
-		if(s_e2){//se o simbolo estava na pilha
-			//carrega seu conteudo em reg_aux_e2
-			printf("loadAI %s, %d => %s\n", vg_ou_vl, s_e2->deslocamento, reg_aux_e2);
-			//faz a op_bin com reg_aux_e1 e coloca em reg_aux_e1
-			printf("%s %s, %s => %s\n", op_bin, reg_aux_e1, reg_aux_e2, reg_aux_e1);
-		}
-	}else{//se o terceiro filho (e2) de expressao for INT
-		//Pega seu valor
-		int val_e2 = n->filhos[3]->filhos[2]->filhos[0]->nodo.valor_lexico.val.int_val;
-		//faz a op_bin com reg_aux_e1 e coloca em reg_aux_e1
-		printf("%sI %s, %d => %s\n", op_bin, reg_aux_e1, val_e2, reg_aux_e1);
-	}
-
-
-
-	//salva na variavel atribuida
-	printf("store %s => %s\n", reg_aux_e1, reg_var);
-
-
-
-
-	/* para os casos:
-	exp_literal
-	exp_identificador
-
-	expressao TK_OC_OR expressao
-	expressao TK_OC_AND expressao
-	expressao TK_OC_LE expressao
-	expressao TK_OC_GE expressao
-	expressao TK_OC_EQ expressao
-	expressao TK_OC_NE expressao
-	expressao '<' expressao
-	expressao '>' expressao
-
-	*/
+	n->reg = reg_var;   
 }
 
 void gera_codigo_if(NodoArvore *n){
@@ -281,13 +167,14 @@ void iloc_list_append_code(NodoArvore *origem, NodoArvore *destino){
     for(int i=origem->code->size-1; i>=0; i--)
     {
         code[i] = op;
-        op = origem->code->iloc->prev;    
+        op = op->prev;    
     }
     
     for(int i=0; i<origem->code->size; i++)
         iloc_list_append_op(destino->code,code[i]);    
-        
-    free(code);   
+     
+    free(code);
+    
 }
 
 void gera_codigo_arit(Pilha_Tabelas *pilha, NodoArvore *n, char *op){
@@ -316,20 +203,30 @@ void gera_codigo_exp_literal(NodoArvore *n){
 }
 
 void imprime_codigo(NodoArvore *arvore){
-    ILOC *iloc = arvore->code->iloc;
-    for(int i=0; i<arvore->code->size; i++){
-        printf("%s ",iloc->opcode);
-        if(iloc->op1 != NULL)
-            printf("%s",iloc->op1);
-        if(iloc->op2 != NULL)
-            printf(", %s",iloc->op2);
-        printf(" => ");
-        if(iloc->op3 != NULL)
-            printf("%s ",iloc->op3);
-        if(iloc->op4 != NULL)
-            printf(", %s",iloc->op4);        
-        printf("\n");
-        iloc = arvore->code->iloc->prev;
+    ILOC **code = (ILOC**)malloc(sizeof(ILOC*)*arvore->code->size);
+
+    ILOC *op = arvore->code->iloc;
+    for(int i=arvore->code->size-1; i>=0; i--)
+    {
+        code[i] = op;
+        op = op->prev;    
     }
+
+    for(int i=0; i<arvore->code->size; i++){
+        op = code[i];
+        printf("%s ",op->opcode);
+        if(op->op1 != NULL)
+            printf("%s",op->op1);
+        if(op->op2 != NULL)
+            printf(", %s",op->op2);
+        printf(" => ");
+        if(op->op3 != NULL)
+            printf("%s ",op->op3);
+        if(op->op4 != NULL)
+            printf(", %s",op->op4);        
+        printf("\n");
+    }
+    
+    free(code);
 }
 
