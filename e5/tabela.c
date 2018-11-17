@@ -464,7 +464,7 @@ void add_vl(Pilha_Tabelas *pilha, NodoArvore *n){
 		}else{//se for um TK_IDENTIFICADOR
 			char *nome_atr = n->filhos[5]->nodo.valor_lexico.val.string_val;
 			//procura o simbolo na ultima tabela
-			Simbolo *s = search_sim_stack(pilha, nome_atr);
+			Simbolo *s = busca_simbolo_global(pilha, nome_atr);
 			vl->valor = s->valor;
 		}
 	}else{
@@ -563,7 +563,7 @@ int analisa_args(Pilha_Tabelas *pilha, NodoArvore *n){
 
 
 //E5: procura simbolos e os retorna
-Simbolo* search_sim_stack(Pilha_Tabelas *pilha, char *chave){
+Simbolo* busca_simbolo_global(Pilha_Tabelas *pilha, char *chave){
 	for(int i=pilha->num_tabelas - 1; i >= 0; i--){//alterado para pegar sempre a tabela mais em cima da pilha
 		for(int j =0; j < pilha->tabelas[i]->num_simbolos; j++){
 			if(!strcmp(chave, pilha->tabelas[i]->simbolos[j]->chave)){
@@ -574,7 +574,7 @@ Simbolo* search_sim_stack(Pilha_Tabelas *pilha, char *chave){
 	return NULL;
 }
 
-Simbolo* search_sim_table(Pilha_Tabelas *pilha, char *chave){
+Simbolo* busca_simbolo_local(Pilha_Tabelas *pilha, char *chave){
 	for(int j =0; j < pilha->tabelas[pilha->num_tabelas - 1]->num_simbolos; j++){
 		if(!strcmp(chave, pilha->tabelas[pilha->num_tabelas - 1]->simbolos[j]->chave)){
 			return pilha->tabelas[pilha->num_tabelas - 1]->simbolos[j];

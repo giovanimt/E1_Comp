@@ -14,8 +14,6 @@ void imprime_codigo(NodoArvore *arvore);
 char* gera_rotulo();
 //Função que gera o nome de um registrador
 char* gera_registrador();
-//Inicializa registradores iniciais e pula para L0
-void gera_codigo_inicio_programa(int rfp, int rsp, int rbss);
 //Gera codigo de declaracao de var_local
 void gera_codigo_vl(Pilha_Tabelas *pilha, NodoArvore *n);
 //Gera codigo para atribuicao

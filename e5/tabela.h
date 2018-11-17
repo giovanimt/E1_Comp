@@ -95,8 +95,8 @@ int eh_usr(Pilha_Tabelas *pilha, NodoArvore *n);
 int analisa_args(Pilha_Tabelas *pilha, NodoArvore *n);
 
 //E5: procura simbolos e os retorna
-Simbolo* search_sim_stack(Pilha_Tabelas *pilha, char *chave);
-Simbolo* search_sim_table(Pilha_Tabelas *pilha, char *chave);
+Simbolo* busca_simbolo_local(Pilha_Tabelas *pilha, char *chave);
+Simbolo* busca_simbolo_global(Pilha_Tabelas *pilha, char *chave);
 
 
 #endif

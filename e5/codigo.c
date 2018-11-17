@@ -28,13 +28,6 @@ char* gera_registrador(){
 	return nome_reg;
 }
 
-//Inicializa registradores iniciais e pula para L0
-void gera_codigo_inicio_programa(int rfp, int rsp, int rbss){
-	printf("loadI %d => rfp\n", rfp);
-	printf("loadI %d => rsp\n", rsp);
-	printf("loadI %d => rbss\n", rbss);
-}
-
 //Gera codigo de declaracao de var_local
 void gera_codigo_vl(Pilha_Tabelas *pilha, NodoArvore *n){
     printf("\nvl\n");
@@ -59,11 +52,11 @@ void gera_codigo_vl(Pilha_Tabelas *pilha, NodoArvore *n){
 		//pega seu nome
 		char *nome_var = n->filhos[5]->nodo.valor_lexico.val.string_val;
 		//procura o simbolo na ultima tabela
-		Simbolo *s = search_sim_table(pilha, nome_var);
+		Simbolo *s = busca_simbolo_local(pilha, nome_var);
 		vg_ou_vl = "rfp";
 		//se nao achou eh VG
 		if(s==NULL){
-			s = search_sim_stack(pilha, nome_var);
+			s = busca_simbolo_global(pilha, nome_var);
 			vg_ou_vl = "rbss";
 		}
 		char* reg_temp2 = gera_registrador();
@@ -75,42 +68,34 @@ void gera_codigo_vl(Pilha_Tabelas *pilha, NodoArvore *n){
     }
 }
 
-
 //Gera codigo de atribuicao TK_IDENTIFICADOR '=' expressao
 void gera_codigo_atr(Pilha_Tabelas *pilha, NodoArvore *n){
-    // Inicializa atributo code da AST
     iloc_list_init(n);
-
-    // Apendar o codigo da expressao ao codigo da atribuicao (nova funcao para apendar o codigo)
-    // Do parser: $$ = cria_nodo(atribuicao,4,cria_folha($1), NULL, NULL,$3);
 	iloc_list_append_code(n->filhos[3], n);
     
     // Recupera simbolo da pilha e calcula deslocamentos
-	char *reg_var = gera_registrador();
+	char *reg_end = gera_registrador();
 	char *nome_var = n->filhos[0]->nodo.valor_lexico.val.string_val;
-    char* vg_ou_vl;
+    char* reg_base;
 	
-	Simbolo *s = search_sim_table(pilha, nome_var);
+	Simbolo *s = busca_simbolo_local(pilha, nome_var);
 	if(s == NULL){
-	    //o simbolo esta no escopo global
-		s = search_sim_stack(pilha, nome_var);
-		vg_ou_vl = "rbss";
+		s = busca_simbolo_global(pilha, nome_var);
+		reg_base = "rbss";
 	}
-	else{
-		//o simbolo estava no escopo local
-		vg_ou_vl = "rfp";
-		
-	}
-	s->valor = n->valor;
+	else
+	    reg_base = "rfp";
+
+	s->valor = n->filhos[3]->valor;
     
     // Gera código pro store e apenda no atributo code da AST
 	char *op_addI = "addI";
 	char *op_store = "store";
 	char desloc[50];
     sprintf(desloc, "%d", s->deslocamento); 
-	iloc_list_append_op(n->code, iloc_create_op(op_addI,vg_ou_vl,desloc,reg_var,NULL));
-	iloc_list_append_op(n->code, iloc_create_op(op_store,n->filhos[3]->reg,NULL,reg_var,NULL));
-	n->reg = reg_var;   
+	iloc_list_append_op(n->code, iloc_create_op(op_addI,reg_base,desloc,reg_end,NULL));
+	iloc_list_append_op(n->code, iloc_create_op(op_store,n->filhos[3]->reg,NULL,reg_end,NULL));
+	n->reg = n->filhos[3]->reg;   
 }
 
 void gera_codigo_if(NodoArvore *n){
@@ -128,10 +113,13 @@ void gera_codigo_do(NodoArvore *n){
 
 //Inicializa atributo code de no da AST
 void iloc_list_init(NodoArvore *n){
-    struct iloc_list *code = (struct iloc_list*)malloc(sizeof(struct iloc_list));
-    n->code = code;
-    n->code->iloc = NULL;
-    n->code->size = 0;
+    if(n->code ==  NULL)
+    {  
+        struct iloc_list *code = (struct iloc_list*)malloc(sizeof(struct iloc_list));
+        n->code = code;
+        n->code->iloc = NULL;
+        n->code->size = 0;
+    }
 }
 
 void iloc_list_append_op(struct iloc_list *code, ILOC *op){
@@ -190,7 +178,6 @@ void gera_codigo_arit(Pilha_Tabelas *pilha, NodoArvore *n, char *op){
 }
 
 void gera_codigo_exp_literal(NodoArvore *n){
-    // Inicializa atributo code da AST
     iloc_list_init(n);
     
     char *op_loadI = "loadI";
@@ -200,6 +187,36 @@ void gera_codigo_exp_literal(NodoArvore *n){
     char *reg = gera_registrador();
 	iloc_list_append_op(n->code, iloc_create_op(op_loadI,valor,NULL,reg,NULL));
 	n->reg = reg;
+}
+
+
+void gera_codigo_exp_identificador(Pilha_Tabelas *pilha, NodoArvore *n){
+    iloc_list_init(n);
+    
+    // Recupera simbolo da pilha e calcula deslocamentos
+	char *nome_var = n->filhos[0]->nodo.valor_lexico.val.string_val;
+	char* reg_base;
+	Simbolo *s = busca_simbolo_local(pilha, nome_var);
+	if(s == NULL){
+		s = busca_simbolo_global(pilha, nome_var);
+		reg_base = "rbss";
+	}
+	else
+	    reg_base = "rfp";
+
+	s->valor = n->valor;
+    
+    // Gera código pro load e apenda no atributo code da AST
+	char *op_addI = "addI";
+	char *op_load = "load";
+    char *reg_end = gera_registrador();
+    char *reg_val = gera_registrador();
+
+   	char desloc[50];
+    sprintf(desloc, "%d", s->deslocamento); 
+	iloc_list_append_op(n->code, iloc_create_op(op_addI,reg_base,desloc,reg_end,NULL));
+	iloc_list_append_op(n->code, iloc_create_op(op_load,reg_end,NULL,reg_val,NULL));
+	n->reg = reg_val;   
 }
 
 void imprime_codigo(NodoArvore *arvore){

@@ -895,13 +895,16 @@ expressao:
     {       
         $$ = cria_nodo(exp_literal,0); adiciona_netos($$,$1); 
         $$->valor = $1->valor;
-        gera_codigo_exp_literal($$);
+        $$->code = $1->code;
+        $$->reg = $1->reg;
     }
   
 | exp_identificador
-    { $$ = cria_nodo(exp_identificador,0); adiciona_netos($$,$1); 
+    { 
+        $$ = cria_nodo(exp_identificador,0); adiciona_netos($$,$1); 
         $$->valor = $1->valor;
-	//TODO: iloc_list_append_code($1, $$);
+        $$->code = $1->code;
+        $$->reg = $1->reg;
     }
     
 | '(' expressao ')' { $$ = cria_nodo(exp_parenteses,0); adiciona_filho($$,$2); }
@@ -946,11 +949,6 @@ exp_identificador:
     { 
         $$ = cria_nodo(exp_identificador,3,cria_folha($1),NULL,NULL); 
 
-        inicializa_pilha(&pilha);
-        //Escopo local não inicializado na pilha
-        if(pilha->num_tabelas == 1)
-            empilha(pilha);          
-
         /* E5: nao necessario	
 	    if(declarado_atr(pilha,cria_folha($1)) == 0)
 		    ;//erro_semantico(ERR_UNDECLARED);
@@ -959,18 +957,8 @@ exp_identificador:
 	    if(eh_usr(pilha,cria_folha($1)) == 1)
 		    ;//erro_semantico(ERR_USER);
 	    */
-	
-	    //recupera simbolo pilha ou stack
-	    Simbolo *s = search_sim_table(pilha, cria_folha($1)->nodo.valor_lexico.val.string_val);
-	    char* vg_ou_vl = "rfp";
-	    //se nao achou eh VG
-	    if(s == NULL){
-		    s = search_sim_stack(pilha, cria_folha($1)->nodo.valor_lexico.val.string_val);
-		    vg_ou_vl = "rbss";
-	    }
-	    /*TODO:*$$->code->op1 = */ char *reg_aux_e1 = gera_registrador();
-	    /*$$->code->opcode = */ printf("loadAI %s, %d => %s\n", vg_ou_vl, s->deslocamento, reg_aux_e1);
-	    $$->valor = s->valor;
+
+        gera_codigo_exp_identificador(pilha,$$);
 	}
 
 | TK_IDENTIFICADOR '[' expressao ']' 
@@ -986,7 +974,7 @@ exp_literal:
     { 
         $$ = cria_nodo(exp_literal,1,cria_folha($1));
 	    $$->valor =  $1.val.int_val;
-	    iloc_list_init($$);
+        gera_codigo_exp_literal($$);
     }
 ;
 

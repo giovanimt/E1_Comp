@@ -15,6 +15,8 @@ NodoArvore* cria_folha(struct valor_lexico valor_lexico){
 	folha->type = 0;
 	folha->num_filhos = 0;
 	folha->filhos = NULL;
+	folha->code = NULL;
+	folha->reg = NULL;
 	
 	return folha;	
 }
@@ -29,6 +31,8 @@ NodoArvore* cria_nodo(enum NaoTerminalType type, int num_filhos, ...){
 	nodo_arvore->type = 1;
 	nodo_arvore->num_filhos = num_filhos;
 	nodo_arvore->filhos = NULL;
+	nodo_arvore->code = NULL;
+	nodo_arvore->reg = NULL;	
 
 	if(num_filhos > 0) {
 		nodo_arvore->filhos = (NodoArvore**)malloc(sizeof(NodoArvore*)*num_filhos);
