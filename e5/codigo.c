@@ -157,8 +157,9 @@ void gera_codigo_arit(Pilha_Tabelas *pilha, NodoArvore *n, char *op){
 	iloc_list_append_code(n->filhos[0], n);
 	
     char *reg = gera_registrador();	
-    iloc_list_append_op(n->code, iloc_create_op(op,n->filhos[0]->reg,n->filhos[2]->reg,reg,NULL));    
+    iloc_list_append_op(n->code, iloc_create_op(strdup(op),n->filhos[0]->reg,n->filhos[2]->reg,reg,NULL));    
     n->reg = reg;
+    n->valor = n->filhos[0]->valor + n->filhos[2]->valor;
     
 }
 

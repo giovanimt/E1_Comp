@@ -479,8 +479,6 @@ sequencia_comandos_simples:
 | sequencia_comandos_simples comando_simples
 	{ 
 	    $$ = $1; adiciona_filho($$,$2); 
-        iloc_list_init($$);
-        iloc_list_append_code($1,$$);
         iloc_list_append_code($2,$$);	    
 	}
 ;
@@ -957,9 +955,8 @@ expressao:
         if(pilha->num_tabelas == 1)
             empilha(pilha);       
         
-        $$->valor = $1->valor + $3->valor;
         gera_codigo_arit(pilha,$$,"add");
-}
+    }
 | expressao '-' expressao	{ $$ = cria_nodo(exp_binaria,3, $1, cria_folha($2), $3); }
 | expressao '*' expressao	{ $$ = cria_nodo(exp_binaria,3, $1, cria_folha($2), $3); }
 | expressao '/' expressao	{ $$ = cria_nodo(exp_binaria,3, $1, cria_folha($2), $3); }

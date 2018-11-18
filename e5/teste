@@ -1,5 +1,4 @@
-x int;
-y int; 
 int f(){
-y = x;
+    int x <= 1;
+    int y <= 2;
 }

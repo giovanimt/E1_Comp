@@ -1,0 +1,3 @@
+loadI 923 => r0 
+addI rfp, 8 => r1 
+store r0 => r1 
