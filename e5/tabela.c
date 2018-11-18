@@ -127,7 +127,8 @@ void tamanho_usr(Pilha_Tabelas *pilha, Simbolo *s, NodoArvore*n){
 	int tipo = TIPO_USR;
 	for(int i=0; i < pilha->num_tabelas; i++){
 		for(int j =0; j < pilha->tabelas[i]->num_simbolos; j++){
-			if(strcmp(chave, pilha->tabelas[i]->simbolos[j]->chave) && tipo == pilha->tabelas[i]->simbolos[j]->tipo){
+			if(strcmp(chave, pilha->tabelas[i]->simbolos[j]->chave) && tipo == pilha->tabelas[i]->simbolos[j]->tipo)
+			{
 				s->Campos = pilha->tabelas[i]->simbolos[j]->Campos;
 				s->num_campos = pilha->tabelas[i]->simbolos[j]->num_campos;
 				s->tamanho = pilha->tabelas[i]->simbolos[j]->tamanho;

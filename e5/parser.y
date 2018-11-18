@@ -381,11 +381,12 @@ funcao:
 
 cabecalho:
   tipo_primario TK_IDENTIFICADOR parametros
-	{ $$ = cria_nodo(cabecalho,4,NULL,cria_folha($1),cria_folha($2),$3); 
+	{ 
+	    $$ = cria_nodo(cabecalho,4,NULL,cria_folha($1),cria_folha($2),$3); 
 	
-//	if(declarado(pilha, cria_folha($2), cria_folha($1)) == 1)
-//		;//erro_semantico(ERR_DECLARED);
-	        add_func(pilha, $$);
+        //	if(declarado(pilha, cria_folha($2), cria_folha($1)) == 1)
+        //		;//erro_semantico(ERR_DECLARED);
+  	    add_func(pilha, $$); 
 	}	
 	
 | TK_IDENTIFICADOR TK_IDENTIFICADOR parametros
@@ -421,8 +422,6 @@ parametros:
 	{ 
 	    $$ = cria_nodo(parametros,0); 
 	    inicializa_pilha(&pilha);
-        if(pilha->num_tabelas == 1)
-            empilha(pilha);  
 	}
 
 | '(' lista_parametros ')'
@@ -481,7 +480,7 @@ sequencia_comandos_simples:
 	{ 
 	    $$ = $1; adiciona_filho($$,$2); 
         iloc_list_init($$);
-        iloc_list_append_code($1,$1);
+        iloc_list_append_code($1,$$);
         iloc_list_append_code($2,$$);	    
 	}
 ;
@@ -520,6 +519,12 @@ var_local:
 	
 	    /*if(declarado_tabela(pilha, cria_folha($2), cria_folha($1)) == 1)
 		    ;//erro_semantico(ERR_DECLARED);*/
+		    
+        inicializa_pilha(&pilha);
+        //Escopo local não inicializado na pilha
+        if(pilha->num_tabelas == 1)
+            empilha(pilha);		 
+	    
 	    add_vl(pilha, $$);
 
         iloc_list_init($$);
@@ -532,6 +537,12 @@ var_local:
 	
 	    /*if(declarado_tabela(pilha, cria_folha($2), cria_folha($1)) == 1)
 		    ;//erro_semantico(ERR_DECLARED);*/
+
+        inicializa_pilha(&pilha);
+        //Escopo local não inicializado na pilha
+        if(pilha->num_tabelas == 1)
+            empilha(pilha);		    
+		    
 	    add_vl(pilha, $$);
 	
 	    gera_codigo_vl(pilha, $$);

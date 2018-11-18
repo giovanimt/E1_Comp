@@ -164,6 +164,7 @@ void gera_codigo_arit(Pilha_Tabelas *pilha, NodoArvore *n, char *op){
 
 void gera_codigo_literal(NodoArvore *n){
     iloc_list_init(n);
+   	n->valor = n->nodo.valor_lexico.val.int_val;
     
     char *op_loadI = "loadI";
 	char valor[50];
@@ -172,7 +173,7 @@ void gera_codigo_literal(NodoArvore *n){
     char *reg = gera_registrador();
 	iloc_list_append_op(n->code, iloc_create_op(op_loadI,valor,NULL,reg,NULL));
 	n->reg = reg;
-	n->valor = n->nodo.valor_lexico.val.int_val;
+
 }
 
 
