@@ -21,9 +21,9 @@ void gera_codigo_atr(Pilha_Tabelas *pilha, NodoArvore *n);
 //Gera codigo para exp aritmeticas
 void gera_codigo_arit(Pilha_Tabelas *pilha, NodoArvore *n, char *op);
 //
-void gera_codigo_exp_literal(NodoArvore *n);
+void gera_codigo_literal(NodoArvore *n);
 //
-void gera_codigo_exp_identificador(Pilha_Tabelas *pilha, NodoArvore *n);
+void gera_codigo_identificador(Pilha_Tabelas *pilha, NodoArvore *n);
 //Inicializa atributo code de no da AST
 void iloc_list_init(NodoArvore *n);
 //Apenda operacao iloc em uma codigo (iloc_list)

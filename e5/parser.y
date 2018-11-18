@@ -418,8 +418,11 @@ cabecalho:
 
 parametros:
   '(' ')'
-	{ $$ = cria_nodo(parametros,0); 
-	empilha(pilha);
+	{ 
+	    $$ = cria_nodo(parametros,0); 
+	    inicializa_pilha(&pilha);
+        if(pilha->num_tabelas == 1)
+            empilha(pilha);  
 	}
 
 | '(' lista_parametros ')'
@@ -485,7 +488,12 @@ sequencia_comandos_simples:
 
 comando_simples:
   bloco_comandos ';'	{ $$ = cria_nodo(comando_simples,1,$1); }
-| var_local ';'		{ $$ = cria_nodo(comando_simples,1,$1); }
+| var_local ';'		
+    { 
+        $$ = cria_nodo(comando_simples,1,$1); 
+        iloc_list_init($$);
+        iloc_list_append_code($1,$$);        
+    }
 | atribuicao ';'    
     { 
         $$ = cria_nodo(comando_simples,1,$1); 
@@ -507,23 +515,26 @@ comando_simples:
 /*Variavel Local*/
 var_local:
   tipo_primario TK_IDENTIFICADOR
-    { $$ = cria_nodo(var_local,5,NULL,NULL,cria_folha($1),cria_folha($2),NULL); 
+    { 
+        $$ = cria_nodo(var_local,5,NULL,NULL,cria_folha($1),cria_folha($2),NULL); 
 	
-	/*if(declarado_tabela(pilha, cria_folha($2), cria_folha($1)) == 1)
-		;//erro_semantico(ERR_DECLARED);*/
-	add_vl(pilha, $$);
-	
-	gera_codigo_vl(pilha, $$);
+	    /*if(declarado_tabela(pilha, cria_folha($2), cria_folha($1)) == 1)
+		    ;//erro_semantico(ERR_DECLARED);*/
+	    add_vl(pilha, $$);
+
+        iloc_list_init($$);
+
 	}
 
 | tipo_primario TK_IDENTIFICADOR var_local_inic
-    { $$ = cria_nodo(var_local,4,NULL,NULL,cria_folha($1),cria_folha($2)); adiciona_netos($$,$3); 
+    { 
+        $$ = cria_nodo(var_local,4,NULL,NULL,cria_folha($1),cria_folha($2)); adiciona_netos($$,$3); 
 	
-	/*if(declarado_tabela(pilha, cria_folha($2), cria_folha($1)) == 1)
-		;//erro_semantico(ERR_DECLARED);*/
-	add_vl(pilha, $$);
+	    /*if(declarado_tabela(pilha, cria_folha($2), cria_folha($1)) == 1)
+		    ;//erro_semantico(ERR_DECLARED);*/
+	    add_vl(pilha, $$);
 	
-	gera_codigo_vl(pilha, $$);
+	    gera_codigo_vl(pilha, $$);
 	}
 
 | TK_IDENTIFICADOR TK_IDENTIFICADOR
@@ -595,15 +606,21 @@ var_local:
 
 var_local_inic:
   TK_OC_LE TK_IDENTIFICADOR
-    { $$ = cria_nodo(var_local_inic,2,cria_folha($1),cria_folha($2)); 
+    { 
+        $$ = cria_nodo(var_local_inic,2,cria_folha($1),cria_folha($2)); 
 	
-	/*if(declarado_atr(pilha,cria_folha($2)) == 0)
+    	/*if(declarado_atr(pilha,cria_folha($2)) == 0)
 		;//erro_semantico(ERR_UNDECLARED);*/
+		
+        gera_codigo_identificador(pilha,$$->filhos[1]);       
 	
 	}
 
 | TK_OC_LE literal
-    { $$ = cria_nodo(var_local_inic,2,cria_folha($1),cria_folha($2)); }
+    { 
+        $$ = cria_nodo(var_local_inic,2,cria_folha($1),cria_folha($2)); 
+        gera_codigo_literal($$->filhos[1]);
+    }
 ;
 
 /*Atribuicao*/
@@ -958,7 +975,10 @@ exp_identificador:
 		    ;//erro_semantico(ERR_USER);
 	    */
 
-        gera_codigo_exp_identificador(pilha,$$);
+        gera_codigo_identificador(pilha,$$->filhos[0]);
+        $$->valor = $$->filhos[0]->valor;
+        $$->code = $$->filhos[0]->code;
+        $$->reg = $$->filhos[0]->reg;
 	}
 
 | TK_IDENTIFICADOR '[' expressao ']' 
@@ -973,8 +993,10 @@ exp_literal:
   literal 
     { 
         $$ = cria_nodo(exp_literal,1,cria_folha($1));
-	    $$->valor =  $1.val.int_val;
-        gera_codigo_exp_literal($$);
+        gera_codigo_literal($$->filhos[0]);
+        $$->valor = $$->filhos[0]->valor;
+        $$->code = $$->filhos[0]->code;        
+        $$->reg = $$->filhos[0]->reg;        
     }
 ;
 

@@ -411,7 +411,8 @@ void add_vl(Pilha_Tabelas *pilha, NodoArvore *n){
 
 	//define natureza TODO:nao entendi muito o sentido da natureza entao nao tenho certeza
 	vl->natureza = NATUREZA_IDENTIFICADOR;
-
+	
+    /* E5: DESNECESSARIO
 	//pega o primeiro filho do nodo para ver se eh static
 	if(n->filhos[0]==NULL){
 		vl->eh_static = 0;
@@ -425,7 +426,7 @@ void add_vl(Pilha_Tabelas *pilha, NodoArvore *n){
 	}else{
 		vl->eh_cons = 1;
 	}
-	/* E5: DESNECESSARIO
+	
 	//pega o terceiro filho do nodo...
 	NodoArvore *f3 = (NodoArvore*)n->filhos[2];
 	//...para definir o tipo e tamanho

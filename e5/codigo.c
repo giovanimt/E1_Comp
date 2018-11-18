@@ -30,42 +30,27 @@ char* gera_registrador(){
 
 //Gera codigo de declaracao de var_local
 void gera_codigo_vl(Pilha_Tabelas *pilha, NodoArvore *n){
-    printf("\nvl\n");
-    char *desl_vl = gera_registrador();
-    char *vg_ou_vl;
+    iloc_list_init(n);
+	iloc_list_append_code(n->filhos[5], n);    
 
-    //Salva deslocamento da vl em des_vl
-    printf("load rsp => %s\n", desl_vl);
-    //Altera o topo da pilha
-    printf("addI rsp, 4 => rsp\n");
+    // Recupera simbolo da pilha e calcula deslocamentos
+    char *reg_end = gera_registrador();
+    char *nome_var = n->filhos[3]->nodo.valor_lexico.val.string_val;
+    char* reg_base = "rfp";
 
-    //Se existe atribuicao juntamente com a declaracao:
-    if(n->filhos[4]){
-	//se a atribuicao for um INT
-        if(n->filhos[5]->nodo.valor_lexico.type == INTEIRO) {
-		char* reg_temp = gera_registrador();
-		//Carrega o valor de INT no reg_temp
-		printf("loadI %d => %s\n",n->filhos[5]->nodo.valor_lexico.val.int_val, reg_temp);
-		//Salva na vl
-		printf("store %s => %s\n", reg_temp, desl_vl);
-	}else{ //se for TK_IDENTIFICADOR
-		//pega seu nome
-		char *nome_var = n->filhos[5]->nodo.valor_lexico.val.string_val;
-		//procura o simbolo na ultima tabela
-		Simbolo *s = busca_simbolo_local(pilha, nome_var);
-		vg_ou_vl = "rfp";
-		//se nao achou eh VG
-		if(s==NULL){
-			s = busca_simbolo_global(pilha, nome_var);
-			vg_ou_vl = "rbss";
-		}
-		char* reg_temp2 = gera_registrador();
-		//carrega o valor do IDENT
-		printf("loadAI %s, %d => %s\n", vg_ou_vl, s->deslocamento, reg_temp2);
-		//salva na VL
-		printf("store %s => %s\n", reg_temp2, desl_vl);
-	}
-    }
+    Simbolo *s = busca_simbolo_local(pilha, nome_var);
+    s->valor = n->filhos[5]->valor;
+    
+    // Gera código pro store e apenda no atributo code da AST
+    char *op_addI = "addI";
+    char *op_store = "store";
+    char desloc[50];
+    sprintf(desloc, "%d", s->deslocamento); 
+    iloc_list_append_op(n->code, iloc_create_op(op_addI,reg_base,desloc,reg_end,NULL));
+    iloc_list_append_op(n->code, iloc_create_op(op_store,n->filhos[5]->reg,NULL,reg_end,NULL));
+    n->reg = n->filhos[3]->reg;
+    n->valor = n->filhos[5]->valor;
+
 }
 
 //Gera codigo de atribuicao TK_IDENTIFICADOR '=' expressao
@@ -177,7 +162,7 @@ void gera_codigo_arit(Pilha_Tabelas *pilha, NodoArvore *n, char *op){
     
 }
 
-void gera_codigo_exp_literal(NodoArvore *n){
+void gera_codigo_literal(NodoArvore *n){
     iloc_list_init(n);
     
     char *op_loadI = "loadI";
@@ -187,14 +172,15 @@ void gera_codigo_exp_literal(NodoArvore *n){
     char *reg = gera_registrador();
 	iloc_list_append_op(n->code, iloc_create_op(op_loadI,valor,NULL,reg,NULL));
 	n->reg = reg;
+	n->valor = n->nodo.valor_lexico.val.int_val;
 }
 
 
-void gera_codigo_exp_identificador(Pilha_Tabelas *pilha, NodoArvore *n){
+void gera_codigo_identificador(Pilha_Tabelas *pilha, NodoArvore *n){
     iloc_list_init(n);
     
     // Recupera simbolo da pilha e calcula deslocamentos
-	char *nome_var = n->filhos[0]->nodo.valor_lexico.val.string_val;
+	char *nome_var = n->nodo.valor_lexico.val.string_val;
 	char* reg_base;
 	Simbolo *s = busca_simbolo_local(pilha, nome_var);
 	if(s == NULL){
@@ -216,7 +202,7 @@ void gera_codigo_exp_identificador(Pilha_Tabelas *pilha, NodoArvore *n){
     sprintf(desloc, "%d", s->deslocamento); 
 	iloc_list_append_op(n->code, iloc_create_op(op_addI,reg_base,desloc,reg_end,NULL));
 	iloc_list_append_op(n->code, iloc_create_op(op_load,reg_end,NULL,reg_val,NULL));
-	n->reg = reg_val;   
+	n->reg = reg_val; 
 }
 
 void imprime_codigo(NodoArvore *arvore){
