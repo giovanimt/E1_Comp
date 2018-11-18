@@ -1,0 +1,7 @@
+loadI 393 => r0 
+addI rfp, 4 => r1 
+store r0 => r1 
+addI rfp, 4 => r2 
+load r2 => r3 
+addI rfp, 0 => r4 
+store r3 => r4 

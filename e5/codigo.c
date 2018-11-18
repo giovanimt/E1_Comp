@@ -158,9 +158,7 @@ void gera_codigo_arit(Pilha_Tabelas *pilha, NodoArvore *n, char *op){
 	
     char *reg = gera_registrador();	
     iloc_list_append_op(n->code, iloc_create_op(strdup(op),n->filhos[0]->reg,n->filhos[2]->reg,reg,NULL));    
-    n->reg = reg;
-    n->valor = n->filhos[0]->valor + n->filhos[2]->valor;
-    
+    n->reg = reg; 
 }
 
 void gera_codigo_literal(NodoArvore *n){
@@ -192,7 +190,7 @@ void gera_codigo_identificador(Pilha_Tabelas *pilha, NodoArvore *n){
 	else
 	    reg_base = "rfp";
 
-	s->valor = n->valor;
+	n->valor = s->valor;
     
     // Gera código pro load e apenda no atributo code da AST
 	char *op_addI = "addI";

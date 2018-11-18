@@ -955,11 +955,42 @@ expressao:
         if(pilha->num_tabelas == 1)
             empilha(pilha);       
         
+        $$->valor = $1->valor + $3->valor;
         gera_codigo_arit(pilha,$$,"add");
     }
-| expressao '-' expressao	{ $$ = cria_nodo(exp_binaria,3, $1, cria_folha($2), $3); }
-| expressao '*' expressao	{ $$ = cria_nodo(exp_binaria,3, $1, cria_folha($2), $3); }
-| expressao '/' expressao	{ $$ = cria_nodo(exp_binaria,3, $1, cria_folha($2), $3); }
+| expressao '-' expressao	
+    { 
+        $$ = cria_nodo(exp_binaria,3, $1, cria_folha($2), $3); 
+        inicializa_pilha(&pilha);
+        //Escopo local não inicializado na pilha
+        if(pilha->num_tabelas == 1)
+            empilha(pilha);       
+        
+        $$->valor = $1->valor - $3->valor;        
+        gera_codigo_arit(pilha,$$,"sub");       
+    }
+| expressao '*' expressao	
+    { 
+        $$ = cria_nodo(exp_binaria,3, $1, cria_folha($2), $3); 
+        inicializa_pilha(&pilha);
+        //Escopo local não inicializado na pilha
+        if(pilha->num_tabelas == 1)
+            empilha(pilha);       
+        
+        $$->valor = $1->valor * $3->valor;        
+        gera_codigo_arit(pilha,$$,"mult");          
+    }
+| expressao '/' expressao	
+    { 
+        $$ = cria_nodo(exp_binaria,3, $1, cria_folha($2), $3); 
+        inicializa_pilha(&pilha);
+        //Escopo local não inicializado na pilha
+        if(pilha->num_tabelas == 1)
+            empilha(pilha);       
+        
+        $$->valor = $1->valor / $3->valor;                
+        gera_codigo_arit(pilha,$$,"div");          
+    }
 | expressao '%' expressao	{ $$ = cria_nodo(exp_binaria,3, $1, cria_folha($2), $3); }
 | expressao '^' expressao	{ $$ = cria_nodo(exp_binaria,3, $1, cria_folha($2), $3); }
 | '&' expressao %prec ENDERECO	{ $$ = cria_nodo(exp_unaria,2, cria_folha($1), $2); }
