@@ -46,8 +46,8 @@ void gera_codigo_vl(Pilha_Tabelas *pilha, NodoArvore *n){
     char *op_store = "store";
     char desloc[50];
     sprintf(desloc, "%d", s->deslocamento); 
-    iloc_list_append_op(n->code, iloc_create_op(op_addI,reg_base,desloc,reg_end,NULL));
-    iloc_list_append_op(n->code, iloc_create_op(op_store,n->filhos[5]->reg,NULL,reg_end,NULL));
+    iloc_list_append_op(n->code, iloc_create_op(NULL,op_addI,reg_base,desloc,reg_end,NULL));
+    iloc_list_append_op(n->code, iloc_create_op(NULL,op_store,n->filhos[5]->reg,NULL,reg_end,NULL));
     n->reg = n->filhos[3]->reg;
     n->valor = n->filhos[5]->valor;
 
@@ -78,8 +78,8 @@ void gera_codigo_atr(Pilha_Tabelas *pilha, NodoArvore *n){
 	char *op_store = "store";
 	char desloc[50];
     sprintf(desloc, "%d", s->deslocamento); 
-	iloc_list_append_op(n->code, iloc_create_op(op_addI,reg_base,desloc,reg_end,NULL));
-	iloc_list_append_op(n->code, iloc_create_op(op_store,n->filhos[3]->reg,NULL,reg_end,NULL));
+	iloc_list_append_op(n->code, iloc_create_op(NULL,op_addI,reg_base,desloc,reg_end,NULL));
+	iloc_list_append_op(n->code, iloc_create_op(NULL,op_store,n->filhos[3]->reg,NULL,reg_end,NULL));
 	n->reg = n->filhos[3]->reg;   
 }
 
@@ -113,9 +113,10 @@ void iloc_list_append_op(struct iloc_list *code, ILOC *op){
     code->size = code->size+1;
 }
 
-ILOC* iloc_create_op(char *opcode, char *op1, char *op2, char *op3, char *op4){
+ILOC* iloc_create_op(char *label, char *opcode, char *op1, char *op2, char *op3, char *op4){
     ILOC *op = (ILOC*)malloc(sizeof(ILOC));
     op->prev = NULL;
+    op->label = NULL;
     op->opcode = strdup(opcode);
     op->op1 = NULL;
     op->op2 = NULL;
@@ -157,7 +158,7 @@ void gera_codigo_arit(Pilha_Tabelas *pilha, NodoArvore *n, char *op){
 	iloc_list_append_code(n->filhos[0], n);
 	
     char *reg = gera_registrador();	
-    iloc_list_append_op(n->code, iloc_create_op(strdup(op),n->filhos[0]->reg,n->filhos[2]->reg,reg,NULL));    
+    iloc_list_append_op(n->code, iloc_create_op(NULL,strdup(op),n->filhos[0]->reg,n->filhos[2]->reg,reg,NULL));    
     n->reg = reg; 
 }
 
@@ -170,7 +171,7 @@ void gera_codigo_literal(NodoArvore *n){
     sprintf(valor, "%d", n->valor);     
     
     char *reg = gera_registrador();
-	iloc_list_append_op(n->code, iloc_create_op(op_loadI,valor,NULL,reg,NULL));
+	iloc_list_append_op(n->code, iloc_create_op(NULL,op_loadI,valor,NULL,reg,NULL));
 	n->reg = reg;
 
 }
@@ -200,8 +201,8 @@ void gera_codigo_identificador(Pilha_Tabelas *pilha, NodoArvore *n){
 
    	char desloc[50];
     sprintf(desloc, "%d", s->deslocamento); 
-	iloc_list_append_op(n->code, iloc_create_op(op_addI,reg_base,desloc,reg_end,NULL));
-	iloc_list_append_op(n->code, iloc_create_op(op_load,reg_end,NULL,reg_val,NULL));
+	iloc_list_append_op(n->code, iloc_create_op(NULL,op_addI,reg_base,desloc,reg_end,NULL));
+	iloc_list_append_op(n->code, iloc_create_op(NULL,op_load,reg_end,NULL,reg_val,NULL));
 	n->reg = reg_val; 
 }
 
@@ -217,6 +218,8 @@ void imprime_codigo(NodoArvore *arvore){
 
     for(int i=0; i<arvore->code->size; i++){
         op = code[i];
+        if(op->label != NULL)
+            printf("%s: ",op->label);
         printf("%s ",op->opcode);
         if(op->op1 != NULL)
             printf("%s",op->op1);

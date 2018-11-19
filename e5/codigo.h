@@ -31,6 +31,6 @@ void iloc_list_append_op(struct iloc_list *code, ILOC *op);
 //Apenda o codigo do no origem da AST no codigo do no destino
 void iloc_list_append_code(NodoArvore *origem, NodoArvore *destino);
 //Cria uma ILOC op
-ILOC* iloc_create_op(char *opcode, char *op1, char *op2, char *op3, char *op4);
+ILOC* iloc_create_op(char *label, char *opcode, char *op1, char *op2, char *op3, char *op4);
 
 #endif

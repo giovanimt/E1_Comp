@@ -848,10 +848,10 @@ contr_fluxo:
 
 constr_cond:
   TK_PR_IF '(' expressao ')' TK_PR_THEN bloco_comandos constr_cond_else
-{ $$ = cria_nodo(constr_cond,4,cria_folha($1),$3,cria_folha($5),$6,NULL); 
-  if($7 != NULL)
-    $$->filhos[4] = $7;
-}
+    { 
+        $$ = cria_nodo(constr_cond,4,cria_folha($1),$3,cria_folha($5),$6); 
+        adiciona_netos($$,$7);
+    }
 ;
 
 constr_cond_else:
