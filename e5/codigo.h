@@ -14,6 +14,8 @@ void imprime_codigo(NodoArvore *arvore);
 char* gera_rotulo();
 //Função que gera o nome de um registrador
 char* gera_registrador();
+//Gera codigo para incrementar topo da pilha
+void gera_codigo_rsp(NodoArvore *n);
 //Gera codigo de declaracao de var_local
 void gera_codigo_vl(Pilha_Tabelas *pilha, NodoArvore *n);
 //Gera codigo para atribuicao
@@ -24,6 +26,12 @@ void gera_codigo_arit(Pilha_Tabelas *pilha, NodoArvore *n, char *op);
 void gera_codigo_literal(NodoArvore *n);
 //
 void gera_codigo_identificador(Pilha_Tabelas *pilha, NodoArvore *n);
+
+void gera_codigo_if(Pilha_Tabelas *pilha, NodoArvore *n);
+
+void gera_codigo_while(Pilha_Tabelas *pilha, NodoArvore *n);
+
+void gera_codigo_do(Pilha_Tabelas *pilha, NodoArvore *n);
 //Inicializa atributo code de no da AST
 void iloc_list_init(NodoArvore *n);
 //Apenda operacao iloc em uma codigo (iloc_list)

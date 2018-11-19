@@ -28,6 +28,14 @@ char* gera_registrador(){
 	return nome_reg;
 }
 
+//Gera codigo para incrementar topo da pilha
+void gera_codigo_rsp(NodoArvore *n){
+    char *op_addI = "addI";
+    char add_topo[2];
+    sprintf(add_topo, "%d", 4);
+    iloc_list_append_op(n->code, iloc_create_op(NULL, op_addI,"rsp",add_topo,"rsp",NULL));
+}
+
 //Gera codigo de declaracao de var_local
 void gera_codigo_vl(Pilha_Tabelas *pilha, NodoArvore *n){
     iloc_list_init(n);
@@ -83,15 +91,15 @@ void gera_codigo_atr(Pilha_Tabelas *pilha, NodoArvore *n){
 	n->reg = n->filhos[3]->reg;   
 }
 
-void gera_codigo_if(NodoArvore *n){
+void gera_codigo_if(Pilha_Tabelas *pilha, NodoArvore *n){
 	printf("nop\n");
 }
 
-void gera_codigo_while(NodoArvore *n){
+void gera_codigo_while(Pilha_Tabelas *pilha, NodoArvore *n){
 	printf("nop\n");
 }
 
-void gera_codigo_do(NodoArvore *n){
+void gera_codigo_do(Pilha_Tabelas *pilha, NodoArvore *n){
 	printf("nop\n");
 }
 
