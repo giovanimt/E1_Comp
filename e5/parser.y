@@ -866,7 +866,7 @@ constr_cond:
         if(pilha->num_tabelas == 1)
             empilha(pilha);
               
-	    gera_codigo_if(pilha, $$);
+	    gera_codigo_if($$);
 	
     }
 ;
@@ -889,27 +889,26 @@ constr_iter:
 | TK_PR_WHILE '(' expressao ')' TK_PR_DO bloco_comandos
 { $$ = cria_nodo(constr_while,4,cria_folha($1),$3,cria_folha($5),$6); 
 
-	//E5:
+	    //E5:
         inicializa_pilha(&pilha);
         //Escopo local não inicializado na pilha
         if(pilha->num_tabelas == 1)
             empilha(pilha);  
-        // Copia o valor do nodo expressao para o valor do nodo atribuicao          
-        $$->valor = $3->valor;
-	    gera_codigo_while(pilha, $$);
+
+	    gera_codigo_while($$);
 }
 | TK_PR_DO bloco_comandos TK_PR_WHILE '(' expressao ')'
-{ $$ = cria_nodo(constr_do,4,cria_folha($1),$2,cria_folha($3),$5); 
+    { 
+        $$ = cria_nodo(constr_do,4,cria_folha($1),$2,cria_folha($3),$5); 
 
-	//E5:
+    	//E5:
         inicializa_pilha(&pilha);
         //Escopo local não inicializado na pilha
         if(pilha->num_tabelas == 1)
             empilha(pilha);  
-        // Copia o valor do nodo expressao para o valor do nodo atribuicao          
-        $$->valor = $5->valor;
-	    gera_codigo_do(pilha, $$);
-}
+
+	    gera_codigo_do($$);
+    }
 ;
 
 lista_foreach:
@@ -984,129 +983,67 @@ expressao:
 | expressao '?' expressao ':' expressao { $$ = cria_nodo(exp_ternaria,5, $1,cria_folha($2), $3,cria_folha($4), $5); }
 | expressao TK_OC_OR expressao
     { 
-        $$ = cria_nodo(exp_binaria,3, $1, cria_folha($2), $3); 
-        inicializa_pilha(&pilha);
-        //Escopo local não inicializado na pilha
-        if(pilha->num_tabelas == 1)
-            empilha(pilha);       
-        
-        $$->valor = $1->valor || $3->valor;                
-        gera_codigo_arit($$,"or");          
+        $$ = cria_nodo(exp_binaria,3, $1, cria_folha($2), $3);     
+        gera_codigo_or($$);          
     }
 | expressao TK_OC_AND expressao
     { 
         $$ = cria_nodo(exp_binaria,3, $1, cria_folha($2), $3); 
-        inicializa_pilha(&pilha);
-        //Escopo local não inicializado na pilha
-        if(pilha->num_tabelas == 1)
-            empilha(pilha);       
-        
-        $$->valor = $1->valor && $3->valor;                
-        gera_codigo_arit($$,"and");          
+        gera_codigo_and($$);          
     }
 | expressao '&' expressao { $$ = cria_nodo(exp_binaria,3, $1, cria_folha($2), $3); }
 | expressao '|' expressao { $$ = cria_nodo(exp_binaria,3, $1, cria_folha($2), $3); }
 | expressao TK_OC_LE expressao
     { 
         $$ = cria_nodo(exp_binaria,3, $1, cria_folha($2), $3); 
-        inicializa_pilha(&pilha);
-        //Escopo local não inicializado na pilha
-        if(pilha->num_tabelas == 1)
-            empilha(pilha);       
-                      
         gera_codigo_cmp($$,"cmp_LE");    
     }
 | expressao TK_OC_GE expressao
     { 
         $$ = cria_nodo(exp_binaria,3, $1, cria_folha($2), $3); 
-        inicializa_pilha(&pilha);
-        //Escopo local não inicializado na pilha
-        if(pilha->num_tabelas == 1)
-            empilha(pilha);       
-                      
         gera_codigo_cmp($$,"cmp_GE");           
     }
 | expressao TK_OC_EQ expressao
     { 
         $$ = cria_nodo(exp_binaria,3, $1, cria_folha($2), $3); 
-        inicializa_pilha(&pilha);
-        //Escopo local não inicializado na pilha
-        if(pilha->num_tabelas == 1)
-            empilha(pilha);       
-                      
         gera_codigo_cmp($$,"cmp_EQ");           
     }
 | expressao TK_OC_NE expressao
     { 
         $$ = cria_nodo(exp_binaria,3, $1, cria_folha($2), $3); 
-        inicializa_pilha(&pilha);
-        //Escopo local não inicializado na pilha
-        if(pilha->num_tabelas == 1)
-            empilha(pilha);       
-                      
         gera_codigo_cmp($$,"cmp_NE");            
     }
 | expressao '<' expressao
     { 
         $$ = cria_nodo(exp_binaria,3, $1, cria_folha($2), $3); 
-        inicializa_pilha(&pilha);
-        //Escopo local não inicializado na pilha
-        if(pilha->num_tabelas == 1)
-            empilha(pilha);       
-                      
         gera_codigo_cmp($$,"cmp_LT");           
     }
 | expressao '>' expressao
     { 
         $$ = cria_nodo(exp_binaria,3, $1, cria_folha($2), $3); 
-        inicializa_pilha(&pilha);
-        //Escopo local não inicializado na pilha
-        if(pilha->num_tabelas == 1)
-            empilha(pilha);       
-                      
         gera_codigo_cmp($$,"cmp_GT");          
     }
 | expressao '+' expressao	
     { 
         $$ = cria_nodo(exp_binaria,3, $1, cria_folha($2), $3);
-        inicializa_pilha(&pilha);
-        //Escopo local não inicializado na pilha
-        if(pilha->num_tabelas == 1)
-            empilha(pilha);       
-        
         $$->valor = $1->valor + $3->valor;
         gera_codigo_arit($$,"add");
     }
 | expressao '-' expressao	
     { 
         $$ = cria_nodo(exp_binaria,3, $1, cria_folha($2), $3); 
-        inicializa_pilha(&pilha);
-        //Escopo local não inicializado na pilha
-        if(pilha->num_tabelas == 1)
-            empilha(pilha);       
-        
         $$->valor = $1->valor - $3->valor;        
         gera_codigo_arit($$,"sub");       
     }
 | expressao '*' expressao	
     { 
         $$ = cria_nodo(exp_binaria,3, $1, cria_folha($2), $3); 
-        inicializa_pilha(&pilha);
-        //Escopo local não inicializado na pilha
-        if(pilha->num_tabelas == 1)
-            empilha(pilha);       
-        
         $$->valor = $1->valor * $3->valor;        
         gera_codigo_arit($$,"mult");          
     }
 | expressao '/' expressao	
     { 
         $$ = cria_nodo(exp_binaria,3, $1, cria_folha($2), $3); 
-        inicializa_pilha(&pilha);
-        //Escopo local não inicializado na pilha
-        if(pilha->num_tabelas == 1)
-            empilha(pilha);       
-        
         $$->valor = $1->valor / $3->valor;                
         gera_codigo_arit($$,"div");          
     }

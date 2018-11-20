@@ -91,13 +91,13 @@ void gera_codigo_atr(Pilha_Tabelas *pilha, NodoArvore *n){
 	n->reg = n->filhos[3]->reg;   
 }
 
-void gera_codigo_if(Pilha_Tabelas *pilha, NodoArvore *n){
+void gera_codigo_if(NodoArvore *n){
     iloc_list_init(n);
 
-    // Gera labels true e false para o if
+    // Gera labels true e false para o while
     char *label_true = gera_rotulo();
     char *label_false = gera_rotulo();
-    char *label_endif = gera_rotulo();    
+    char *label_end = gera_rotulo();    
 
     // Preenche os labels pendentes das operacoes de comparacao    
     patch(&(n->filhos[1]->patch_list_true),label_true);
@@ -111,22 +111,103 @@ void gera_codigo_if(Pilha_Tabelas *pilha, NodoArvore *n){
 	// Codigo se true (bloco_comandos)
    	iloc_list_append_code(n->filhos[3], n);
    	char *jumpI = "jumpI";
-   	iloc_list_append_op(n->code, iloc_create_op(NULL,jumpI,NULL,NULL,label_endif,NULL));
+   	iloc_list_append_op(n->code, iloc_create_op(NULL,jumpI,NULL,NULL,label_end,NULL));
    	// Label se false
 	iloc_list_append_op(n->code, iloc_create_op(label_false,nop,NULL,NULL,NULL,NULL));   		
 	// Codigo se false (caso exista else)
 	if(n->num_filhos > 4)
    	    iloc_list_append_code(n->filhos[5], n);
    	// Label endif
-	iloc_list_append_op(n->code, iloc_create_op(label_endif,nop,NULL,NULL,NULL,NULL));   		   	  
+	iloc_list_append_op(n->code, iloc_create_op(label_end,nop,NULL,NULL,NULL,NULL));  		
 }
 
-void gera_codigo_while(Pilha_Tabelas *pilha, NodoArvore *n){
-	printf("nop\n");
+void gera_codigo_while(NodoArvore *n){
+    iloc_list_init(n);
+
+    // Gera labels true e false para o if
+    char *label_true = gera_rotulo();
+    char *label_false = gera_rotulo();
+    char *label_start = gera_rotulo();    
+
+    // Preenche os labels pendentes das operacoes de comparacao    
+    patch(&(n->filhos[1]->patch_list_true),label_true);
+    patch(&(n->filhos[1]->patch_list_false),label_false);
+    
+   	// Label inicio do while (start)
+   	char *nop = "nop";
+	iloc_list_append_op(n->code, iloc_create_op(label_start,nop,NULL,NULL,NULL,NULL));    
+    // Codigo da expressao booleana do while    
+   	iloc_list_append_code(n->filhos[1], n);         
+   	// Label se true
+	iloc_list_append_op(n->code, iloc_create_op(label_true,nop,NULL,NULL,NULL,NULL));
+	// Codigo while (bloco_comandos)
+   	iloc_list_append_code(n->filhos[3], n);
+   	char *jumpI = "jumpI";
+   	iloc_list_append_op(n->code, iloc_create_op(NULL,jumpI,NULL,NULL,label_start,NULL));   	  	
+   	// Label se false
+	iloc_list_append_op(n->code, iloc_create_op(label_false,nop,NULL,NULL,NULL,NULL));   
 }
 
-void gera_codigo_do(Pilha_Tabelas *pilha, NodoArvore *n){
-	printf("nop\n");
+void gera_codigo_do(NodoArvore *n){
+    iloc_list_init(n);
+
+    // Gera labels true e false para o if
+    char *label_true = gera_rotulo();
+    char *label_false = gera_rotulo();
+
+    // Preenche os labels pendentes das operacoes de comparacao    
+    patch(&(n->filhos[3]->patch_list_true),label_true);
+    patch(&(n->filhos[3]->patch_list_false),label_false);    
+    
+   	// Label se true
+   	char *nop = "nop";
+	iloc_list_append_op(n->code, iloc_create_op(label_true,nop,NULL,NULL,NULL,NULL));
+	// Codigo "do" (bloco_comandos)
+   	iloc_list_append_code(n->filhos[1], n);
+    // Codigo da expressao booleana do while    
+   	iloc_list_append_code(n->filhos[3], n);   	
+   	// Label se false
+	iloc_list_append_op(n->code, iloc_create_op(label_false,nop,NULL,NULL,NULL,NULL));   
+}
+
+void  gera_codigo_or(NodoArvore *n){
+    iloc_list_init(n);
+
+    // Gera label se exp1 false (nao ocorreu curto-circuito)
+    char *label_false = gera_rotulo();
+    // Preenche os labels false pendentes da exp1
+    patch(&(n->filhos[0]->patch_list_false),label_false);
+    // Codigo da exp1
+   	iloc_list_append_code(n->filhos[0], n);
+   	// Label se exp1 false
+   	char *nop = "nop";
+	iloc_list_append_op(n->code, iloc_create_op(label_false,nop,NULL,NULL,NULL,NULL));
+    // Codigo da exp2
+   	iloc_list_append_code(n->filhos[2], n);	  
+
+    patch_list_concat(&(n->patch_list_true),&(n->filhos[0]->patch_list_true),&(n->filhos[2]->patch_list_true));
+ 	n->patch_list_false.list = n->filhos[2]->patch_list_false.list;
+ 	n->patch_list_false.size = n->filhos[2]->patch_list_false.size;        
+}
+
+void  gera_codigo_and(NodoArvore *n){
+    iloc_list_init(n);
+
+    // Gera label se exp1 true (nao ocorreu curto-circuito)
+    char *label_true = gera_rotulo();
+    // Preenche os labels true pendentes da exp1
+    patch(&(n->filhos[0]->patch_list_true),label_true);
+    // Codigo da exp1
+   	iloc_list_append_code(n->filhos[0], n);
+   	// Label se exp1 true
+   	char *nop = "nop";
+	iloc_list_append_op(n->code, iloc_create_op(label_true,nop,NULL,NULL,NULL,NULL));
+    // Codigo da exp2
+   	iloc_list_append_code(n->filhos[2], n);	  
+
+    patch_list_concat(&(n->patch_list_false),&(n->filhos[0]->patch_list_false),&(n->filhos[2]->patch_list_false));
+ 	n->patch_list_true.list = n->filhos[2]->patch_list_true.list;
+ 	n->patch_list_true.size = n->filhos[2]->patch_list_true.size;
 }
 
 
@@ -213,6 +294,22 @@ void patch_list_append(struct patch_list *plist, char **label){
     plist->list = (char***)realloc(plist->list,sizeof(char**)*plist->size+1);
     plist->list[plist->size] = label;
     plist->size++;
+}
+
+void patch_list_concat(struct patch_list *plist_dest, struct patch_list *plist1, struct patch_list *plist2){
+    plist_dest->list = (char***)realloc(plist_dest->list,sizeof(char**)*(plist_dest->size + plist1->size + plist2->size));
+
+    for(int i = plist_dest->size; i < plist1->size; i++)
+        plist_dest->list[i] = plist1->list[(plist1->size-1)*i];
+    plist1->size = 0;    
+    free(plist1->list);
+    
+    for(int i = plist_dest->size; i < plist2->size; i++)
+        plist_dest->list[i] = plist2->list[(plist2->size-1)*i];
+    plist2->size = 0;    
+    free(plist2->list);    
+    
+    plist_dest->size = plist_dest->size + plist1->size + plist2->size;
 }
 
 void gera_codigo_cmp(NodoArvore *n,char *op){

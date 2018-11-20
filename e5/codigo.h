@@ -28,12 +28,16 @@ void gera_codigo_cmp(NodoArvore *n,char *op);
 void gera_codigo_literal(NodoArvore *n);
 //
 void gera_codigo_identificador(Pilha_Tabelas *pilha, NodoArvore *n);
-
-void gera_codigo_if(Pilha_Tabelas *pilha, NodoArvore *n);
-
-void gera_codigo_while(Pilha_Tabelas *pilha, NodoArvore *n);
-
-void gera_codigo_do(Pilha_Tabelas *pilha, NodoArvore *n);
+//
+void gera_codigo_if(NodoArvore *n);
+//
+void gera_codigo_while(NodoArvore *n);
+//
+void  gera_codigo_or(NodoArvore *n);
+//
+void  gera_codigo_and(NodoArvore *n);
+//
+void gera_codigo_do(NodoArvore *n);
 //Inicializa atributo code de no da AST
 void iloc_list_init(NodoArvore *n);
 //Apenda operacao iloc em uma codigo (iloc_list)
@@ -46,5 +50,7 @@ ILOC* iloc_create_op(char *label, char *opcode, char *op1, char *op2, char *op3,
 void patch(struct patch_list *plist, char *label);
 //
 void patch_list_append(struct patch_list *plist, char **label);
+//
+void patch_list_concat(struct patch_list *plist_dest, struct patch_list *plist1, struct patch_list *plist2);
 
 #endif

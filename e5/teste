@@ -1,8 +1,5 @@
 //Os seguintes comandos de fluxo de controle: if sem else
 int main()
 {
-  int a;
-  a = 1;
-  a = 2;
-  if(a>0) then {};
+  if(1 < 2 || 1 < 2) then {};
 }

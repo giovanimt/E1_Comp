@@ -1,0 +1,17 @@
+addI rsp, 4 => rsp
+loadI 10 => r0
+addI rfp, 0 => r1
+store r0 => r1
+L0: nop 
+addI rfp, 0 => r2
+load r2 => r3
+loadI 1 => r4
+sub r3, r4 => r5
+addI rfp, 0 => r6
+store r5 => r6
+addI rfp, 0 => r7
+load r7 => r8
+loadI 5 => r9
+cmp_GT r8, r9 => r10
+cbr r10 => L0, L1
+L1: nop 
