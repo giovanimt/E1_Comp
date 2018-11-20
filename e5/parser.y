@@ -873,7 +873,10 @@ constr_cond:
 
 constr_cond_else:
   TK_PR_ELSE bloco_comandos
-{ $$ = cria_nodo(constr_cond_else,2,cria_folha($1),$2); }
+    { 
+        $$ = cria_nodo(constr_cond_else,2,cria_folha($1),$2);
+        $$->code = $2->code;
+    }
 | %empty
 { $$ = cria_nodo(constr_cond_else,0); }
 ;
@@ -1010,14 +1013,8 @@ expressao:
         //Escopo local não inicializado na pilha
         if(pilha->num_tabelas == 1)
             empilha(pilha);       
-        
-	if($1->valor <= $3->valor){
-		$$->valor = 1; //TRUE
-	}else{
-		$$->valor = 0; //FALSE
-	}
-             
-        gera_codigo_arit($$,"cmp_LE");          
+                      
+        gera_codigo_cmp($$,"cmp_LE");    
     }
 | expressao TK_OC_GE expressao
     { 
@@ -1026,14 +1023,8 @@ expressao:
         //Escopo local não inicializado na pilha
         if(pilha->num_tabelas == 1)
             empilha(pilha);       
-        
-	if($1->valor >= $3->valor){
-		$$->valor = 1; //TRUE
-	}else{
-		$$->valor = 0; //FALSE
-	}
-             
-        gera_codigo_arit($$,"cmp_GE");          
+                      
+        gera_codigo_cmp($$,"cmp_GE");           
     }
 | expressao TK_OC_EQ expressao
     { 
@@ -1042,14 +1033,8 @@ expressao:
         //Escopo local não inicializado na pilha
         if(pilha->num_tabelas == 1)
             empilha(pilha);       
-        
-	if($1->valor == $3->valor){
-		$$->valor = 1; //TRUE
-	}else{
-		$$->valor = 0; //FALSE
-	}
-               
-        gera_codigo_arit($$,"cmp_EQ");          
+                      
+        gera_codigo_cmp($$,"cmp_EQ");           
     }
 | expressao TK_OC_NE expressao
     { 
@@ -1058,14 +1043,8 @@ expressao:
         //Escopo local não inicializado na pilha
         if(pilha->num_tabelas == 1)
             empilha(pilha);       
-        
-	if($1->valor != $3->valor){
-		$$->valor = 1; //TRUE
-	}else{
-		$$->valor = 0; //FALSE
-	}           
-  
-        gera_codigo_arit($$,"cmp_NE");          
+                      
+        gera_codigo_cmp($$,"cmp_NE");            
     }
 | expressao '<' expressao
     { 
@@ -1074,14 +1053,8 @@ expressao:
         //Escopo local não inicializado na pilha
         if(pilha->num_tabelas == 1)
             empilha(pilha);       
-        
-	if($1->valor > $3->valor){
-		$$->valor = 1; //TRUE
-	}else{
-		$$->valor = 0; //FALSE
-	}
-          
-        gera_codigo_arit($$,"cmp_LT");          
+                      
+        gera_codigo_cmp($$,"cmp_LT");           
     }
 | expressao '>' expressao
     { 

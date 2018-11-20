@@ -97,6 +97,7 @@ void gera_codigo_if(Pilha_Tabelas *pilha, NodoArvore *n){
     // Gera labels true e false para o if
     char *label_true = gera_rotulo();
     char *label_false = gera_rotulo();
+    char *label_endif = gera_rotulo();    
 
     // Preenche os labels pendentes das operacoes de comparacao    
     patch(&(n->filhos[1]->patch_list_true),label_true);
@@ -109,12 +110,15 @@ void gera_codigo_if(Pilha_Tabelas *pilha, NodoArvore *n){
 	iloc_list_append_op(n->code, iloc_create_op(label_true,nop,NULL,NULL,NULL,NULL));
 	// Codigo se true (bloco_comandos)
    	iloc_list_append_code(n->filhos[3], n);
+   	char *jumpI = "jumpI";
+   	iloc_list_append_op(n->code, iloc_create_op(NULL,jumpI,NULL,NULL,label_endif,NULL));
    	// Label se false
 	iloc_list_append_op(n->code, iloc_create_op(label_false,nop,NULL,NULL,NULL,NULL));   		
 	// Codigo se false (caso exista else)
 	if(n->num_filhos > 4)
    	    iloc_list_append_code(n->filhos[5], n);
-   	       	    
+   	// Label endif
+	iloc_list_append_op(n->code, iloc_create_op(label_endif,nop,NULL,NULL,NULL,NULL));   		   	  
 }
 
 void gera_codigo_while(Pilha_Tabelas *pilha, NodoArvore *n){

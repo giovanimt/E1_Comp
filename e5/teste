@@ -3,6 +3,6 @@ int main()
 {
   int a;
   a = 1;
-  //a = 2;
-  if(a > 0) then {};
+  a = 2;
+  if(a>0) then {};
 }
