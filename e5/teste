@@ -1,4 +1,8 @@
-int f(){
-    int x <= 1;
-    int y <= 2;
+//Os seguintes comandos de fluxo de controle: if sem else
+int main()
+{
+  int a;
+  a = 1;
+  //a = 2;
+  if(a > 0) then {};
 }

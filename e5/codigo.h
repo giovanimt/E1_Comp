@@ -21,7 +21,9 @@ void gera_codigo_vl(Pilha_Tabelas *pilha, NodoArvore *n);
 //Gera codigo para atribuicao
 void gera_codigo_atr(Pilha_Tabelas *pilha, NodoArvore *n);
 //Gera codigo para exp aritmeticas
-void gera_codigo_arit(Pilha_Tabelas *pilha, NodoArvore *n, char *op);
+void gera_codigo_arit(NodoArvore *n, char *op);
+//
+void gera_codigo_cmp(NodoArvore *n,char *op);
 //
 void gera_codigo_literal(NodoArvore *n);
 //
@@ -40,5 +42,9 @@ void iloc_list_append_op(struct iloc_list *code, ILOC *op);
 void iloc_list_append_code(NodoArvore *origem, NodoArvore *destino);
 //Cria uma ILOC op
 ILOC* iloc_create_op(char *label, char *opcode, char *op1, char *op2, char *op3, char *op4);
+//
+void patch(struct patch_list *plist, char *label);
+//
+void patch_list_append(struct patch_list *plist, char **label);
 
 #endif

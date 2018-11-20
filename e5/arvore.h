@@ -35,6 +35,12 @@ struct iloc_list {
     int size; 
 };
 
+// Lista de "remendos"
+struct patch_list {
+    char ***list;
+    int size;
+};
+
 union Literal {
 	int bool_val;
 	int int_val;
@@ -122,9 +128,13 @@ typedef struct NodoArvore {
 	int tipo; //TODO: todos os nós da Árvore Sintática Abstrata (AST), gerada na etapa anterior, terão agora um campo que indica o seu tipo
 	int num_filhos;
 	struct NodoArvore **filhos;
+	//E5
 	struct iloc_list *code;
 	int valor;
 	char *reg;
+	struct patch_list patch_list_true;
+	struct patch_list patch_list_false;
+	
 } NodoArvore;
 
 NodoArvore* cria_nodo(enum NaoTerminalType type, int num_filhos, ...);

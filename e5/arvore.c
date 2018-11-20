@@ -32,7 +32,11 @@ NodoArvore* cria_nodo(enum NaoTerminalType type, int num_filhos, ...){
 	nodo_arvore->num_filhos = num_filhos;
 	nodo_arvore->filhos = NULL;
 	nodo_arvore->code = NULL;
-	nodo_arvore->reg = NULL;	
+	nodo_arvore->reg = NULL;
+	nodo_arvore->patch_list_true.list = NULL;
+	nodo_arvore->patch_list_true.size = 0;		
+	nodo_arvore->patch_list_false.list = NULL;
+	nodo_arvore->patch_list_false.size = 0;		
 
 	if(num_filhos > 0) {
 		nodo_arvore->filhos = (NodoArvore**)malloc(sizeof(NodoArvore*)*num_filhos);

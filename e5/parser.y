@@ -497,7 +497,12 @@ comando_simples:
         iloc_list_init($$);
         iloc_list_append_code($1,$$);
     }
-| contr_fluxo ';'  	{ $$ = cria_nodo(comando_simples,1,$1); }	
+| contr_fluxo ';'  	
+    { 
+        $$ = cria_nodo(comando_simples,1,$1); 
+        iloc_list_init($$);
+        iloc_list_append_code($1,$$);        
+    }	
 | entrada ';'		{ $$ = cria_nodo(comando_simples,1,$1); }	
 | saida			{ $$ = cria_nodo(comando_simples,1,$1); }		
 | retorno ';'		{ $$ = cria_nodo(comando_simples,1,$1); }	
@@ -855,13 +860,12 @@ constr_cond:
         $$ = cria_nodo(constr_cond,4,cria_folha($1),$3,cria_folha($5),$6); 
         adiciona_netos($$,$7);
 
-	//E5:
+	    //E5:
         inicializa_pilha(&pilha);
         //Escopo local não inicializado na pilha
         if(pilha->num_tabelas == 1)
-            empilha(pilha);  
-        // Copia o valor do nodo expressao para o valor do nodo atribuicao          
-        $$->valor = $3->valor;
+            empilha(pilha);
+              
 	    gera_codigo_if(pilha, $$);
 	
     }
@@ -964,7 +968,14 @@ expressao:
         $$->reg = $1->reg;
     }
     
-| '(' expressao ')' { $$ = cria_nodo(exp_parenteses,0); adiciona_filho($$,$2); }
+| '(' expressao ')' 
+    { 
+        $$ = cria_nodo(exp_parenteses,0); adiciona_filho($$,$2);
+        $$->valor = $2->valor;
+        $$->code = $2->code;
+        $$->reg = $2->reg;        
+        
+    }
 | com_pipes { $$ = $1; }
 | cham_func { $$ = $1; }
 | expressao '?' expressao ':' expressao { $$ = cria_nodo(exp_ternaria,5, $1,cria_folha($2), $3,cria_folha($4), $5); }
@@ -977,7 +988,7 @@ expressao:
             empilha(pilha);       
         
         $$->valor = $1->valor || $3->valor;                
-        gera_codigo_arit(pilha,$$,"or");          
+        gera_codigo_arit($$,"or");          
     }
 | expressao TK_OC_AND expressao
     { 
@@ -988,7 +999,7 @@ expressao:
             empilha(pilha);       
         
         $$->valor = $1->valor && $3->valor;                
-        gera_codigo_arit(pilha,$$,"and");          
+        gera_codigo_arit($$,"and");          
     }
 | expressao '&' expressao { $$ = cria_nodo(exp_binaria,3, $1, cria_folha($2), $3); }
 | expressao '|' expressao { $$ = cria_nodo(exp_binaria,3, $1, cria_folha($2), $3); }
@@ -1006,7 +1017,7 @@ expressao:
 		$$->valor = 0; //FALSE
 	}
              
-        gera_codigo_arit(pilha,$$,"cmp_LE");          
+        gera_codigo_arit($$,"cmp_LE");          
     }
 | expressao TK_OC_GE expressao
     { 
@@ -1022,7 +1033,7 @@ expressao:
 		$$->valor = 0; //FALSE
 	}
              
-        gera_codigo_arit(pilha,$$,"cmp_GE");          
+        gera_codigo_arit($$,"cmp_GE");          
     }
 | expressao TK_OC_EQ expressao
     { 
@@ -1038,7 +1049,7 @@ expressao:
 		$$->valor = 0; //FALSE
 	}
                
-        gera_codigo_arit(pilha,$$,"cmp_EQ");          
+        gera_codigo_arit($$,"cmp_EQ");          
     }
 | expressao TK_OC_NE expressao
     { 
@@ -1054,7 +1065,7 @@ expressao:
 		$$->valor = 0; //FALSE
 	}           
   
-        gera_codigo_arit(pilha,$$,"cmp_NE");          
+        gera_codigo_arit($$,"cmp_NE");          
     }
 | expressao '<' expressao
     { 
@@ -1070,7 +1081,7 @@ expressao:
 		$$->valor = 0; //FALSE
 	}
           
-        gera_codigo_arit(pilha,$$,"cmp_LT");          
+        gera_codigo_arit($$,"cmp_LT");          
     }
 | expressao '>' expressao
     { 
@@ -1079,14 +1090,8 @@ expressao:
         //Escopo local não inicializado na pilha
         if(pilha->num_tabelas == 1)
             empilha(pilha);       
-        
-	if($1->valor > $3->valor){
-		$$->valor = 1; //TRUE
-	}else{
-		$$->valor = 0; //FALSE
-	}
-              
-        gera_codigo_arit(pilha,$$,"cmp_GT");          
+                      
+        gera_codigo_cmp($$,"cmp_GT");          
     }
 | expressao '+' expressao	
     { 
@@ -1097,7 +1102,7 @@ expressao:
             empilha(pilha);       
         
         $$->valor = $1->valor + $3->valor;
-        gera_codigo_arit(pilha,$$,"add");
+        gera_codigo_arit($$,"add");
     }
 | expressao '-' expressao	
     { 
@@ -1108,7 +1113,7 @@ expressao:
             empilha(pilha);       
         
         $$->valor = $1->valor - $3->valor;        
-        gera_codigo_arit(pilha,$$,"sub");       
+        gera_codigo_arit($$,"sub");       
     }
 | expressao '*' expressao	
     { 
@@ -1119,7 +1124,7 @@ expressao:
             empilha(pilha);       
         
         $$->valor = $1->valor * $3->valor;        
-        gera_codigo_arit(pilha,$$,"mult");          
+        gera_codigo_arit($$,"mult");          
     }
 | expressao '/' expressao	
     { 
@@ -1130,7 +1135,7 @@ expressao:
             empilha(pilha);       
         
         $$->valor = $1->valor / $3->valor;                
-        gera_codigo_arit(pilha,$$,"div");          
+        gera_codigo_arit($$,"div");          
     }
 | expressao '%' expressao	{ $$ = cria_nodo(exp_binaria,3, $1, cria_folha($2), $3); }
 | expressao '^' expressao	{ $$ = cria_nodo(exp_binaria,3, $1, cria_folha($2), $3); }

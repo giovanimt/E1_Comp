@@ -92,7 +92,29 @@ void gera_codigo_atr(Pilha_Tabelas *pilha, NodoArvore *n){
 }
 
 void gera_codigo_if(Pilha_Tabelas *pilha, NodoArvore *n){
-	printf("nop\n");
+    iloc_list_init(n);
+
+    // Gera labels true e false para o if
+    char *label_true = gera_rotulo();
+    char *label_false = gera_rotulo();
+
+    // Preenche os labels pendentes das operacoes de comparacao    
+    patch(&(n->filhos[1]->patch_list_true),label_true);
+    patch(&(n->filhos[1]->patch_list_false),label_false);    
+    
+    // Codigo da expressao booleana do if    
+   	iloc_list_append_code(n->filhos[1], n);
+   	// Label se true
+   	char *nop = "nop";
+	iloc_list_append_op(n->code, iloc_create_op(label_true,nop,NULL,NULL,NULL,NULL));
+	// Codigo se true (bloco_comandos)
+   	iloc_list_append_code(n->filhos[3], n);
+   	// Label se false
+	iloc_list_append_op(n->code, iloc_create_op(label_false,nop,NULL,NULL,NULL,NULL));   		
+	// Codigo se false (caso exista else)
+	if(n->num_filhos > 4)
+   	    iloc_list_append_code(n->filhos[5], n);
+   	       	    
 }
 
 void gera_codigo_while(Pilha_Tabelas *pilha, NodoArvore *n){
@@ -125,11 +147,15 @@ ILOC* iloc_create_op(char *label, char *opcode, char *op1, char *op2, char *op3,
     ILOC *op = (ILOC*)malloc(sizeof(ILOC));
     op->prev = NULL;
     op->label = NULL;
-    op->opcode = strdup(opcode);
+    op->opcode = NULL;
     op->op1 = NULL;
     op->op2 = NULL;
     op->op3 = NULL;
     op->op4 = NULL;
+    if(label != NULL)
+        op->label = strdup(label);
+    if(opcode != NULL)
+        op->opcode = strdup(opcode);
     if(op1 != NULL)
         op->op1 = strdup(op1);
     if(op2 != NULL)
@@ -159,15 +185,46 @@ void iloc_list_append_code(NodoArvore *origem, NodoArvore *destino){
     
 }
 
-void gera_codigo_arit(Pilha_Tabelas *pilha, NodoArvore *n, char *op){
+void gera_codigo_arit(NodoArvore *n, char *op){
     iloc_list_init(n);
     
-	iloc_list_append_code(n->filhos[2], n);
 	iloc_list_append_code(n->filhos[0], n);
+	iloc_list_append_code(n->filhos[2], n);
 	
     char *reg = gera_registrador();	
     iloc_list_append_op(n->code, iloc_create_op(NULL,strdup(op),n->filhos[0]->reg,n->filhos[2]->reg,reg,NULL));    
     n->reg = reg; 
+}
+
+void patch(struct patch_list *plist, char *label){
+    for(int i = 0; i < plist->size; i++)
+        *(plist->list[i]) = label;
+        
+    free(plist->list);
+    plist->list = NULL;
+    plist->size = 0;
+}
+
+void patch_list_append(struct patch_list *plist, char **label){
+    plist->list = (char***)realloc(plist->list,sizeof(char**)*plist->size+1);
+    plist->list[plist->size] = label;
+    plist->size++;
+}
+
+void gera_codigo_cmp(NodoArvore *n,char *op){
+    iloc_list_init(n);
+    
+	iloc_list_append_code(n->filhos[0], n);
+	iloc_list_append_code(n->filhos[2], n);
+	
+    char *reg = gera_registrador();	
+    iloc_list_append_op(n->code, iloc_create_op(NULL,strdup(op),n->filhos[0]->reg,n->filhos[2]->reg,reg,NULL));    
+    n->reg = reg; 
+    
+    char *cbr = "cbr";
+    iloc_list_append_op(n->code, iloc_create_op(NULL,cbr,reg,NULL,NULL,NULL));
+    patch_list_append(&(n->patch_list_true),&(n->code->iloc->op3));
+    patch_list_append(&(n->patch_list_false),&(n->code->iloc->op4));
 }
 
 void gera_codigo_literal(NodoArvore *n){
@@ -229,13 +286,17 @@ void imprime_codigo(NodoArvore *arvore){
         if(op->label != NULL)
             printf("%s: ",op->label);
         printf("%s ",op->opcode);
+        if(!strcmp(op->opcode,"nop")){
+            printf("\n");
+            continue;
+        }
         if(op->op1 != NULL)
             printf("%s",op->op1);
         if(op->op2 != NULL)
             printf(", %s",op->op2);
         printf(" => ");
         if(op->op3 != NULL)
-            printf("%s ",op->op3);
+            printf("%s",op->op3);
         if(op->op4 != NULL)
             printf(", %s",op->op4);        
         printf("\n");
