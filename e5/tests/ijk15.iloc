@@ -15,4 +15,6 @@ L0: nop
 loadI 393 => r8
 addI rfp, 4 => r9
 store r8 => r9
+jumpI  => L2
 L1: nop 
+L2: nop 

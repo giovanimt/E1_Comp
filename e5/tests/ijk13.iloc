@@ -1,3 +1,4 @@
-loadI 2 => r0 
-addI rfp, 0 => r1 
-store r0 => r1 
+addI rsp, 4 => rsp
+loadI 2 => r0
+addI rfp, 0 => r1
+store r0 => r1
