@@ -1,5 +1,0 @@
-//Os seguintes comandos de fluxo de controle: if sem else
-int main()
-{
-  if(1 < 2 || 1 < 2) then {};
-}
