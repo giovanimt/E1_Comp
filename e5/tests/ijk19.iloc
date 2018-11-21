@@ -1,0 +1,37 @@
+addI rsp, 4 => rsp
+addI rsp, 4 => rsp
+addI rsp, 4 => rsp
+addI rsp, 4 => rsp
+addI rsp, 4 => rsp
+loadI 0 => r0
+addI rfp, 0 => r1
+store r0 => r1
+loadI 1 => r2
+addI rfp, 4 => r3
+store r2 => r3
+loadI 2 => r4
+addI rfp, 8 => r5
+store r4 => r5
+loadI 3 => r6
+addI rfp, 12 => r7
+store r6 => r7
+addI rfp, 0 => r8
+load r8 => r9
+addI rfp, 4 => r10
+load r10 => r11
+cmp_LT r9, r11 => r12
+cbr r12 => L1, L0
+L0: nop 
+addI rfp, 8 => r13
+load r13 => r14
+addI rfp, 12 => r15
+load r15 => r16
+cmp_LT r14, r16 => r17
+cbr r17 => L1, L2
+L1: nop 
+loadI 293 => r18
+addI rfp, 16 => r19
+store r18 => r19
+jumpI  => L3
+L2: nop 
+L3: nop 

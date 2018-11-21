@@ -464,7 +464,7 @@ bloco_comandos:
 	{ 
 	    $$ = cria_nodo(bloco_comandos,0); adiciona_netos($$,$2);
 	    iloc_list_init($$);
-        iloc_list_append_code($2,$$);
+        $$->code = $2->code;
 	}
 ;
 

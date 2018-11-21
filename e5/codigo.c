@@ -187,7 +187,7 @@ void  gera_codigo_or(NodoArvore *n){
 
     patch_list_concat(&(n->patch_list_true),&(n->filhos[0]->patch_list_true),&(n->filhos[2]->patch_list_true));
  	n->patch_list_false.list = n->filhos[2]->patch_list_false.list;
- 	n->patch_list_false.size = n->filhos[2]->patch_list_false.size;        
+ 	n->patch_list_false.size = n->filhos[2]->patch_list_false.size;
 }
 
 void  gera_codigo_and(NodoArvore *n){
@@ -300,16 +300,18 @@ void patch_list_concat(struct patch_list *plist_dest, struct patch_list *plist1,
     plist_dest->list = (char***)realloc(plist_dest->list,sizeof(char**)*(plist_dest->size + plist1->size + plist2->size));
 
     for(int i = plist_dest->size; i < plist1->size; i++)
-        plist_dest->list[i] = plist1->list[(plist1->size-1)*i];
+        plist_dest->list[i] = plist1->list[(plist1->size-1)*i];        
+    plist_dest->size = plist_dest->size + plist1->size;
+    
+    for(int i = plist_dest->size; i < plist1->size+plist2->size; i++)
+        plist_dest->list[i] = plist2->list[(plist2->size-1)*i];    
+    plist_dest->size = plist_dest->size + plist2->size;
+
     plist1->size = 0;    
     free(plist1->list);
-    
-    for(int i = plist_dest->size; i < plist2->size; i++)
-        plist_dest->list[i] = plist2->list[(plist2->size-1)*i];
+
     plist2->size = 0;    
     free(plist2->list);    
-    
-    plist_dest->size = plist_dest->size + plist1->size + plist2->size;
 }
 
 void gera_codigo_cmp(NodoArvore *n,char *op){
