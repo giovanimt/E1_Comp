@@ -1,0 +1,8 @@
+No de tabelas: 2
+No de simbolos 1a tabela 2
+Nome 2o simbolo main
+addI rsp, 4 => rsp
+addI rsp, 4 => rsp
+loadI 2 => r0
+addI rfp, 0 => r1
+store r0 => r1
