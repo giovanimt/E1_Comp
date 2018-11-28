@@ -1,10 +1,17 @@
 /* int mult (int z, int w)
 {
   int x;
-  x = z * w;
-  return x;
-}*/
+//  x = z * w;
+//  return x;
+}
+
 z int;
+*/
+int f(){
+  int k;
+  k = 2;
+}
+
 int main()
 {
   int x;

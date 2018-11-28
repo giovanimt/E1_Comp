@@ -177,8 +177,12 @@ programa:
     { 
         $$ = $1; arvore = $$; adiciona_filho($$,$2);
 	    iloc_list_init($$);
+	printf("code 1:\n");
+	imprime_codigo($1);
+	printf("code 2:\n");
+	imprime_codigo($2);
         iloc_list_append_code($1,$$);                	    
-        iloc_list_append_code($2,$$);
+        //iloc_list_append_code($2,$$);
     }
 ;
 
@@ -290,11 +294,13 @@ parametros:
 	{ 
 	$$ = cria_nodo(parametros,0); 
 	inicializa_pilha(&pilha);
+	empilha(pilha);
 	}
 
 | '(' lista_parametros ')'
 	{
 	$$ = cria_nodo(parametros,0); adiciona_netos($$,$2); 
+	inicializa_pilha(&pilha);
 	empilha(pilha);
 	}
 ;
@@ -340,6 +346,7 @@ bloco_comandos:
 
 	iloc_list_init($$);
         $$->code = $2->code;
+	//imprime_pilha(pilha);
 	}
 ;
 
@@ -404,9 +411,10 @@ var_local:
 
 	inicializa_pilha(&pilha);
         //Escopo local não inicializado na pilha
-        if(pilha->num_tabelas == 1)
-            empilha(pilha);		 
-	    
+        if(pilha->num_tabelas == 1){
+            empilha(pilha);
+	    printf ("oi");	 
+	}
 	add_vl(pilha, $$);
 
         iloc_list_init($$);
@@ -419,8 +427,10 @@ var_local:
 	
         inicializa_pilha(&pilha);
         //Escopo local não inicializado na pilha
-        if(pilha->num_tabelas == 1)
-            empilha(pilha);		    
+        if(pilha->num_tabelas == 1){
+            empilha(pilha);
+	    printf("oi");	 
+	}		    
 		    
 	add_vl(pilha, $$);
 	
@@ -475,8 +485,10 @@ atribuicao:
 
         inicializa_pilha(&pilha);
         //Escopo local não inicializado na pilha
-        if(pilha->num_tabelas == 1)
-            empilha(pilha);  
+        if(pilha->num_tabelas == 1){
+            empilha(pilha);
+	    printf("oi");	 
+	}
 
         // Copia o valor do nodo expressao para o valor do nodo atribuicao          
         $$->valor = $3->valor;
@@ -612,8 +624,10 @@ constr_cond:
 	//E5:
         inicializa_pilha(&pilha);
         //Escopo local não inicializado na pilha
-        if(pilha->num_tabelas == 1)
+        if(pilha->num_tabelas == 1){
             empilha(pilha);
+	    printf("oi");	 
+	}
               
 	gera_codigo_if($$);
 	}
@@ -640,8 +654,10 @@ constr_iter:
 	//E5:
         inicializa_pilha(&pilha);
         //Escopo local não inicializado na pilha
-        if(pilha->num_tabelas == 1)
-            empilha(pilha);  
+        if(pilha->num_tabelas == 1){
+            empilha(pilha);
+	    printf("oi");	 
+	}
 
 	gera_codigo_while($$);
 	}
@@ -653,8 +669,10 @@ constr_iter:
     	//E5:
         inicializa_pilha(&pilha);
         //Escopo local não inicializado na pilha
-        if(pilha->num_tabelas == 1)
-            empilha(pilha);  
+        if(pilha->num_tabelas == 1){
+            empilha(pilha);
+	    printf("oi");	 
+	} 
 
 	gera_codigo_do($$);
 	}

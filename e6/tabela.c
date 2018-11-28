@@ -139,10 +139,12 @@ void add_func(Pilha_Tabelas *pilha, NodoArvore *f1){
 	//adiciona simbolo na tabela
 	add_simbolo_tabela(func, pilha->tabelas[pilha->num_tabelas - 1]);
 
-/*
+
 	//pega o quarto filho do cabecalho que sao os parametros(= argumentos)...
 	NodoArvore *fc4 = (NodoArvore*)f1->filhos[2];
-	//testa se existem...
+	//printf("No Parametros: %d\n", fc4->num_filhos);
+	
+	/*testa se existem...
 	if(fc4->num_filhos == 0){
 		func->Argumentos = NULL;
 		func->num_argumentos = 0;
@@ -218,15 +220,7 @@ void add_vl(Pilha_Tabelas *pilha, NodoArvore *n){
 	//Definir valor
     	//Se existe atribuicao juntamente com a declaracao:
    	 if(n->filhos[4]){
-		//se a atribuicao for um INT
-        	if(n->filhos[5]->nodo.valor_lexico.type == INTEIRO) {
-			vl->valor = n->filhos[5]->nodo.valor_lexico.val.int_val;
-		}else{//se for um TK_IDENTIFICADOR
-			char *nome_atr = n->filhos[5]->nodo.valor_lexico.val.string_val;
-			//procura o simbolo na ultima tabela
-			Simbolo *s = busca_simbolo_global(pilha, nome_atr);
-			vl->valor = s->valor;
-		}
+		vl->valor = n->filhos[5]->nodo.valor_lexico.val.int_val;
 	}else{
 		vl->valor = 0;
 	}
@@ -257,3 +251,65 @@ Simbolo* busca_simbolo_local(Pilha_Tabelas *pilha, char *chave){
 	}
 	return NULL;
 }
+
+
+
+
+void imprime_pilha(Pilha_Tabelas *pilha){
+	printf("%d tabelas\n", pilha->num_tabelas);
+	for(int i=pilha->num_tabelas - 1; i >= 0; i--){//alterado para pegar sempre a tabela mais em cima da pilha
+		printf("tabela %d: %d simbolos\n", i, pilha->tabelas[i]->num_simbolos);
+		for(int j =0; j < pilha->tabelas[i]->num_simbolos; j++){
+			printf("nome simbolo: %s\n", pilha->tabelas[i]->simbolos[j]->chave);
+		}
+	}
+}
+
+void inicializa_pilha_RA(Pilha_RA* pilha, NodoArvore *n){
+	if(pilha == NULL){
+		pilha = malloc(sizeof(RAtivacao));
+		pilha->RAs = NULL;
+		char *op_loadI = "loadI";
+		/*TODO E6: pq esta dando core dumped?
+		iloc_list_append_op(n->code, iloc_create_op(NULL,op_loadI,"1024",NULL,"rfp",NULL));
+		iloc_list_append_op(n->code, iloc_create_op(NULL,op_loadI,"1024",NULL,"rsp",NULL));
+		iloc_list_append_op(n->code, iloc_create_op(NULL,op_loadI,"512",NULL,"rbss",NULL));*/
+	}
+}
+
+/*
+void criaRA(Lista_Padroes_RA *lista){
+	RAtivacao *RA = (RAtivacao*)malloc(sizeof(RAtivacao));
+
+	//Espacos que sao realmente inicializados ao EA ser empilhado:
+	RA->InicioRA = 0;
+	RA->VEstatico = 0; //eh sempre 0 pq sao sempre globais
+	RA->VDinamico = 0;
+	RA->EndRetorno = 0;
+	RA->ValorRetornado = 0;
+	
+	
+
+
+
+
+
+struct Variavel {
+	char* nome;
+	int valor;
+};
+
+
+	int num_parametros;
+	struct Variavel **Parametros;
+	int num_variaveis;
+	struct Variavel **Vlocais;
+	struct Variavel **Estados; //Guardando registradores como variaveis mesmo
+
+
+}
+
+void chama_func();
+
+void retorna_func();*/
+

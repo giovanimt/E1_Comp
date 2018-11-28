@@ -49,6 +49,42 @@ typedef struct Pilha_Tabelas {
 	Tabela **tabelas;
 } Pilha_Tabelas;
 
+
+
+
+
+struct Variavel {
+	char* nome;
+	int valor;
+};
+
+typedef struct RAtivacao {
+	int InicioRA;
+	int VEstatico;
+	int VDinamico;
+	int EndRetorno;
+	int ValorRetornado;
+	int num_parametros;
+	struct Variavel **Parametros;
+	int num_variaveis;
+	struct Variavel **Vlocais;
+	struct Variavel **Estados; //Guardando registradores como variaveis mesmo
+} RAtivacao;
+
+typedef struct Pilha_RA {
+	RAtivacao **RAs;
+} Pilha_RA;
+
+typedef struct Lista_Padroes_RA {
+	RAtivacao *next;
+	RAtivacao *RA;
+	char* nome;
+}Lista_Padroes_RA;
+
+
+
+
+
 //Funcoes tabela
 Tabela* cria_tabela();
 void add_simbolo_tabela(Simbolo *s, Tabela *t);
@@ -90,5 +126,14 @@ int analisa_args(Pilha_Tabelas *pilha, NodoArvore *n);
 Simbolo* busca_simbolo_local(Pilha_Tabelas *pilha, char *chave);
 Simbolo* busca_simbolo_global(Pilha_Tabelas *pilha, char *chave);
 
+void imprime_pilha(Pilha_Tabelas *pilha);
+
+void inicializa_pilha_RA(Pilha_RA *pilha, NodoArvore *n);
+
+void criaRA();
+
+void chama_func();
+
+void retorna_func();
 
 #endif

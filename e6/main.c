@@ -14,7 +14,7 @@ void libera (void *arvore);
 int main (int argc, char **argv)
 {
   int ret = yyparse(); 
-  imprime_codigo(arvore);
+  //imprime_codigo(arvore);
   libera(arvore);
   arvore = NULL;
   return ret;

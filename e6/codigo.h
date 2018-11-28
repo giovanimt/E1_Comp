@@ -8,35 +8,6 @@ Vinicius Castro 193026
 #include "arvore.h"
 #include "tabela.h"
 
-struct Variavel {
-	char* nome;
-	int valor;
-};
-
-typedef struct RAtivacao {
-	int InicioRA;
-	int VEstatico;
-	int VDinamico;
-	int EndRetorno;
-	int ValorRetornado;
-	int num_parametros;
-	struct Variavel **Parametros;
-	int num_variaveis;
-	struct Variavel **Vlocais;
-	struct Variavel **Estados; //Guardando registradores como variaveis mesmo
-} RAtivacao;
-
-typedef struct Pilha_RA {
-	RAtivacao **RAs;
-} Pilha_RA;
-
-typedef struct Lista_Padroes_RA {
-	RAtivacao *next;
-	RAtivacao *RA;
-	char* nome;
-}Lista_Padroes_RA;
-	
-
 
 void imprime_codigo(NodoArvore *arvore);
 //Função que gera o nome de um rótulo
@@ -81,15 +52,5 @@ void patch(struct patch_list *plist, char *label);
 void patch_list_append(struct patch_list *plist, char **label);
 //
 void patch_list_concat(struct patch_list *plist_dest, struct patch_list *plist1, struct patch_list *plist2);
-
-
-
-void inicializa_pilha_RA(Pilha_RA *pilha, NodoArvore *n);
-
-void criaRA();
-
-void chama_func();
-
-void retorna_func();
 
 #endif
