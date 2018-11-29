@@ -1,11 +1,17 @@
-code 1:
-code 2:
-addI rsp, 4 => rsp
+loadI 1024 => rfp
+loadI 1024 => rsp
+loadI 512 => rbss
+jumpI => L0
+L1: addI rsp, 4 => rsp
 loadI 2 => r0
 addI rfp, 4 => r1
 store r0 => r1
-code 1:
-code 2:
+L0: loadI 0 => r4
+store r4 => rsp
+storeAI r4 => rsp, 4
+storeAI r4 => rsp, 8
+storeAI r4 => rsp, 12
+addI rsp, 16 => rsp
 addI rsp, 4 => rsp
 addI rsp, 4 => rsp
 loadI 2 => r2

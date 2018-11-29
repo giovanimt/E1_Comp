@@ -36,6 +36,7 @@ typedef struct Simbolo {
 	int num_argumentos;
 	int deslocamento; // E5: deslocamento em bytes em relaçãõ ao endereço base da pilha/seg dados
 	int valor;
+	char *label;
 } Simbolo;
 
 typedef struct Tabela {
@@ -59,16 +60,13 @@ struct Variavel {
 };
 
 typedef struct RAtivacao {
-	int InicioRA;
-	int VEstatico;
-	int VDinamico;
-	int EndRetorno;
-	int ValorRetornado;
-	int num_parametros;
-	struct Variavel **Parametros;
-	int num_variaveis;
-	struct Variavel **Vlocais;
-	struct Variavel **Estados; //Guardando registradores como variaveis mesmo
+	int VDinamico; //end 0
+	int VEstatico; //end 4
+	int ValorRetornado; //end 8
+	int EndRetorno; //end 12
+	struct Variavel **Parametros; //end 16++
+	struct Variavel **Estados;
+	//Variaveis locais...
 } RAtivacao;
 
 typedef struct Pilha_RA {
@@ -130,7 +128,7 @@ void imprime_pilha(Pilha_Tabelas *pilha);
 
 void inicializa_pilha_RA(Pilha_RA *pilha, NodoArvore *n);
 
-void criaRA();
+void inicio_funcao(NodoArvore *n, Pilha_Tabelas *pilha);
 
 void chama_func();
 

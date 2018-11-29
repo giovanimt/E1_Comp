@@ -4,6 +4,7 @@ Vinicius Castro 193026
 */
 
 #include "tabela.h"
+#include "codigo.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -15,6 +16,8 @@ Vinicius Castro 193026
 #define NATUREZA_LITERAL_STRING     4
 #define NATUREZA_LITERAL_BOOL       5
 #define NATUREZA_IDENTIFICADOR      6
+
+char *rotulo_main = "L0";
 
 
 //Funcoes tabela
@@ -270,46 +273,115 @@ void inicializa_pilha_RA(Pilha_RA* pilha, NodoArvore *n){
 		pilha = malloc(sizeof(RAtivacao));
 		pilha->RAs = NULL;
 		char *op_loadI = "loadI";
-		/*TODO E6: pq esta dando core dumped?
+		char *op_jumpI = "jumpI";
 		iloc_list_append_op(n->code, iloc_create_op(NULL,op_loadI,"1024",NULL,"rfp",NULL));
 		iloc_list_append_op(n->code, iloc_create_op(NULL,op_loadI,"1024",NULL,"rsp",NULL));
-		iloc_list_append_op(n->code, iloc_create_op(NULL,op_loadI,"512",NULL,"rbss",NULL));*/
+		iloc_list_append_op(n->code, iloc_create_op(NULL,op_loadI,"512",NULL,"rbss",NULL));
+		iloc_list_append_op(n->code, iloc_create_op(NULL,op_jumpI,NULL,NULL,"L0",NULL));
 	}
 }
 
+
+void inicio_funcao(NodoArvore *n, Pilha_Tabelas *pilha){
+
+	int i = 1;
+	NodoArvore *f1 = n->filhos[0];
+
+	Simbolo *s;
+
+	if(!strcmp(f1->filhos[2]->nodo.valor_lexico.val.string_val, "main")){
+		s = busca_simbolo_local(pilha, "main");
+		s->label = rotulo_main;
+
+		char *op_loadI = "loadI";
+		char *op_store = "store";
+		char *op_storeAI = "storeAI";
+		char *op_addI = "addI";
+		char *reg_zerado = gera_registrador();
+
+		iloc_list_append_op(n->code, iloc_create_op(rotulo_main,op_loadI,"0",NULL,reg_zerado,NULL));
+		iloc_list_append_op(n->code, iloc_create_op(NULL,op_store,reg_zerado,NULL,"rsp",NULL));
+		iloc_list_append_op(n->code, iloc_create_op(NULL,op_storeAI,reg_zerado,NULL,"rsp","4"));
+		iloc_list_append_op(n->code, iloc_create_op(NULL,op_storeAI,reg_zerado,NULL,"rsp","8"));
+		iloc_list_append_op(n->code, iloc_create_op(NULL,op_storeAI,reg_zerado,NULL,"rsp","12"));
+		iloc_list_append_op(n->code, iloc_create_op(NULL,op_addI,"rsp","16","rsp",NULL));
+
+
+
+
+	}else{
+
+		NodoArvore *f2 = n->filhos[1];
+	
+		ILOC* op = f2->code->iloc;
+		while( i < f2->code->size){
+			op = op->prev;
+			i++;
+		}
+
+
+		s = busca_simbolo_local(pilha, f1->filhos[2]->nodo.valor_lexico.val.string_val);
+		op->label = gera_rotulo();
+		s->label = op->label;
+
+		//Aloca parametros por valor
+		//loadAI rfp, 12 => r0   // Obtém o parâmetro
+		//storeAI r0 => rfp, 20  // Salva o parâmetro na variável y
+		//loop
+
+	}
+	
+}	
+
+
 /*
-void criaRA(Lista_Padroes_RA *lista){
-	RAtivacao *RA = (RAtivacao*)malloc(sizeof(RAtivacao));
+void chama_func(){
 
-	//Espacos que sao realmente inicializados ao EA ser empilhado:
-	RA->InicioRA = 0;
-	RA->VEstatico = 0; //eh sempre 0 pq sao sempre globais
-	RA->VDinamico = 0;
-	RA->EndRetorno = 0;
-	RA->ValorRetornado = 0;
-	
-	
+Salva o atual rfp na pilha (como vínculo dinâmico)	store rfp => rsp
+Calcula o vínculo estático				loadI 0 => reg1
+							storeAI reg1 => rsp, 4
+Passa o endereço de retorno para o chamado		addI rpc, X => reg2
+							storeAI reg2 => rsp, 12
 
 
+Passa os parâmetros (organizando-os na pilha)
+loadAI  rfp, 0 => r0   // Carrega o valor da variável x em r0
+storeAI r0 => rsp, 16+Y  // Empilha o parâmetro
+loop
+
+//i2i rsp => rfp //Atualiza rfp
+
+addI rsp, Y_final => rsp    // Atualiza o rsp (SP)
 
 
+Transfere o controle para o chamado rpc
+jumpI => Label            // Salta para o início da função chamada
 
-struct Variavel {
-	char* nome;
-	int valor;
-};
-
-
-	int num_parametros;
-	struct Variavel **Parametros;
-	int num_variaveis;
-	struct Variavel **Vlocais;
-	struct Variavel **Estados; //Guardando registradores como variaveis mesmo
-
+Recebe o resultado
+loadAI rsp, 8 => r0   // Retorno da função, carrega o valor de retorno
+storeAI r0 => rfp, 0   // Salva o retorno na variável x
 
 }
 
-void chama_func();
+void retorna_func(){
 
-void retorna_func();*/
+
+Atualiza o estado de execução do chamador
+
+
+Disponibiliza o valor de retorno para o chamador
+storeAI r0 => rfp, 8  // Registra o valor de retorno
+
+
+loadAI rfp, 0 => reg_end_ret    // Obtém end. retorno
+
+Atualiza o rfp e o rsp
+load rfp => r2    // Obtém rfp (RFP) salvo
+i2i rfp => rsp        // Atualiza o rsp (SP)
+i2i r2 => rfp        // Atualiza o rfp (RFP)
+
+Transfere o controle rpc
+jump => reg_end_ret             // Salta para o endereço de retorno
+
+*/
 

@@ -177,12 +177,8 @@ programa:
     { 
         $$ = $1; arvore = $$; adiciona_filho($$,$2);
 	    iloc_list_init($$);
-	printf("code 1:\n");
-	imprime_codigo($1);
-	printf("code 2:\n");
-	imprime_codigo($2);
-        iloc_list_append_code($1,$$);                	    
-        //iloc_list_append_code($2,$$);
+        //iloc_list_append_code($1,$$);                	    
+        iloc_list_append_code($2,$$);
     }
 ;
 
@@ -270,6 +266,10 @@ funcao:
 	$$ = cria_nodo(funcao,2,$1,$2); 
 
 	iloc_list_init($$);
+
+	//E6:
+	inicio_funcao($$, pilha);
+	
         iloc_list_append_code($2,$$);
 	}
 ;
@@ -338,6 +338,9 @@ bloco_comandos:
 	$$ = cria_nodo(bloco_comandos,0); 
 
 	iloc_list_init($$);
+
+	//FUNCAO VAZIA
+	iloc_list_append_op($$->code, iloc_create_op(NULL,"addI","rsp","0","rsp",NULL));
 	}
 
 | '{' sequencia_comandos_simples '}'

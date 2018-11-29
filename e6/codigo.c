@@ -9,7 +9,7 @@ Vinicius Castro 193026
 #include <stdarg.h>
 #include "codigo.h"
 
-int num_rotulos = 0;
+int num_rotulos = 1;
 int num_regs = 0;
 
 //Função que gera o nome de um rótulo
@@ -254,8 +254,9 @@ ILOC* iloc_create_op(char *label, char *opcode, char *op1, char *op2, char *op3,
 }
 
 void iloc_list_append_code(NodoArvore *origem, NodoArvore *destino){
+    //code = tamanho codigo a ser apendado
     ILOC **code = (ILOC**)malloc(sizeof(ILOC*)*origem->code->size);
-
+    //
     ILOC *op = origem->code->iloc;
     for(int i=origem->code->size-1; i>=0; i--)
     {
@@ -388,13 +389,13 @@ void imprime_codigo(NodoArvore *arvore){
         op = code[i];
         if(op->label != NULL)
             printf("%s: ",op->label);
-        printf("%s ",op->opcode);
+        printf("%s",op->opcode);
         if(!strcmp(op->opcode,"nop")){
             printf("\n");
             continue;
         }
         if(op->op1 != NULL)
-            printf("%s",op->op1);
+            printf(" %s",op->op1);
         if(op->op2 != NULL)
             printf(", %s",op->op2);
         printf(" => ");
