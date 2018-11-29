@@ -3,15 +3,6 @@ Giovani Tirello 252741
 Vinicius Castro 193026
 */
 
-/*
-E4:
-1: Ver TODOs de Novo tipo, var globais e var locais e Funcoes
-   Ver onde colocar certo os empilha() e desempilha()
-   OBS: ja foi colocado um empilha em add_func
-2: Falta ver se foi declarado quando usado
-3 a 7 nao implementados
-*/
-
 #ifndef __tabela__
 #define __tabela__
 
@@ -130,8 +121,8 @@ void inicializa_pilha_RA(Pilha_RA *pilha, NodoArvore *n);
 
 void inicio_funcao(NodoArvore *n, Pilha_Tabelas *pilha);
 
-void chama_func();
+void chama_func(NodoArvore *n, Pilha_Tabelas *pilha);
 
-void retorna_func();
+void retorna_func(NodoArvore *n);
 
 #endif

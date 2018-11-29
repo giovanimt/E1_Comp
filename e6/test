@@ -1,15 +1,12 @@
-/* int mult (int z, int w)
-{
-  int x;
-//  x = z * w;
-//  return x;
-}
-
 z int;
-*/
+
+int g(){}
+
 int f(){
   int k;
+  g();
   k = 2;
+  return k;
 }
 
 int main()
@@ -17,5 +14,5 @@ int main()
   int x;
   int y;
   x = 2;
-  /// y = mult(x, x);
+  y = f();
 }

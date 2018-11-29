@@ -125,7 +125,7 @@ union Nodo {
 typedef struct NodoArvore {
 	union Nodo nodo;
 	int type; // 0 valor_lexico, 1 nao_terminal
-	int tipo; //TODO: todos os nós da Árvore Sintática Abstrata (AST), gerada na etapa anterior, terão agora um campo que indica o seu tipo
+	int tipo; 
 	int num_filhos;
 	struct NodoArvore **filhos;
 	//E5

@@ -396,13 +396,24 @@ comando_simples:
 	
 | entrada ';'		{;}	
 | saida			{;}		
-| retorno ';'		{ $$ = cria_nodo(comando_simples,1,$1); }	
-| break_t ';'		{ $$ = cria_nodo(comando_simples,1,$1); }	
-| continue_t ';'	{ $$ = cria_nodo(comando_simples,1,$1); }	
-| case_t		{ $$ = cria_nodo(comando_simples,1,$1); }		
-| cham_func ';'		{ $$ = cria_nodo(comando_simples,1,$1); }	
-| com_shift ';'		{ $$ = cria_nodo(comando_simples,1,$1); }	
-| com_pipes ';'		{ $$ = cria_nodo(comando_simples,1,$1); }	
+| retorno ';'
+	{
+	$$ = cria_nodo(comando_simples,1,$1);
+	iloc_list_init($$);
+	iloc_list_append_code($1,$$); 
+	}	
+| break_t ';'		{;}	
+| continue_t ';'	{;}	
+| case_t		{;}		
+| cham_func ';'		
+	{
+	$$ = cria_nodo(comando_simples,1,$1); 
+	iloc_list_init($$);
+        iloc_list_append_code($1,$$); 
+	}	
+
+| com_shift ';'		{;}	
+| com_pipes ';'		{;}	
 ;
 
 
@@ -525,6 +536,10 @@ retorno:
   TK_PR_RETURN expressao
 	{
 	$$ = cria_nodo(retorno,2,cria_folha($1), $2);
+	$$->reg = $2->reg;
+	iloc_list_init($$);
+	iloc_list_append_code($2,$$);
+	retorna_func($$);
 	}
 ;
 
@@ -544,6 +559,8 @@ cham_func:
 	{
 	$$ = cria_nodo(cham_func,1,cria_folha($1));
 	adiciona_netos($$,$3);
+	iloc_list_init($$);
+	chama_func($$, pilha);
 	}
 ;
 
@@ -557,7 +574,7 @@ cham_func_arg:
 | point cham_func_fim
 	{
 	$$ = cria_nodo(cham_func,1, cria_folha($1));
-	adiciona_netos($$,$2);
+	adiciona_netos($$,$2);	
 	}
 
 | cham_func_fim
@@ -626,7 +643,7 @@ constr_cond:
 
 	//E5:
         inicializa_pilha(&pilha);
-        //Escopo local não inicializado na pilha
+        //TODO: Escopo local não inicializado na pilha
         if(pilha->num_tabelas == 1){
             empilha(pilha);
 	    printf("oi");	 

@@ -143,7 +143,7 @@ void add_func(Pilha_Tabelas *pilha, NodoArvore *f1){
 	add_simbolo_tabela(func, pilha->tabelas[pilha->num_tabelas - 1]);
 
 
-	//pega o quarto filho do cabecalho que sao os parametros(= argumentos)...
+	//TODO: pega o quarto filho do cabecalho que sao os parametros(= argumentos)...
 	NodoArvore *fc4 = (NodoArvore*)f1->filhos[2];
 	//printf("No Parametros: %d\n", fc4->num_filhos);
 	
@@ -186,7 +186,7 @@ void add_func(Pilha_Tabelas *pilha, NodoArvore *f1){
 			//pega o terceiro filho do parametro...
 			NodoArvore *fp3 = (NodoArvore*)param->filhos[2];
 			//...para definir a *chave...
-			func->Argumentos[i]->chave = fp3->nodo.valor_lexico.val.string_val; //TODO:pode causar ponteiro pendente?
+			func->Argumentos[i]->chave = fp3->nodo.valor_lexico.val.string_val; //pode causar ponteiro pendente?
 
 			//adiciona parametro na tabela
 			add_simbolo_tabela(func->Argumentos[i], pilha->tabelas[pilha->num_tabelas - 1]);
@@ -324,6 +324,7 @@ void inicio_funcao(NodoArvore *n, Pilha_Tabelas *pilha){
 		op->label = gera_rotulo();
 		s->label = op->label;
 
+		//TODO:
 		//Aloca parametros por valor
 		//loadAI rfp, 12 => r0   // Obtém o parâmetro
 		//storeAI r0 => rfp, 20  // Salva o parâmetro na variável y
@@ -334,54 +335,83 @@ void inicio_funcao(NodoArvore *n, Pilha_Tabelas *pilha){
 }	
 
 
-/*
-void chama_func(){
 
-Salva o atual rfp na pilha (como vínculo dinâmico)	store rfp => rsp
-Calcula o vínculo estático				loadI 0 => reg1
-							storeAI reg1 => rsp, 4
-Passa o endereço de retorno para o chamado		addI rpc, X => reg2
-							storeAI reg2 => rsp, 12
+void chama_func(NodoArvore *n, Pilha_Tabelas *pilha){
+
+//Salva o atual rfp na pilha (como vínculo dinâmico)	store rfp => rsp
+	iloc_list_append_op(n->code, iloc_create_op(NULL,"store","rfp",NULL,"rsp",NULL));
 
 
-Passa os parâmetros (organizando-os na pilha)
+//Calcula o vínculo estático				loadI 0 => reg1
+//						storeAI reg1 => rsp, 4
+	char *reg_zerado = gera_registrador();
+	iloc_list_append_op(n->code, iloc_create_op(NULL,"loadI","0",NULL,reg_zerado,NULL));
+	iloc_list_append_op(n->code, iloc_create_op(NULL,"storeAI",reg_zerado,NULL,"rsp","4"));
+
+
+//TODO: Passa o endereço de retorno para o chamado		addI rpc, X => reg2
+//						storeAI reg2 => rsp, 12
+
+
+
+/*TODO: Passa os parâmetros (organizando-os na pilha)
 loadAI  rfp, 0 => r0   // Carrega o valor da variável x em r0
 storeAI r0 => rsp, 16+Y  // Empilha o parâmetro
-loop
+loop*/
+
+
+
 
 //i2i rsp => rfp //Atualiza rfp
+	iloc_list_append_op(n->code, iloc_create_op(NULL,"i2i","rsp",NULL,"rfp",NULL));
 
-addI rsp, Y_final => rsp    // Atualiza o rsp (SP)
+
+//TODO: addI rsp, Y_final => rsp    // Atualiza o rsp (SP)
 
 
-Transfere o controle para o chamado rpc
-jumpI => Label            // Salta para o início da função chamada
 
-Recebe o resultado
+
+//Transfere o controle para o chamado rpc
+//jumpI => Label            // Salta para o início da função chamada
+	Simbolo *s;
+	s = busca_simbolo_global(pilha, n->filhos[0]->nodo.valor_lexico.val.string_val);
+	iloc_list_append_op(n->code, iloc_create_op(NULL,"jumpI",NULL,NULL,s->label,NULL));
+
+
+/*Recebe o resultado
 loadAI rsp, 8 => r0   // Retorno da função, carrega o valor de retorno
-storeAI r0 => rfp, 0   // Salva o retorno na variável x
-
+storeAI r0 => rfp, 0   // Salva o retorno na variável x*/
+	n->reg = gera_registrador();
+	iloc_list_append_op(n->code, iloc_create_op(NULL,"loadAI","rsp","8",n->reg,NULL));
 }
 
-void retorna_func(){
 
 
-Atualiza o estado de execução do chamador
+
+void retorna_func(NodoArvore *n){
+
+//Disponibiliza o valor de retorno para o chamador
+//storeAI r0 => rfp, 8  // Registra o valor de retorno
+	iloc_list_append_op(n->code, iloc_create_op(NULL,"storeAI",n->reg,NULL,"rfp","8"));
 
 
-Disponibiliza o valor de retorno para o chamador
-storeAI r0 => rfp, 8  // Registra o valor de retorno
+//loadAI rfp, 12 => reg_end_ret    // Obtém end. retorno
+	char *reg_end_ret = gera_registrador();
+	iloc_list_append_op(n->code, iloc_create_op(NULL,"loadAI","rfp","12",reg_end_ret,NULL));
 
 
-loadAI rfp, 0 => reg_end_ret    // Obtém end. retorno
-
-Atualiza o rfp e o rsp
+/* Atualiza o rfp e o rsp
 load rfp => r2    // Obtém rfp (RFP) salvo
 i2i rfp => rsp        // Atualiza o rsp (SP)
-i2i r2 => rfp        // Atualiza o rfp (RFP)
+i2i r2 => rfp        // Atualiza o rfp (RFP)*/
+	char *reg_vin_din = gera_registrador();
+	iloc_list_append_op(n->code, iloc_create_op(NULL,"load","rfp",NULL,reg_vin_din,NULL));
+	iloc_list_append_op(n->code, iloc_create_op(NULL,"i2i","rfp",NULL,"rsp",NULL));
+	iloc_list_append_op(n->code, iloc_create_op(NULL,"i2i",reg_vin_din,NULL,"rfp",NULL));
 
-Transfere o controle rpc
-jump => reg_end_ret             // Salta para o endereço de retorno
 
-*/
+//Transfere o controle rpc
+//jump => reg_end_ret             // Salta para o endereço de retorno
+	iloc_list_append_op(n->code, iloc_create_op(NULL,"jump",NULL,NULL,reg_end_ret,NULL));
+}
 
