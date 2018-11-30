@@ -2,17 +2,20 @@ z int;
 
 int g(){}
 
-int f(){
+int f(int l, int m){
   int k;
+  int j <= l;
   g();
   k = 2;
-  return k;
+  return l;
 }
 
 int main()
 {
   int x;
   int y;
+  int d;
+  d = 3;
   x = 2;
-  y = f();
+  y = f(x, d);
 }

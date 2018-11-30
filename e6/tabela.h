@@ -14,8 +14,7 @@ Vinicius Castro 193026
 #include <stdlib.h>
 #include <stdarg.h>
 
-//Arg_Func = *chave tipo eh_cons
-//Cmp_Usr = *chave tipo encapsulamento
+typedef struct Lista_Argumentos Lista_Argumentos;
 
 typedef struct Simbolo {
 	char *chave;
@@ -23,7 +22,7 @@ typedef struct Simbolo {
 	int col;
 	int tipo;  //int
 	int tamanho; //4
-	struct Simbolo **Argumentos; //argumentos caso for uma funcao
+	Lista_Argumentos *Argumentos; //argumentos caso for uma funcao
 	int num_argumentos;
 	int deslocamento; // E5: deslocamento em bytes em relaçãõ ao endereço base da pilha/seg dados
 	int valor;
@@ -41,7 +40,10 @@ typedef struct Pilha_Tabelas {
 	Tabela **tabelas;
 } Pilha_Tabelas;
 
-
+struct Lista_Argumentos {
+	struct Simbolo *Argumento;
+	struct Lista_Argumentos *next;
+};
 
 
 

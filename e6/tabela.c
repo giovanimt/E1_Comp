@@ -124,6 +124,7 @@ void add_vg(Pilha_Tabelas *pilha, NodoArvore *n){
 
 //Funcao Funcao
 void add_func(Pilha_Tabelas *pilha, NodoArvore *f1){
+
 	//inicializa simbolo
 	Simbolo *func = (Simbolo*)malloc(sizeof(Simbolo));
 
@@ -143,57 +144,54 @@ void add_func(Pilha_Tabelas *pilha, NodoArvore *f1){
 	add_simbolo_tabela(func, pilha->tabelas[pilha->num_tabelas - 1]);
 
 
-	//TODO: pega o quarto filho do cabecalho que sao os parametros(= argumentos)...
-	NodoArvore *fc4 = (NodoArvore*)f1->filhos[2];
+	// pega o quarto filho do cabecalho que sao os parametros(= argumentos)...
+	NodoArvore *fc4 = (NodoArvore*)f1->filhos[3];
 	//printf("No Parametros: %d\n", fc4->num_filhos);
 	
-	/*testa se existem...
+	//testa se existem...
 	if(fc4->num_filhos == 0){
 		func->Argumentos = NULL;
 		func->num_argumentos = 0;
 	}else{
-		func->Argumentos = (Simbolo**)malloc(sizeof(Simbolo*));
-		NodoArvore *param = (NodoArvore*)malloc(sizeof(NodoArvore));
-		NodoArvore *fp2 = (NodoArvore*)malloc(sizeof(NodoArvore));
-		NodoArvore *fp3 = (NodoArvore*)malloc(sizeof(NodoArvore));
+		//Se existem aloca argumentos na Lista de Simbolos e os empilha
 		func->num_argumentos = fc4->num_filhos;
+		func->Argumentos = (Lista_Argumentos*)malloc(sizeof(Lista_Argumentos));
+		Lista_Argumentos *arg = func->Argumentos;
+		NodoArvore *param;
+		NodoArvore *fp3;
+		int desloc = 16;
 		//para cada parametro...
-		for(int i = 0; i < fc4->num_filhos; i++){
-			func->Argumentos = (Simbolo**) realloc(func->Argumentos, (i + 1) * sizeof(Simbolo*));
-			
+		for(int i = 0; i < func->num_argumentos; i++){
 			//Anula ou zera componentes de simbolo que nao sao necessarios para um argumento
-			func->Argumentos[i]->line = 0;
-			func->Argumentos[i]->col = 0;
-			func->Argumentos[i]->natureza = 0;
-			func->Argumentos[i]->eh_static = 0;
-			func->Argumentos[i]->encapsulamento = 0;
-			func->Argumentos[i]->Argumentos = NULL;
-			func->Argumentos[i]->Campos = NULL;
+			arg->Argumento = (Simbolo*)malloc(sizeof(Simbolo));
+			arg->next = (Lista_Argumentos*)malloc(sizeof(Lista_Argumentos));
 
+			arg->Argumento->line = 0;
+			arg->Argumento->col = 0;
+			arg->Argumento->Argumentos = NULL;
+			arg->Argumento->num_argumentos = 0;
+			arg->Argumento->tipo = TIPO_INT;
+			arg->Argumento->tamanho = 4;
+			arg->Argumento->valor = 0;
+
+			
+			arg->Argumento->deslocamento = desloc;
+			
 			param = fc4->filhos[i];
-			//pega o primeiro filho do parametro para ver se eh cons
-			if(param->filhos[0]==NULL){
-				func->Argumentos[i]->eh_cons = 0;
-			}else{
-				func->Argumentos[i]->eh_cons = 1;
-			}
 
-			//pega o segundo filho do parametro...
-			NodoArvore *fp2 = (NodoArvore*)param->filhos[1];
-			//...para definir o tipo e tamanho
-			define_tipo(func->Argumentos[i],fp2);
 
 			//pega o terceiro filho do parametro...
 			NodoArvore *fp3 = (NodoArvore*)param->filhos[2];
 			//...para definir a *chave...
-			func->Argumentos[i]->chave = fp3->nodo.valor_lexico.val.string_val; //pode causar ponteiro pendente?
+			arg->Argumento->chave = fp3->nodo.valor_lexico.val.string_val;
 
 			//adiciona parametro na tabela
-			add_simbolo_tabela(func->Argumentos[i], pilha->tabelas[pilha->num_tabelas - 1]);
+			add_simbolo_tabela(arg->Argumento, pilha->tabelas[pilha->num_tabelas - 1]);
+			arg = arg->next;
+			desloc = desloc + 4;
 		}
 	
 	}
-*/	
 	
 }
 
@@ -218,7 +216,10 @@ void add_vl(Pilha_Tabelas *pilha, NodoArvore *n){
 	//E5: considerar somente INT
 	vl->tipo = TIPO_INT;
 	vl->tamanho = 4;
-	vl->deslocamento = vl->tamanho*pilha->tabelas[pilha->num_tabelas - 1]->num_simbolos;
+	
+	//printf("Num Simbolos %d\n", vl->tamanho*pilha->tabelas[pilha->num_tabelas - 1]->num_simbolos);
+	vl->deslocamento = 16 - 4 + vl->tamanho*pilha->tabelas[pilha->num_tabelas - 1]->num_simbolos;
+	//printf("Deslocamento %d\n", vl->deslocamento);
 	
 	//Definir valor
     	//Se existe atribuicao juntamente com a declaracao:
@@ -324,11 +325,35 @@ void inicio_funcao(NodoArvore *n, Pilha_Tabelas *pilha){
 		op->label = gera_rotulo();
 		s->label = op->label;
 
-		//TODO:
+
+		//TODO: Precisa Fazer?
 		//Aloca parametros por valor
 		//loadAI rfp, 12 => r0   // Obtém o parâmetro
 		//storeAI r0 => rfp, 20  // Salva o parâmetro na variável y
 		//loop
+
+		/*
+
+		//printf("Num params %d\n", s->num_argumentos);
+
+		int desloc = 16;
+		char *des;
+		char *reg_temp = gera_registrador();
+
+		for(int i = 0; i < s->num_argumentos; i++){
+			sprintf(des, "%d", desloc);   
+			if(i==0){
+				iloc_list_append_op(n->code, iloc_create_op(s->label,"loadAI","rfp",des,reg_temp,NULL));
+			}else{
+				iloc_list_append_op(n->code, iloc_create_op(NULL,"loadAI","rfp",des,reg_temp,NULL));
+			}
+
+			iloc_list_append_op(n->code, iloc_create_op(s->label,"storeAI",reg_temp,NULL,"rfp",NULL));
+
+
+			desloc = desloc+4;
+			i++;
+		}*/
 
 	}
 	
@@ -349,16 +374,37 @@ void chama_func(NodoArvore *n, Pilha_Tabelas *pilha){
 	iloc_list_append_op(n->code, iloc_create_op(NULL,"storeAI",reg_zerado,NULL,"rsp","4"));
 
 
-//TODO: Passa o endereço de retorno para o chamado		addI rpc, X => reg2
-//						storeAI reg2 => rsp, 12
 
-
-
-/*TODO: Passa os parâmetros (organizando-os na pilha)
+/* Passa os parâmetros (organizando-os na pilha)
 loadAI  rfp, 0 => r0   // Carrega o valor da variável x em r0
 storeAI r0 => rsp, 16+Y  // Empilha o parâmetro
 loop*/
+	//printf("Num filhos: %d", n->num_filhos);
 
+	Simbolo *s, *s1;
+	s = busca_simbolo_global(pilha, n->filhos[0]->nodo.valor_lexico.val.string_val);
+	int desloc = 16;
+	char var_des[50];
+	char par_des[50];
+	char *reg_temp = gera_registrador();
+	sprintf(par_des,"%i", desloc); 
+	for(int i = 0; i < s->num_argumentos; i++){
+		s1 = busca_simbolo_global(pilha, n->filhos[i+1]->filhos[0]->nodo.valor_lexico.val.string_val);
+		sprintf(var_des,"%i", s1->deslocamento); 
+		//printf("Nome var: %s\n", n->filhos[i+1]->filhos[0]->nodo.valor_lexico.val.string_val);
+		iloc_list_append_op(n->code, iloc_create_op(NULL,"loadAI","rfp",var_des,reg_temp,NULL));
+		iloc_list_append_op(n->code, iloc_create_op(NULL,"storeAI",reg_temp,NULL,"rsp",par_des));
+		desloc = desloc+4;
+
+		sprintf(par_des,"%i", desloc); 
+	}
+
+
+
+// Passa o endereço de retorno para o chamado	addI rpc, X => reg2
+//						storeAI reg2 => rsp, 12
+	iloc_list_append_op(n->code, iloc_create_op(NULL,"addI","rpc","5",reg_temp,NULL));
+	iloc_list_append_op(n->code, iloc_create_op(NULL,"storeAI",reg_temp,NULL,"rsp","12"));
 
 
 
@@ -366,15 +412,13 @@ loop*/
 	iloc_list_append_op(n->code, iloc_create_op(NULL,"i2i","rsp",NULL,"rfp",NULL));
 
 
-//TODO: addI rsp, Y_final => rsp    // Atualiza o rsp (SP)
-
+// addI rsp, Y_final => rsp    // Atualiza o rsp (SP)
+	iloc_list_append_op(n->code, iloc_create_op(NULL,"addI","rsp",par_des,"rsp",NULL));
 
 
 
 //Transfere o controle para o chamado rpc
 //jumpI => Label            // Salta para o início da função chamada
-	Simbolo *s;
-	s = busca_simbolo_global(pilha, n->filhos[0]->nodo.valor_lexico.val.string_val);
 	iloc_list_append_op(n->code, iloc_create_op(NULL,"jumpI",NULL,NULL,s->label,NULL));
 
 

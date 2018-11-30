@@ -1,0 +1,25 @@
+
+int change(int b)
+{
+  int a <= 393;
+  return a;
+}
+
+int wrong(int b)
+{
+  int a <= 432;
+  return a;
+}
+
+int main()
+{
+  int a;
+  int b;
+  a = 1;
+  b = 234;
+  if (a > 0) then {
+    b = change(b);
+  }else{
+    b = wrong(b);
+  };
+}

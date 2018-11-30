@@ -349,7 +349,6 @@ bloco_comandos:
 
 	iloc_list_init($$);
         $$->code = $2->code;
-	//imprime_pilha(pilha);
 	}
 ;
 
@@ -426,8 +425,7 @@ var_local:
 	inicializa_pilha(&pilha);
         //Escopo local não inicializado na pilha
         if(pilha->num_tabelas == 1){
-            empilha(pilha);
-	    printf ("oi");	 
+            empilha(pilha);	 
 	}
 	add_vl(pilha, $$);
 
@@ -442,8 +440,7 @@ var_local:
         inicializa_pilha(&pilha);
         //Escopo local não inicializado na pilha
         if(pilha->num_tabelas == 1){
-            empilha(pilha);
-	    printf("oi");	 
+            empilha(pilha);	 
 	}		    
 		    
 	add_vl(pilha, $$);
@@ -500,8 +497,7 @@ atribuicao:
         inicializa_pilha(&pilha);
         //Escopo local não inicializado na pilha
         if(pilha->num_tabelas == 1){
-            empilha(pilha);
-	    printf("oi");	 
+            empilha(pilha);	 
 	}
 
         // Copia o valor do nodo expressao para o valor do nodo atribuicao          
@@ -569,6 +565,8 @@ cham_func_arg:
 	{
 	$$ = cria_nodo(cham_func,1,$1);
 	adiciona_netos($$,$2);
+	iloc_list_init($$);
+	iloc_list_append_code($1,$$);
 	}
 
 | point cham_func_fim
@@ -645,8 +643,7 @@ constr_cond:
         inicializa_pilha(&pilha);
         //TODO: Escopo local não inicializado na pilha
         if(pilha->num_tabelas == 1){
-            empilha(pilha);
-	    printf("oi");	 
+            empilha(pilha); 
 	}
               
 	gera_codigo_if($$);
@@ -675,8 +672,7 @@ constr_iter:
         inicializa_pilha(&pilha);
         //Escopo local não inicializado na pilha
         if(pilha->num_tabelas == 1){
-            empilha(pilha);
-	    printf("oi");	 
+            empilha(pilha);	 
 	}
 
 	gera_codigo_while($$);
@@ -690,8 +686,7 @@ constr_iter:
         inicializa_pilha(&pilha);
         //Escopo local não inicializado na pilha
         if(pilha->num_tabelas == 1){
-            empilha(pilha);
-	    printf("oi");	 
+            empilha(pilha); 
 	} 
 
 	gera_codigo_do($$);
