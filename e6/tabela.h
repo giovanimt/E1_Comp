@@ -47,33 +47,17 @@ struct Lista_Argumentos {
 
 
 
-struct Variavel {
-	char* nome;
-	int valor;
-};
+/*
+RA:
 
-typedef struct RAtivacao {
-	int VDinamico; //end 0
-	int VEstatico; //end 4
-	int ValorRetornado; //end 8
-	int EndRetorno; //end 12
-	struct Variavel **Parametros; //end 16++
-	struct Variavel **Estados;
-	//Variaveis locais...
-} RAtivacao;
-
-typedef struct Pilha_RA {
-	RAtivacao **RAs;
-} Pilha_RA;
-
-typedef struct Lista_Padroes_RA {
-	RAtivacao *next;
-	RAtivacao *RA;
-	char* nome;
-}Lista_Padroes_RA;
-
-
-
+int VDinamico; //end 0-3
+int VEstatico; //end 4-7
+int ValorRetornado; //end 8-11
+int EndRetorno; //end 12-15
+int Estado_Maquina //16-19
+Parametros; //end 20++
+Variaveis locais
+*/
 
 
 //Funcoes tabela
@@ -119,11 +103,13 @@ Simbolo* busca_simbolo_global(Pilha_Tabelas *pilha, char *chave);
 
 void imprime_pilha(Pilha_Tabelas *pilha);
 
-void inicializa_pilha_RA(Pilha_RA *pilha, NodoArvore *n);
+void inicializa_pilha_RA(NodoArvore *n);
 
 void inicio_funcao(NodoArvore *n, Pilha_Tabelas *pilha);
 
 void chama_func(NodoArvore *n, Pilha_Tabelas *pilha);
+
+void valor_return(NodoArvore *n);
 
 void retorna_func(NodoArvore *n);
 

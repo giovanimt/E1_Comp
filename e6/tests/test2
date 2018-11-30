@@ -1,0 +1,11 @@
+int f(int y, int z, int k) 
+{
+  y = y + z;
+  return y;
+}
+
+int main()
+{
+  int x <= 1;
+  x = f(4, x, 2/x);
+}

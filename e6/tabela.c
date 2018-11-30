@@ -18,6 +18,7 @@ Vinicius Castro 193026
 #define NATUREZA_IDENTIFICADOR      6
 
 char *rotulo_main = "L0";
+int houve_return = 0;
 
 
 //Funcoes tabela
@@ -159,7 +160,7 @@ void add_func(Pilha_Tabelas *pilha, NodoArvore *f1){
 		Lista_Argumentos *arg = func->Argumentos;
 		NodoArvore *param;
 		NodoArvore *fp3;
-		int desloc = 16;
+		int desloc = 20;
 		//para cada parametro...
 		for(int i = 0; i < func->num_argumentos; i++){
 			//Anula ou zera componentes de simbolo que nao sao necessarios para um argumento
@@ -218,7 +219,7 @@ void add_vl(Pilha_Tabelas *pilha, NodoArvore *n){
 	vl->tamanho = 4;
 	
 	//printf("Num Simbolos %d\n", vl->tamanho*pilha->tabelas[pilha->num_tabelas - 1]->num_simbolos);
-	vl->deslocamento = 16 - 4 + vl->tamanho*pilha->tabelas[pilha->num_tabelas - 1]->num_simbolos;
+	vl->deslocamento = 20 - 4 + vl->tamanho*pilha->tabelas[pilha->num_tabelas - 1]->num_simbolos;
 	//printf("Deslocamento %d\n", vl->deslocamento);
 	
 	//Definir valor
@@ -269,17 +270,13 @@ void imprime_pilha(Pilha_Tabelas *pilha){
 	}
 }
 
-void inicializa_pilha_RA(Pilha_RA* pilha, NodoArvore *n){
-	if(pilha == NULL){
-		pilha = malloc(sizeof(RAtivacao));
-		pilha->RAs = NULL;
+void inicializa_pilha_RA(NodoArvore *n){
 		char *op_loadI = "loadI";
 		char *op_jumpI = "jumpI";
 		iloc_list_append_op(n->code, iloc_create_op(NULL,op_loadI,"1024",NULL,"rfp",NULL));
 		iloc_list_append_op(n->code, iloc_create_op(NULL,op_loadI,"1024",NULL,"rsp",NULL));
 		iloc_list_append_op(n->code, iloc_create_op(NULL,op_loadI,"512",NULL,"rbss",NULL));
 		iloc_list_append_op(n->code, iloc_create_op(NULL,op_jumpI,NULL,NULL,"L0",NULL));
-	}
 }
 
 
@@ -305,7 +302,8 @@ void inicio_funcao(NodoArvore *n, Pilha_Tabelas *pilha){
 		iloc_list_append_op(n->code, iloc_create_op(NULL,op_storeAI,reg_zerado,NULL,"rsp","4"));
 		iloc_list_append_op(n->code, iloc_create_op(NULL,op_storeAI,reg_zerado,NULL,"rsp","8"));
 		iloc_list_append_op(n->code, iloc_create_op(NULL,op_storeAI,reg_zerado,NULL,"rsp","12"));
-		iloc_list_append_op(n->code, iloc_create_op(NULL,op_addI,"rsp","16","rsp",NULL));
+		iloc_list_append_op(n->code, iloc_create_op(NULL,op_storeAI,reg_zerado,NULL,"rsp","16"));
+		iloc_list_append_op(n->code, iloc_create_op(NULL,op_addI,"rsp","20","rsp",NULL));
 
 
 
@@ -367,11 +365,12 @@ void chama_func(NodoArvore *n, Pilha_Tabelas *pilha){
 	iloc_list_append_op(n->code, iloc_create_op(NULL,"store","rfp",NULL,"rsp",NULL));
 
 
-//Calcula o vínculo estático				loadI 0 => reg1
+//Calcula o vínculo estático e estado da maquina				loadI 0 => reg1
 //						storeAI reg1 => rsp, 4
 	char *reg_zerado = gera_registrador();
 	iloc_list_append_op(n->code, iloc_create_op(NULL,"loadI","0",NULL,reg_zerado,NULL));
 	iloc_list_append_op(n->code, iloc_create_op(NULL,"storeAI",reg_zerado,NULL,"rsp","4"));
+	iloc_list_append_op(n->code, iloc_create_op(NULL,"storeAI",reg_zerado,NULL,"rsp","16"));
 
 
 
@@ -379,24 +378,43 @@ void chama_func(NodoArvore *n, Pilha_Tabelas *pilha){
 loadAI  rfp, 0 => r0   // Carrega o valor da variável x em r0
 storeAI r0 => rsp, 16+Y  // Empilha o parâmetro
 loop*/
-	//printf("Num filhos: %d", n->num_filhos);
-
+	//printf("Num filhos: %d\n", n->num_filhos);
 	Simbolo *s, *s1;
 	s = busca_simbolo_global(pilha, n->filhos[0]->nodo.valor_lexico.val.string_val);
-	int desloc = 16;
+	int desloc = 20;
 	char var_des[50];
 	char par_des[50];
 	char *reg_temp = gera_registrador();
 	sprintf(par_des,"%i", desloc); 
 	for(int i = 0; i < s->num_argumentos; i++){
-		s1 = busca_simbolo_global(pilha, n->filhos[i+1]->filhos[0]->nodo.valor_lexico.val.string_val);
-		sprintf(var_des,"%i", s1->deslocamento); 
+		/*
+		printf("Num filhos 2 %d\n", n->filhos[i+1]->num_filhos);
+		printf("Valor %d\n", n->filhos[i+1]->valor);
+		printf("Tipo %d\n", n->filhos[i+1]->filhos[0]->type);
+		*/
+
+		if(!n->filhos[i+1]->filhos[0]->type){
+			if(n->filhos[i+1]->filhos[0]->nodo.valor_lexico.type == 1){
+				//printf("Valor var: %d\n", n->filhos[i+1]->filhos[0]->nodo.valor_lexico.val.int_val);
+				sprintf(var_des,"%i", n->filhos[i+1]->filhos[0]->nodo.valor_lexico.val.int_val); 
+				iloc_list_append_op(n->code, iloc_create_op(NULL,"loadI",var_des,NULL,reg_temp,NULL));
+			}else{
+				//printf("Nome var: %s\n", n->filhos[i+1]->filhos[0]->nodo.valor_lexico.val.string_val);
+				s1 = busca_simbolo_global(pilha, n->filhos[i+1]->filhos[0]->nodo.valor_lexico.val.string_val);
+				sprintf(var_des,"%i", s1->deslocamento); 
+				iloc_list_append_op(n->code, iloc_create_op(NULL,"loadAI","rfp",var_des,reg_temp,NULL));
+			}
+		}else{
+			iloc_list_append_code(n->filhos[i+1],n);
+			iloc_list_append_op(n->code, iloc_create_op(NULL,"i2i", n->filhos[i+1]->reg,NULL,reg_temp,NULL));
+
+		}		
 		//printf("Nome var: %s\n", n->filhos[i+1]->filhos[0]->nodo.valor_lexico.val.string_val);
-		iloc_list_append_op(n->code, iloc_create_op(NULL,"loadAI","rfp",var_des,reg_temp,NULL));
 		iloc_list_append_op(n->code, iloc_create_op(NULL,"storeAI",reg_temp,NULL,"rsp",par_des));
 		desloc = desloc+4;
 
 		sprintf(par_des,"%i", desloc); 
+		
 	}
 
 
@@ -422,40 +440,58 @@ loop*/
 	iloc_list_append_op(n->code, iloc_create_op(NULL,"jumpI",NULL,NULL,s->label,NULL));
 
 
+/*recebe o estado da maquina*/
+	iloc_list_append_op(n->code, iloc_create_op(NULL,"loadAI","rsp","16",reg_temp,NULL));
+	iloc_list_append_op(n->code, iloc_create_op(NULL,"storeAI",reg_temp,NULL,"rfp","16"));
+
+if(houve_return){
 /*Recebe o resultado
 loadAI rsp, 8 => r0   // Retorno da função, carrega o valor de retorno
 storeAI r0 => rfp, 0   // Salva o retorno na variável x*/
 	n->reg = gera_registrador();
 	iloc_list_append_op(n->code, iloc_create_op(NULL,"loadAI","rsp","8",n->reg,NULL));
+	houve_return = 0;
 }
+
+}
+
+void valor_return(NodoArvore *n){
+//Disponibiliza o valor de retorno para o chamador
+//storeAI r0 => rfp, 8  // Registra o valor de retorno
+	iloc_list_append_op(n->code, iloc_create_op(NULL,"storeAI",n->reg,NULL,"rfp","8"));
+	houve_return = 1;
+}
+
 
 
 
 
 void retorna_func(NodoArvore *n){
 
-//Disponibiliza o valor de retorno para o chamador
-//storeAI r0 => rfp, 8  // Registra o valor de retorno
-	iloc_list_append_op(n->code, iloc_create_op(NULL,"storeAI",n->reg,NULL,"rfp","8"));
+	NodoArvore *f1 = n->filhos[0];
 
-
+	if(strcmp(f1->filhos[2]->nodo.valor_lexico.val.string_val, "main"))
+	{
+//replicar para quando nao ha return
 //loadAI rfp, 12 => reg_end_ret    // Obtém end. retorno
-	char *reg_end_ret = gera_registrador();
-	iloc_list_append_op(n->code, iloc_create_op(NULL,"loadAI","rfp","12",reg_end_ret,NULL));
+		char *reg_end_ret = gera_registrador();
+		iloc_list_append_op(n->code, iloc_create_op(NULL,"loadAI","rfp","12",reg_end_ret,NULL));
 
 
 /* Atualiza o rfp e o rsp
 load rfp => r2    // Obtém rfp (RFP) salvo
 i2i rfp => rsp        // Atualiza o rsp (SP)
 i2i r2 => rfp        // Atualiza o rfp (RFP)*/
-	char *reg_vin_din = gera_registrador();
-	iloc_list_append_op(n->code, iloc_create_op(NULL,"load","rfp",NULL,reg_vin_din,NULL));
-	iloc_list_append_op(n->code, iloc_create_op(NULL,"i2i","rfp",NULL,"rsp",NULL));
-	iloc_list_append_op(n->code, iloc_create_op(NULL,"i2i",reg_vin_din,NULL,"rfp",NULL));
+		char *reg_vin_din = gera_registrador();
+		iloc_list_append_op(n->code, iloc_create_op(NULL,"load","rfp",NULL,reg_vin_din,NULL));
+		iloc_list_append_op(n->code, iloc_create_op(NULL,"i2i","rfp",NULL,"rsp",NULL));
+		iloc_list_append_op(n->code, iloc_create_op(NULL,"i2i",reg_vin_din,NULL,"rfp",NULL));
 
 
 //Transfere o controle rpc
 //jump => reg_end_ret             // Salta para o endereço de retorno
-	iloc_list_append_op(n->code, iloc_create_op(NULL,"jump",NULL,NULL,reg_end_ret,NULL));
+		iloc_list_append_op(n->code, iloc_create_op(NULL,"jump",NULL,NULL,reg_end_ret,NULL));
+
+	}
 }
 

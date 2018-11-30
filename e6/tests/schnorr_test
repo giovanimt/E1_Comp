@@ -1,0 +1,31 @@
+w int;
+
+int lixo() {}
+
+int cons (int x)
+{
+  if (x < 0) then {
+    w = 2;
+  }else{
+    w = 3;
+  };
+  lixo();
+  w = x*w;  //12
+  return w;
+}
+
+int mult (int z, int w)
+{
+  int x;
+  x = z * w;  //4
+  x = cons(x+2);
+  return x;
+}
+
+int main()
+{
+  int x;
+  int y;
+  x = 2;
+  y = mult(x, x); //=12
+}

@@ -20,8 +20,6 @@ extern void *arvore;
 extern void descompila (void *arvore);
 extern void libera (void *arvore);
 Pilha_Tabelas *pilha = NULL;
-Pilha_RA *pilhaRA = NULL;
-Lista_Padroes_RA *listaRA = NULL;
 
 %}
 
@@ -169,7 +167,7 @@ programa:
         $$ = cria_nodo(programa,0); arvore = $$; 
    	    iloc_list_init($$);
 	    //E6:
-	    inicializa_pilha_RA(pilhaRA, $$);
+	    inicializa_pilha_RA($$);
 	}
 | programa novo_tipo	{ $$ = $1; arvore = $$; adiciona_filho($$,$2); }
 | programa var_global	{ $$ = $1; arvore = $$; adiciona_filho($$,$2); }
@@ -271,6 +269,7 @@ funcao:
 	inicio_funcao($$, pilha);
 	
         iloc_list_append_code($2,$$);
+	retorna_func($$);
 	}
 ;
 
@@ -535,7 +534,7 @@ retorno:
 	$$->reg = $2->reg;
 	iloc_list_init($$);
 	iloc_list_append_code($2,$$);
-	retorna_func($$);
+	valor_return($$);
 	}
 ;
 
@@ -556,6 +555,7 @@ cham_func:
 	$$ = cria_nodo(cham_func,1,cria_folha($1));
 	adiciona_netos($$,$3);
 	iloc_list_init($$);
+	//iloc_list_append_code($3,$$);
 	chama_func($$, pilha);
 	}
 ;

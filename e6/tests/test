@@ -1,7 +1,7 @@
-int mult (int z, int w)
+int f (int z, int w)
 {
   int x;
-  x = z * w;
+  x = z + w; //4
   return x;
 }
 
@@ -10,5 +10,5 @@ int main()
   int x;
   int y;
   x = 2;
-  y = mult(x, x);
+  y = 2 + f(x, x); //6
 }
