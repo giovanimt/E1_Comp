@@ -55,7 +55,8 @@ int VEstatico; //end 4-7
 int ValorRetornado; //end 8-11
 int EndRetorno; //end 12-15
 int Estado_Maquina //16-19
-Parametros; //end 20++
+int Temporarios //20-23
+Parametros; //end 24++
 Variaveis locais
 */
 

@@ -1,10 +1,9 @@
 int f(int y) 
-{
- return y;
-}
+{return y;}
 
 int main() 
 {
  int x;
- x = f(x); 
+ f(x);
+ x = 2;
 }
